@@ -194,9 +194,14 @@ p:last-child{margin-bottom:0}
 @media (min-width:1000px){.hdr .wrap{height:76px}.hdr-logo img{height:52px}}
 .nav{display:none;gap:32px;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
 .nav a{text-decoration:none;opacity:.8}.nav a:hover{opacity:1}
-.lang{display:flex;gap:2px;font-size:13px;font-weight:500;letter-spacing:.1em}
-.lang a{display:grid;place-items:center;min-width:44px;height:44px;text-decoration:none;opacity:.55}
-.lang a[aria-current]{opacity:1;box-shadow:inset 0 -1px 0 currentColor}
+.lang{position:relative;display:grid;grid-template-columns:1fr 1fr;padding:3px;border:1px solid rgba(244,240,232,.28);border-radius:999px;
+  background:rgba(35,33,31,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-size:12px;font-weight:600;letter-spacing:.14em}
+.lang a{position:relative;z-index:1;display:grid;place-items:center;width:46px;height:34px;text-decoration:none;color:var(--on-dark);opacity:.7;transition:color .35s var(--ease),opacity .35s}
+.lang a[aria-current]{color:var(--ink);opacity:1}
+.lang-thumb{position:absolute;top:3px;bottom:3px;left:3px;width:46px;border-radius:999px;background:var(--on-dark);
+  box-shadow:inset 0 0 0 1px rgba(91,70,54,.25);transition:transform .38s cubic-bezier(.3,1.35,.5,1)}
+.lang[data-cur="ru"] .lang-thumb{transform:translateX(46px)}
+.lang a:not([aria-current]):hover{opacity:1}
 @media (min-width:1000px){.nav{display:flex}}
 
 /* Hero */
@@ -228,33 +233,22 @@ p:last-child{margin-bottom:0}
 .why .grid{display:grid;gap:48px}
 .why .txt{max-width:560px}
 .why .txt .tlink{margin-top:16px}
+.why{padding-bottom:0}
 .why figure{margin:0 calc(var(--gut) * -1)}
-.why figure img{width:100%;aspect-ratio:4/5;object-fit:cover}
+.why-gal{background:var(--dark-2)}
 @media (min-width:900px){
+  .why{padding-bottom:var(--sec)}
   .why .grid{grid-template-columns:5fr 1fr 6fr;align-items:start}
   .why .txt{grid-column:1;padding-top:40px}
   .why figure{grid-column:3;margin:0 calc(var(--bleed) * -1) 0 0}
 }
 
-/* Gallery */
-.gal-grid{display:grid;gap:8px}
-.gal-show{margin:0 calc(var(--gut) * -1)}
+/* Gallery (inside the Why block) */
 .arrows{display:flex;gap:8px}
 .arrows button{width:48px;height:48px;border:1px solid var(--line-l);display:grid;place-items:center;transition:border-color .2s,opacity .2s}
 .dark .arrows button{border-color:var(--line-d)}
 .arrows button:hover{border-color:currentColor}
 .arrows button:disabled{opacity:.3;cursor:default}
-.gal-rail{display:none}
-@media (min-width:900px){
-  .gal-grid{gap:0}
-  .gal-show{display:none}
-  .gal-rail{display:block;overflow:hidden;margin-right:calc(var(--bleed) * -1)}
-  .gal-strip{display:flex;gap:20px;will-change:transform}
-  .gal-strip.anim{transition:transform .9s var(--ease)}
-  .gal-strip figure{margin:0;flex:0 0 calc((min(100vw, var(--max)) - 2 * var(--gut) - 40px) / 3);overflow:hidden;background:var(--paper-2)}
-  .gal-strip img{width:100%;aspect-ratio:4/5;object-fit:cover;transition:transform .6s var(--ease)}
-  .gal-strip figure:hover img{transform:scale(1.03)}
-}
 
 /* About */
 .about .grid{display:grid;gap:48px}
@@ -287,9 +281,8 @@ p:last-child{margin-bottom:0}
 @media (min-width:900px){
   .bento{grid-template-columns:repeat(12,1fr);gap:16px}
   .b-pin{grid-column:6/13;grid-row:1}
-  .b-gongfu{grid-column:6/9;grid-row:2}
   .b-cer{grid-column:1/6;grid-row:1/3}
-  .b-group{grid-column:9/13;grid-row:2}
+  .b-group{grid-column:6/13;grid-row:2}
   .b-matcha{grid-column:1/13;grid-row:3;flex-direction:row;align-items:baseline;gap:32px;flex-wrap:wrap}
   .b-matcha h3{min-width:22ch}.b-matcha p{flex:1;min-width:30ch}
   .b-pin .price{font-size:40px}
@@ -419,12 +412,14 @@ p:last-child{margin-bottom:0}
 .bar.on{transform:none}
 .bar .in{max-width:var(--max);margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px}
 .bar .addr{display:none;font-size:14px;color:var(--muted-d)}
-.bar .btn{width:100%;min-height:54px;position:relative}
-.bar.on .btn{animation:breathe 2.8s ease-in-out infinite}
-.bar.on .btn::after{content:"";position:absolute;inset:0;border-radius:2px;animation:ring 2.8s ease-out infinite;pointer-events:none}
-@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
-@keyframes ring{0%{box-shadow:0 0 0 0 rgba(181,96,47,.55)}70%,100%{box-shadow:0 0 0 12px rgba(181,96,47,0)}}
-@media (min-width:900px){.bar .addr{display:block}.bar .btn{width:auto}}
+.bar-act{display:flex;gap:10px;flex:1;min-width:0}
+.bar .btn{flex:1;min-height:54px;padding:0 18px}
+.bar.on .btn{animation:breathe 2.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+.bar-msg{flex:none;width:54px;height:54px;display:grid;place-items:center;border:1px solid var(--line-d);border-radius:2px;color:var(--on-dark);transition:background .2s,border-color .2s}
+.bar-msg:hover{background:var(--clay);border-color:var(--clay)}
+.bar-msg .bi{width:24px;height:24px}
+@media (min-width:900px){.bar .addr{display:block}.bar-act{flex:none}.bar .btn{flex:none;padding:0 30px}}
 
 /* Reveal on scroll */
 .js .rv{opacity:0;transform:translateY(18px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
@@ -434,7 +429,7 @@ p:last-child{margin-bottom:0}
   .js .rv{opacity:1;transform:none;transition:none}
   .hero-bg img{transform:none!important}
   .acc-p,.bar{transition:none}
-  .bar.on .btn,.bar.on .btn::after{animation:none}
+  .bar.on .btn{animation:none}
 }
 </style>
 </head>
@@ -469,7 +464,8 @@ p:last-child{margin-bottom:0}
     <nav class="nav" aria-label="{{nav_label}}">
       <a href="#why-visit">{{nav_visit}}</a><a href="#prices">{{nav_ways}}</a><a href="#teas">{{nav_tea}}</a><a href="#events">{{nav_events}}</a><a href="#find-us">{{nav_find}}</a>
     </nav>
-    <div class="lang">
+    <div class="lang" data-cur="{{lang}}" role="group" aria-label="Language">
+      <span class="lang-thumb" aria-hidden="true"></span>
       <a href="{{root}}" hreflang="en" lang="en" {{cur_en}}>EN</a>
       <a href="{{root}}ru/" hreflang="ru" lang="ru" {{cur_ru}}>RU</a>
     </div>
@@ -491,7 +487,7 @@ p:last-child{margin-bottom:0}
       <li><svg class="ico"><use href="#i-clock"/></svg>{{hours}}</li>
     </ul>
     <div class="actions">
-      <a class="btn" href="{{maps}}" target="_blank" rel="noopener" data-track="directions" data-place="hero"><svg class="ico"><use href="#i-route"/></svg>{{cta_directions}}</a>
+      <a class="btn" href="{{maps}}" target="_blank" rel="noopener" data-track="directions" data-place="hero"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>{{cta_directions}}</a>
       <a class="tlink" href="{{msg_url}}" target="_blank" rel="noopener" data-track="{{msg_event}}" data-place="hero"><svg class="bi" aria-hidden="true"><use href="#{{msg_icon}}"/></svg>{{cta_message}}</a>
     </div>
   </div>
@@ -515,15 +511,7 @@ p:last-child{margin-bottom:0}
 {{why_body}}
       <a class="tlink" href="{{maps}}" target="_blank" rel="noopener" data-track="directions" data-place="why">{{cta_plan}}<svg class="ico"><use href="#i-arrow"/></svg></a>
     </div>
-    <figure class="rv"><img src="{{root}}img/interior/6_shop.jpg" srcset="{{root}}img/interior/6_shop-700.jpg 700w, {{root}}img/interior/6_shop.jpg 1400w" sizes="(min-width:900px) 50vw, 100vw" width="1400" height="2489" loading="lazy" decoding="async" alt="{{alt_6shop}}"></figure>
-  </div>
-</section>
-
-<!-- 4. INSIDE THE TEA HOUSE (gallery, auto slideshow) -->
-<section class="sec light" id="gallery">
-  <div class="wrap gal-grid">
-    <p class="eyebrow rv">{{gal_eyebrow}}</p>
-    <figure class="show gal-show" data-interval="3000">
+    <figure class="show why-gal" id="gallery" data-interval="3000">
       <img src="{{root}}img/interior/1_shop-700.jpg" srcset="{{root}}img/interior/1_shop-700.jpg 700w, {{root}}img/interior/1_shop.jpg 1400w" sizes="(min-width:900px) 56vw, 100vw" loading="lazy" decoding="async" alt="{{alt_1shop}}" class="on">
       <img src="{{root}}img/interior/2_shop-700.jpg" srcset="{{root}}img/interior/2_shop-700.jpg 700w, {{root}}img/interior/2_shop.jpg 1400w" sizes="(min-width:900px) 56vw, 100vw" loading="lazy" decoding="async" alt="{{alt_2shop}}">
       <img src="{{root}}img/interior/3_shop-700.jpg" srcset="{{root}}img/interior/3_shop-700.jpg 700w, {{root}}img/interior/3_shop.jpg 1400w" sizes="(min-width:900px) 56vw, 100vw" loading="lazy" decoding="async" alt="{{alt_3shop}}">
@@ -533,18 +521,6 @@ p:last-child{margin-bottom:0}
       <img src="{{root}}img/interior/7_shop-700.jpg" srcset="{{root}}img/interior/7_shop-700.jpg 700w, {{root}}img/interior/7_shop.jpg 1400w" sizes="(min-width:900px) 56vw, 100vw" loading="lazy" decoding="async" alt="{{alt_7shop}}">
       <img src="{{root}}img/interior/8_shop-700.jpg" srcset="{{root}}img/interior/8_shop-700.jpg 700w, {{root}}img/interior/8_shop.jpg 1400w" sizes="(min-width:900px) 56vw, 100vw" loading="lazy" decoding="async" alt="{{alt_8shop}}">
     </figure>
-    <div class="gal-rail" data-interval="3000">
-      <div class="gal-strip">
-        <figure><img src="{{root}}img/interior/1_shop-700.jpg" srcset="{{root}}img/interior/1_shop-700.jpg 700w, {{root}}img/interior/1_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="{{alt_1shop}}"></figure>
-        <figure><img src="{{root}}img/interior/2_shop-700.jpg" srcset="{{root}}img/interior/2_shop-700.jpg 700w, {{root}}img/interior/2_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="{{alt_2shop}}"></figure>
-        <figure><img src="{{root}}img/interior/3_shop-700.jpg" srcset="{{root}}img/interior/3_shop-700.jpg 700w, {{root}}img/interior/3_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="{{alt_3shop}}"></figure>
-        <figure><img src="{{root}}img/interior/4_shop-700.jpg" srcset="{{root}}img/interior/4_shop-700.jpg 700w, {{root}}img/interior/4_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="{{alt_4shop}}"></figure>
-        <figure><img src="{{root}}img/interior/5_shop-700.jpg" srcset="{{root}}img/interior/5_shop-700.jpg 700w, {{root}}img/interior/5_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="{{alt_5shop}}"></figure>
-        <figure><img src="{{root}}img/interior/6_shop-700.jpg" srcset="{{root}}img/interior/6_shop-700.jpg 700w, {{root}}img/interior/6_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="{{alt_6shop}}"></figure>
-        <figure><img src="{{root}}img/interior/7_shop-700.jpg" srcset="{{root}}img/interior/7_shop-700.jpg 700w, {{root}}img/interior/7_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="{{alt_7shop}}"></figure>
-        <figure><img src="{{root}}img/interior/8_shop-700.jpg" srcset="{{root}}img/interior/8_shop-700.jpg 700w, {{root}}img/interior/8_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="{{alt_8shop}}"></figure>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -670,7 +646,7 @@ p:last-child{margin-bottom:0}
         <div><dt>{{find_hours_l}}</dt><dd>{{hours_full}}</dd></div>
         <div><dt>{{find_park_l}}</dt><dd>{{find_park}}</dd></div>
       </dl>
-      <a class="btn" href="{{maps}}" target="_blank" rel="noopener" data-track="directions" data-place="find"><svg class="ico"><use href="#i-route"/></svg>{{cta_directions}}</a>
+      <a class="btn" href="{{maps}}" target="_blank" rel="noopener" data-track="directions" data-place="find"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>{{cta_directions}}</a>
     </div>
   </div>
 </section>
@@ -685,7 +661,7 @@ p:last-child{margin-bottom:0}
     <h2>{{final_h2}}</h2>
     <p>{{final_text}}</p>
     <div class="actions">
-      <a class="btn" href="{{maps}}" target="_blank" rel="noopener" data-track="directions" data-place="final"><svg class="ico"><use href="#i-route"/></svg>{{cta_directions}}</a>
+      <a class="btn" href="{{maps}}" target="_blank" rel="noopener" data-track="directions" data-place="final"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>{{cta_directions}}</a>
       <a class="tlink" href="{{msg_url}}" target="_blank" rel="noopener" data-track="{{msg_event}}" data-place="final"><svg class="bi" aria-hidden="true"><use href="#{{msg_icon}}"/></svg>{{cta_message}}</a>
     </div>
   </div>
@@ -714,7 +690,10 @@ p:last-child{margin-bottom:0}
 <div class="bar" id="bar">
   <div class="in">
     <span class="addr">{{addr_short}} · {{hours}}</span>
-    <a class="btn" href="{{maps}}" target="_blank" rel="noopener" data-track="directions" data-place="sticky" tabindex="-1"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>{{cta_directions_sticky}}</a>
+    <div class="bar-act">
+      <a class="btn" href="{{maps}}" target="_blank" rel="noopener" data-track="directions" data-place="sticky" tabindex="-1"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>{{cta_directions_sticky}}</a>
+      <a class="bar-msg" href="{{sticky_msg_url}}" target="_blank" rel="noopener" data-track="{{msg_event}}" data-place="sticky" tabindex="-1" aria-label="{{sticky_msg_label}}"><svg class="bi" aria-hidden="true"><use href="#{{msg_icon}}"/></svg></a>
+    </div>
   </div>
 </div>
 
@@ -725,6 +704,18 @@ p:last-child{margin-bottom:0}
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* Language switch: slide the thumb, then go */
+  $$('.lang a').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      if (a.hasAttribute('aria-current') || e.metaKey || e.ctrlKey) return;
+      e.preventDefault();
+      var box = a.parentNode;
+      box.setAttribute('data-cur', a.getAttribute('hreflang'));
+      $$('a', box).forEach(function (x) { x.toggleAttribute('aria-current', x === a); });
+      setTimeout(function () { location.href = a.href; }, reduce ? 0 : 320);
+    });
+  });
+
   /* Click tracking → analytics */
   document.addEventListener('click', function (e) {
     var a = e.target.closest('[data-track]');
@@ -732,7 +723,7 @@ p:last-child{margin-bottom:0}
   });
 
   /* Header + sticky bar + hero parallax */
-  var hdr = $('#hdr'), bar = $('#bar'), barBtn = $('.btn', bar), hero = $('#home'), find = $('#find-us'), heroImg = $('#heroImg');
+  var hdr = $('#hdr'), bar = $('#bar'), barLinks = $$('a', bar), hero = $('#home'), find = $('#find-us'), heroImg = $('#heroImg');
   var ticking = false, btnsInView = [];
   // Hide the bar while another primary button is on screen (one main CTA at a time)
   if ('IntersectionObserver' in window) {
@@ -753,7 +744,7 @@ p:last-child{margin-bottom:0}
     var show = hero.getBoundingClientRect().bottom < 0 && find.getBoundingClientRect().top > vh && !btnsInView.length;
     if (show !== bar.classList.contains('on')) {
       bar.classList.toggle('on', show);
-      barBtn.tabIndex = show ? 0 : -1;
+      barLinks.forEach(function (a) { a.tabIndex = show ? 0 : -1; });
       document.documentElement.style.setProperty('--bar-h', show ? bar.offsetHeight + 'px' : '0px');
     }
     if (!reduce && y < vh) heroImg.style.transform = 'scale(1.04) translateY(' + (y * 0.12).toFixed(1) + 'px)';
@@ -829,32 +820,6 @@ p:last-child{margin-bottom:0}
       }, { threshold: 0.3 }).observe(show);
     }
   });
-
-  /* Desktop gallery rail: moves one photo every 3s, loops, pauses on hover / off screen */
-  var rail = $('.gal-rail');
-  if (rail) {
-    var strip = $('.gal-strip', rail), items = $$('figure', strip), n = items.length, pos = 0, rt = null, hover = false, seen = false;
-    items.slice(0, 3).forEach(function (f) { var c = f.cloneNode(true); c.setAttribute('aria-hidden', 'true'); strip.appendChild(c); });
-    function step() { var f = strip.firstElementChild; return f.offsetWidth + (parseFloat(getComputedStyle(strip).columnGap) || 0); }
-    function place(anim) { strip.classList.toggle('anim', anim); strip.style.transform = 'translateX(' + (-pos * step()) + 'px)'; }
-    function nextSlide() {
-      if (hover || !desk.matches) return;
-      pos++; place(true);
-      $$('img', strip).slice(pos, pos + 4).forEach(function (i) { i.loading = 'eager'; });
-    }
-    strip.addEventListener('transitionend', function (e) {
-      if (e.target === strip && pos >= n) { pos = 0; place(false); }
-    });
-    rail.addEventListener('mouseenter', function () { hover = true; });
-    rail.addEventListener('mouseleave', function () { hover = false; });
-    window.addEventListener('resize', function () { place(false); });
-    if ('IntersectionObserver' in window && !reduce) {
-      new IntersectionObserver(function (es) {
-        seen = es[0].isIntersecting;
-        clearInterval(rt); rt = seen ? setInterval(nextSlide, Number(rail.getAttribute('data-interval')) || 3000) : null;
-      }, { threshold: 0.3 }).observe(rail);
-    }
-  }
 
   /* Events from Google Sheets (CSV export — keeps every cell as typed text):
      columns → date | time | title_en | title_ru | text_en | text_ru | price_en | price_ru | link | show | image (optional)

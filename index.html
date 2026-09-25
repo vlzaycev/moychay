@@ -194,9 +194,14 @@ p:last-child{margin-bottom:0}
 @media (min-width:1000px){.hdr .wrap{height:76px}.hdr-logo img{height:52px}}
 .nav{display:none;gap:32px;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
 .nav a{text-decoration:none;opacity:.8}.nav a:hover{opacity:1}
-.lang{display:flex;gap:2px;font-size:13px;font-weight:500;letter-spacing:.1em}
-.lang a{display:grid;place-items:center;min-width:44px;height:44px;text-decoration:none;opacity:.55}
-.lang a[aria-current]{opacity:1;box-shadow:inset 0 -1px 0 currentColor}
+.lang{position:relative;display:grid;grid-template-columns:1fr 1fr;padding:3px;border:1px solid rgba(244,240,232,.28);border-radius:999px;
+  background:rgba(35,33,31,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-size:12px;font-weight:600;letter-spacing:.14em}
+.lang a{position:relative;z-index:1;display:grid;place-items:center;width:46px;height:34px;text-decoration:none;color:var(--on-dark);opacity:.7;transition:color .35s var(--ease),opacity .35s}
+.lang a[aria-current]{color:var(--ink);opacity:1}
+.lang-thumb{position:absolute;top:3px;bottom:3px;left:3px;width:46px;border-radius:999px;background:var(--on-dark);
+  box-shadow:inset 0 0 0 1px rgba(91,70,54,.25);transition:transform .38s cubic-bezier(.3,1.35,.5,1)}
+.lang[data-cur="ru"] .lang-thumb{transform:translateX(46px)}
+.lang a:not([aria-current]):hover{opacity:1}
 @media (min-width:1000px){.nav{display:flex}}
 
 /* Hero */
@@ -228,33 +233,22 @@ p:last-child{margin-bottom:0}
 .why .grid{display:grid;gap:48px}
 .why .txt{max-width:560px}
 .why .txt .tlink{margin-top:16px}
+.why{padding-bottom:0}
 .why figure{margin:0 calc(var(--gut) * -1)}
-.why figure img{width:100%;aspect-ratio:4/5;object-fit:cover}
+.why-gal{background:var(--dark-2)}
 @media (min-width:900px){
+  .why{padding-bottom:var(--sec)}
   .why .grid{grid-template-columns:5fr 1fr 6fr;align-items:start}
   .why .txt{grid-column:1;padding-top:40px}
   .why figure{grid-column:3;margin:0 calc(var(--bleed) * -1) 0 0}
 }
 
-/* Gallery */
-.gal-grid{display:grid;gap:8px}
-.gal-show{margin:0 calc(var(--gut) * -1)}
+/* Gallery (inside the Why block) */
 .arrows{display:flex;gap:8px}
 .arrows button{width:48px;height:48px;border:1px solid var(--line-l);display:grid;place-items:center;transition:border-color .2s,opacity .2s}
 .dark .arrows button{border-color:var(--line-d)}
 .arrows button:hover{border-color:currentColor}
 .arrows button:disabled{opacity:.3;cursor:default}
-.gal-rail{display:none}
-@media (min-width:900px){
-  .gal-grid{gap:0}
-  .gal-show{display:none}
-  .gal-rail{display:block;overflow:hidden;margin-right:calc(var(--bleed) * -1)}
-  .gal-strip{display:flex;gap:20px;will-change:transform}
-  .gal-strip.anim{transition:transform .9s var(--ease)}
-  .gal-strip figure{margin:0;flex:0 0 calc((min(100vw, var(--max)) - 2 * var(--gut) - 40px) / 3);overflow:hidden;background:var(--paper-2)}
-  .gal-strip img{width:100%;aspect-ratio:4/5;object-fit:cover;transition:transform .6s var(--ease)}
-  .gal-strip figure:hover img{transform:scale(1.03)}
-}
 
 /* About */
 .about .grid{display:grid;gap:48px}
@@ -287,9 +281,8 @@ p:last-child{margin-bottom:0}
 @media (min-width:900px){
   .bento{grid-template-columns:repeat(12,1fr);gap:16px}
   .b-pin{grid-column:6/13;grid-row:1}
-  .b-gongfu{grid-column:6/9;grid-row:2}
   .b-cer{grid-column:1/6;grid-row:1/3}
-  .b-group{grid-column:9/13;grid-row:2}
+  .b-group{grid-column:6/13;grid-row:2}
   .b-matcha{grid-column:1/13;grid-row:3;flex-direction:row;align-items:baseline;gap:32px;flex-wrap:wrap}
   .b-matcha h3{min-width:22ch}.b-matcha p{flex:1;min-width:30ch}
   .b-pin .price{font-size:40px}
@@ -419,12 +412,14 @@ p:last-child{margin-bottom:0}
 .bar.on{transform:none}
 .bar .in{max-width:var(--max);margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px}
 .bar .addr{display:none;font-size:14px;color:var(--muted-d)}
-.bar .btn{width:100%;min-height:54px;position:relative}
-.bar.on .btn{animation:breathe 2.8s ease-in-out infinite}
-.bar.on .btn::after{content:"";position:absolute;inset:0;border-radius:2px;animation:ring 2.8s ease-out infinite;pointer-events:none}
-@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
-@keyframes ring{0%{box-shadow:0 0 0 0 rgba(181,96,47,.55)}70%,100%{box-shadow:0 0 0 12px rgba(181,96,47,0)}}
-@media (min-width:900px){.bar .addr{display:block}.bar .btn{width:auto}}
+.bar-act{display:flex;gap:10px;flex:1;min-width:0}
+.bar .btn{flex:1;min-height:54px;padding:0 18px}
+.bar.on .btn{animation:breathe 2.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+.bar-msg{flex:none;width:54px;height:54px;display:grid;place-items:center;border:1px solid var(--line-d);border-radius:2px;color:var(--on-dark);transition:background .2s,border-color .2s}
+.bar-msg:hover{background:var(--clay);border-color:var(--clay)}
+.bar-msg .bi{width:24px;height:24px}
+@media (min-width:900px){.bar .addr{display:block}.bar-act{flex:none}.bar .btn{flex:none;padding:0 30px}}
 
 /* Reveal on scroll */
 .js .rv{opacity:0;transform:translateY(18px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
@@ -434,7 +429,7 @@ p:last-child{margin-bottom:0}
   .js .rv{opacity:1;transform:none;transition:none}
   .hero-bg img{transform:none!important}
   .acc-p,.bar{transition:none}
-  .bar.on .btn,.bar.on .btn::after{animation:none}
+  .bar.on .btn{animation:none}
 }
 </style>
 </head>
@@ -469,7 +464,8 @@ p:last-child{margin-bottom:0}
     <nav class="nav" aria-label="Sections">
       <a href="#why-visit">Visit</a><a href="#prices">Try tea</a><a href="#teas">Teas</a><a href="#events">Events</a><a href="#find-us">Find us</a>
     </nav>
-    <div class="lang">
+    <div class="lang" data-cur="en" role="group" aria-label="Language">
+      <span class="lang-thumb" aria-hidden="true"></span>
       <a href="" hreflang="en" lang="en" aria-current="page">EN</a>
       <a href="ru/" hreflang="ru" lang="ru" >RU</a>
     </div>
@@ -491,7 +487,7 @@ p:last-child{margin-bottom:0}
       <li><svg class="ico"><use href="#i-clock"/></svg>Open daily 11AM – 10PM</li>
     </ul>
     <div class="actions">
-      <a class="btn" href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="hero"><svg class="ico"><use href="#i-route"/></svg>Get directions</a>
+      <a class="btn" href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="hero"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Get directions</a>
       <a class="tlink" href="https://wa.me/66817959110?text=Hi%21%20I%20found%20you%20on%20teaphuket.com" target="_blank" rel="noopener" data-track="whatsapp" data-place="hero"><svg class="bi" aria-hidden="true"><use href="#i-wa"/></svg>Message us on WhatsApp</a>
     </div>
   </div>
@@ -520,15 +516,7 @@ p:last-child{margin-bottom:0}
       <p class="muted">The room does a lot of the work: bare concrete, calligraphy on the walls, a rattan peacock chair by the window, and shelves stacked with hundreds of teapots. Come in, sit down, and our tea master will help you find what fits – whether that's a full ceremony or just a good cup.</p>
       <a class="tlink" href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="why">Plan your visit<svg class="ico"><use href="#i-arrow"/></svg></a>
     </div>
-    <figure class="rv"><img src="img/interior/6_shop.jpg" srcset="img/interior/6_shop-700.jpg 700w, img/interior/6_shop.jpg 1400w" sizes="(min-width:900px) 50vw, 100vw" width="1400" height="2489" loading="lazy" decoding="async" alt="Rattan peacock chair and calligraphy scrolls on a concrete wall"></figure>
-  </div>
-</section>
-
-<!-- 4. INSIDE THE TEA HOUSE (gallery, auto slideshow) -->
-<section class="sec light" id="gallery">
-  <div class="wrap gal-grid">
-    <p class="eyebrow rv">Inside the tea house</p>
-    <figure class="show gal-show" data-interval="3000">
+    <figure class="show why-gal" id="gallery" data-interval="3000">
       <img src="img/interior/1_shop-700.jpg" srcset="img/interior/1_shop-700.jpg 700w, img/interior/1_shop.jpg 1400w" sizes="(min-width:900px) 56vw, 100vw" loading="lazy" decoding="async" alt="Round tea table by the arched window with teaware shelves" class="on">
       <img src="img/interior/2_shop-700.jpg" srcset="img/interior/2_shop-700.jpg 700w, img/interior/2_shop.jpg 1400w" sizes="(min-width:900px) 56vw, 100vw" loading="lazy" decoding="async" alt="Pu-erh tea cakes on dark shelves">
       <img src="img/interior/3_shop-700.jpg" srcset="img/interior/3_shop-700.jpg 700w, img/interior/3_shop.jpg 1400w" sizes="(min-width:900px) 56vw, 100vw" loading="lazy" decoding="async" alt="Shelves of clay teapots and porcelain cups">
@@ -538,18 +526,6 @@ p:last-child{margin-bottom:0}
       <img src="img/interior/7_shop-700.jpg" srcset="img/interior/7_shop-700.jpg 700w, img/interior/7_shop.jpg 1400w" sizes="(min-width:900px) 56vw, 100vw" loading="lazy" decoding="async" alt="Moychay Phuket entrance on Boat Avenue">
       <img src="img/interior/8_shop-700.jpg" srcset="img/interior/8_shop-700.jpg 700w, img/interior/8_shop.jpg 1400w" sizes="(min-width:900px) 56vw, 100vw" loading="lazy" decoding="async" alt="Tea table by the arched window">
     </figure>
-    <div class="gal-rail" data-interval="3000">
-      <div class="gal-strip">
-        <figure><img src="img/interior/1_shop-700.jpg" srcset="img/interior/1_shop-700.jpg 700w, img/interior/1_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="Round tea table by the arched window with teaware shelves"></figure>
-        <figure><img src="img/interior/2_shop-700.jpg" srcset="img/interior/2_shop-700.jpg 700w, img/interior/2_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="Pu-erh tea cakes on dark shelves"></figure>
-        <figure><img src="img/interior/3_shop-700.jpg" srcset="img/interior/3_shop-700.jpg 700w, img/interior/3_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="Shelves of clay teapots and porcelain cups"></figure>
-        <figure><img src="img/interior/4_shop-700.jpg" srcset="img/interior/4_shop-700.jpg 700w, img/interior/4_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="Round tea table with teaware and books"></figure>
-        <figure><img src="img/interior/5_shop-700.jpg" srcset="img/interior/5_shop-700.jpg 700w, img/interior/5_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="Long room with concrete walls and wooden tables"></figure>
-        <figure><img src="img/interior/6_shop-700.jpg" srcset="img/interior/6_shop-700.jpg 700w, img/interior/6_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="Rattan peacock chair and calligraphy scrolls on a concrete wall"></figure>
-        <figure><img src="img/interior/7_shop-700.jpg" srcset="img/interior/7_shop-700.jpg 700w, img/interior/7_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="Moychay Phuket entrance on Boat Avenue"></figure>
-        <figure><img src="img/interior/8_shop-700.jpg" srcset="img/interior/8_shop-700.jpg 700w, img/interior/8_shop.jpg 1400w" sizes="34vw" loading="lazy" decoding="async" alt="Tea table by the arched window"></figure>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -578,15 +554,10 @@ p:last-child{margin-bottom:0}
         <p class="price">300฿ <small>+ tea by weight</small></p>
         <p>A relaxed 10-minute introduction from our tea master, then you sit and enjoy the tea you picked. No booking needed.</p>
       </article>
-      <article class="card b-gongfu rv">
-        <h3>Gongfu teapot</h3>
-        <p class="price">400฿</p>
-        <p>Loose-leaf tea, served in the traditional way, at your own pace. No booking needed.</p>
-      </article>
       <article class="card feature b-cer rv">
         <div class="ph"><img src="img/people/8_people-700.jpg" srcset="img/people/8_people-700.jpg 700w, img/people/8_people.jpg 1400w" sizes="(min-width:900px) 40vw, 100vw" loading="lazy" decoding="async" alt="Guests at a tea ceremony at the round table by the arched window"></div>
         <div class="in">
-          <h3>Full gong fu cha ceremony</h3>
+          <h3>Gong fu cha ceremony</h3>
           <p class="price">600฿ <small>per person</small></p>
           <p>A 60-minute guided ceremony covering brewing steps, teaware, and the tea itself, followed by up to 60 minutes to relax in the space. Booking required.</p>
         </div>
@@ -677,7 +648,7 @@ p:last-child{margin-bottom:0}
   <div class="wrap ev-grid">
     <div class="ev-txt">
       <p class="eyebrow rv">Events at the tea house</p>
-      <h2 class="h2 rv">Something's usually happening here</h2>
+      <h2 class="h2 rv">Upcoming events</h2>
       <p class="lead rv">We run tea tastings, ceremonies and other events at the tea house every week – open to everyone, no tea background required.</p>
     </div>
     <div class="ev-links">
@@ -765,7 +736,7 @@ p:last-child{margin-bottom:0}
         <div><dt>Hours</dt><dd>Open daily, 11AM – 10PM</dd></div>
         <div><dt>Parking</dt><dd>Parking on site, no booking needed</dd></div>
       </dl>
-      <a class="btn" href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="find"><svg class="ico"><use href="#i-route"/></svg>Get directions</a>
+      <a class="btn" href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="find"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Get directions</a>
     </div>
   </div>
 </section>
@@ -780,7 +751,7 @@ p:last-child{margin-bottom:0}
     <h2>Come taste it for yourself</h2>
     <p>2nd floor, Boat Avenue. Walk in – no booking, no rush.</p>
     <div class="actions">
-      <a class="btn" href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="final"><svg class="ico"><use href="#i-route"/></svg>Get directions</a>
+      <a class="btn" href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="final"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Get directions</a>
       <a class="tlink" href="https://wa.me/66817959110?text=Hi%21%20I%20found%20you%20on%20teaphuket.com" target="_blank" rel="noopener" data-track="whatsapp" data-place="final"><svg class="bi" aria-hidden="true"><use href="#i-wa"/></svg>Message us on WhatsApp</a>
     </div>
   </div>
@@ -812,7 +783,10 @@ p:last-child{margin-bottom:0}
 <div class="bar" id="bar">
   <div class="in">
     <span class="addr">2nd floor, Boat Avenue, Bangtao · Open daily 11AM – 10PM</span>
-    <a class="btn" href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="sticky" tabindex="-1"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Get directions</a>
+    <div class="bar-act">
+      <a class="btn" href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="sticky" tabindex="-1"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Get directions</a>
+      <a class="bar-msg" href="https://wa.me/66817959110?text=Hi%21%20I%20found%20you%20on%20teaphuket.com" target="_blank" rel="noopener" data-track="whatsapp" data-place="sticky" tabindex="-1" aria-label="WhatsApp"><svg class="bi" aria-hidden="true"><use href="#i-wa"/></svg></a>
+    </div>
   </div>
 </div>
 
@@ -823,6 +797,18 @@ p:last-child{margin-bottom:0}
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* Language switch: slide the thumb, then go */
+  $$('.lang a').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      if (a.hasAttribute('aria-current') || e.metaKey || e.ctrlKey) return;
+      e.preventDefault();
+      var box = a.parentNode;
+      box.setAttribute('data-cur', a.getAttribute('hreflang'));
+      $$('a', box).forEach(function (x) { x.toggleAttribute('aria-current', x === a); });
+      setTimeout(function () { location.href = a.href; }, reduce ? 0 : 320);
+    });
+  });
+
   /* Click tracking → analytics */
   document.addEventListener('click', function (e) {
     var a = e.target.closest('[data-track]');
@@ -830,7 +816,7 @@ p:last-child{margin-bottom:0}
   });
 
   /* Header + sticky bar + hero parallax */
-  var hdr = $('#hdr'), bar = $('#bar'), barBtn = $('.btn', bar), hero = $('#home'), find = $('#find-us'), heroImg = $('#heroImg');
+  var hdr = $('#hdr'), bar = $('#bar'), barLinks = $$('a', bar), hero = $('#home'), find = $('#find-us'), heroImg = $('#heroImg');
   var ticking = false, btnsInView = [];
   // Hide the bar while another primary button is on screen (one main CTA at a time)
   if ('IntersectionObserver' in window) {
@@ -851,7 +837,7 @@ p:last-child{margin-bottom:0}
     var show = hero.getBoundingClientRect().bottom < 0 && find.getBoundingClientRect().top > vh && !btnsInView.length;
     if (show !== bar.classList.contains('on')) {
       bar.classList.toggle('on', show);
-      barBtn.tabIndex = show ? 0 : -1;
+      barLinks.forEach(function (a) { a.tabIndex = show ? 0 : -1; });
       document.documentElement.style.setProperty('--bar-h', show ? bar.offsetHeight + 'px' : '0px');
     }
     if (!reduce && y < vh) heroImg.style.transform = 'scale(1.04) translateY(' + (y * 0.12).toFixed(1) + 'px)';
@@ -927,32 +913,6 @@ p:last-child{margin-bottom:0}
       }, { threshold: 0.3 }).observe(show);
     }
   });
-
-  /* Desktop gallery rail: moves one photo every 3s, loops, pauses on hover / off screen */
-  var rail = $('.gal-rail');
-  if (rail) {
-    var strip = $('.gal-strip', rail), items = $$('figure', strip), n = items.length, pos = 0, rt = null, hover = false, seen = false;
-    items.slice(0, 3).forEach(function (f) { var c = f.cloneNode(true); c.setAttribute('aria-hidden', 'true'); strip.appendChild(c); });
-    function step() { var f = strip.firstElementChild; return f.offsetWidth + (parseFloat(getComputedStyle(strip).columnGap) || 0); }
-    function place(anim) { strip.classList.toggle('anim', anim); strip.style.transform = 'translateX(' + (-pos * step()) + 'px)'; }
-    function nextSlide() {
-      if (hover || !desk.matches) return;
-      pos++; place(true);
-      $$('img', strip).slice(pos, pos + 4).forEach(function (i) { i.loading = 'eager'; });
-    }
-    strip.addEventListener('transitionend', function (e) {
-      if (e.target === strip && pos >= n) { pos = 0; place(false); }
-    });
-    rail.addEventListener('mouseenter', function () { hover = true; });
-    rail.addEventListener('mouseleave', function () { hover = false; });
-    window.addEventListener('resize', function () { place(false); });
-    if ('IntersectionObserver' in window && !reduce) {
-      new IntersectionObserver(function (es) {
-        seen = es[0].isIntersecting;
-        clearInterval(rt); rt = seen ? setInterval(nextSlide, Number(rail.getAttribute('data-interval')) || 3000) : null;
-      }, { threshold: 0.3 }).observe(rail);
-    }
-  }
 
   /* Events from Google Sheets (CSV export — keeps every cell as typed text):
      columns → date | time | title_en | title_ru | text_en | text_ru | price_en | price_ru | link | show | image (optional)

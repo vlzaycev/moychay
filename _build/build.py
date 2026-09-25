@@ -50,8 +50,8 @@ def trust(items):
 
 
 def cards(items, root):
-    # order: pin, gongfu, ceremony, group, matcha
-    keys = ["b-pin", "b-gongfu", "b-cer", "b-group", "b-matcha"]
+    # order: pin, ceremony, group, matcha
+    keys = ["b-pin", "b-cer", "b-group", "b-matcha"]
     out = []
     for key, c in zip(keys, items):
         price = c["price"]
@@ -175,7 +175,7 @@ EN = dict(
         ("Herbal tea", "Caffeine-free infusions of herbs, flowers and fruit – calming or energizing, your pick."),
     ]),
     ev_eyebrow="Events at the tea house",
-    ev_h2="Something's usually happening here",
+    ev_h2="Upcoming events",
     ev_intro="We run tea tastings, ceremonies and other events at the tea house every week – open to everyone, no tea background required.",
     ev_cta="See upcoming events",
     ev_extra="",
@@ -211,6 +211,8 @@ EN = dict(
     shop_link="Visit online shop",
     credit="Website development and marketing",
     msg_icon="i-wa",
+    sticky_msg_url=wa("Hi! I found you on teaphuket.com"),
+    sticky_msg_label="WhatsApp",
     cta_ways="Book in WhatsApp",
     prev_label="Previous", next_label="Next",
     alt_1shop="Round tea table by the arched window with teaware shelves",
@@ -221,9 +223,7 @@ EN = dict(
 EN["ways_cards"] = cards([
     dict(name="Walk-in tasting (Pin Cha)", price="300฿ <small>+ tea by weight</small>",
          text="A relaxed 10-minute introduction from our tea master, then you sit and enjoy the tea you picked.", note="No booking needed."),
-    dict(name="Gongfu teapot", price="400฿",
-         text="Loose-leaf tea, served in the traditional way, at your own pace.", note="No booking needed."),
-    dict(name="Full gong fu cha ceremony", price="600฿ <small>per person</small>",
+    dict(name="Gong fu cha ceremony", price="600฿ <small>per person</small>",
          text="A 60-minute guided ceremony covering brewing steps, teaware, and the tea itself, followed by up to 60 minutes to relax in the space.",
          note="Booking required.", alt="Guests at a tea ceremony at the round table by the arched window"),
     dict(name="Group ceremonies", price="<small>Price on request</small>",
@@ -306,7 +306,7 @@ RU = dict(
         ("Травяной чай", "Бескофеиновые настои трав, цветов и фруктов – успокаивающие или бодрящие, на ваш выбор."),
     ]),
     ev_eyebrow="Мероприятия в чайной",
-    ev_h2="У нас почти всегда что-то происходит",
+    ev_h2="Ближайшие мероприятия",
     ev_intro="Мы проводим чайные дегустации, церемонии и другие мероприятия каждую неделю – открыто для всех, чайный опыт не требуется.",
     ev_cta="Смотреть ближайшие мероприятия",
     ev_extra=f'        <a class="tlink" href="{TG}" target="_blank" rel="noopener" data-track="telegram" data-place="events"><svg class="bi" aria-hidden="true"><use href="#i-tg"/></svg>Анонсы в нашем чайном клубе в Telegram</a>',
@@ -344,6 +344,8 @@ RU = dict(
     shop_link="Перейти в интернет-магазин",
     credit="Разработка сайта и маркетинг",
     msg_icon="i-tg",
+    sticky_msg_url="https://t.me/moychayphuket",
+    sticky_msg_label="Telegram",
     cta_ways="Написать в Telegram",
     prev_label="Назад", next_label="Вперёд",
     alt_1shop="Круглый чайный стол у арочного окна с полками посуды",
@@ -354,9 +356,7 @@ RU = dict(
 RU["ways_cards"] = cards([
     dict(name="Дегустация без записи (Пин Ча)", price="300฿ <small>+ чай по весу</small>",
          text="Спокойное 10-минутное введение от чайного мастера, а затем вы садитесь и наслаждаетесь выбранным чаем.", note="Без предварительной записи."),
-    dict(name="Гунфу чайник", price="400฿",
-         text="Рассыпной чай, поданный традиционным способом, в своём темпе.", note="Без предварительной записи."),
-    dict(name="Полная церемония гунфу ча", price="600฿ <small>с человека</small>",
+    dict(name="Церемония гунфу ча", price="600฿ <small>с человека</small>",
          text="60-минутная церемония с чайным мастером: этапы заваривания, посуда и сам чай, плюс до 60 минут отдыха в пространстве после.",
          note="Требуется предварительная запись.", alt="Гости на чайной церемонии за круглым столом у арочного окна"),
     dict(name="Групповые церемонии", price="<small>Цена по запросу</small>",
