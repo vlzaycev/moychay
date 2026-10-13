@@ -1,0 +1,13 @@
+{
+  "name": "teaphuket-qa",
+  "private": true,
+  "description": "QA tests for teaphuket.com (not published: GitHub Pages ignores _-prefixed folders)",
+  "scripts": {
+    "test": "playwright test",
+    "test:prod": "BASE_URL=https://teaphuket.com playwright test --project=chromium-desktop --project=chromium-mobile",
+    "unit": "node --test unit/*.test.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0"
+  }
+}

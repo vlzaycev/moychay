@@ -1,0 +1,6 @@
+date,time,title_en,title_ru,text_en,text_ru,price_en,price_ru,link,show
+01.01.2020,18:00,PAST EVENT,ПРОШЕДШЕЕ,old,старое,Donation,Донат,https://www.instagram.com/moychay.phuket,yes
+31.12.2099,19:00,Later event,"Дегустация ""Позже""",Second by date,Второе по дате,380.00THB,380.00THB,https://www.instagram.com/moychay.phuket,yes
+30.12.2099,18:00,Sooner event,Раньше,"Text with, comma",Текст,Donation,Донат,https://www.instagram.com/moychay.phuket,yes
+29.12.2099,18:00,HIDDEN EVENT,СКРЫТОЕ,hidden,скрытое,,,,no
+28.12.2099,18:00,<img src=x onerror=alert(1)>,<script>alert(1)</script>,xss,xss,,,javascript:alert(1),yes
