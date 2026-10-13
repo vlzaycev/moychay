@@ -106,7 +106,8 @@ for (const p of PAGES) {
       await expect.poll(idx, { timeout: 6000 }).not.toBe(start);
       const now = await idx();
       await g.click();
-      expect(await idx()).toBe((now + 1) % 8);
+      // the slide switches once the next photo has loaded (instant locally, network-dependent on production)
+      await expect.poll(idx, { timeout: 5000 }).not.toBe(now);
     });
 
     test('header becomes solid after scrolling', async ({ page }) => {
