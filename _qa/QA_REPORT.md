@@ -210,3 +210,30 @@ npm run unit                 # статические проверки
 npx playwright test          # E2E локально, все браузеры
 npm run test:prod            # смоук production (только чтение)
 ```
+
+---
+
+## 10. Статус исправлений (13.10.2026)
+
+| Пункт | Статус | Где |
+|---|---|---|
+| B1 стрелки при пустых мероприятиях, B2 пустой `href` у EN | ✅ исправлено | код |
+| M3 контраст кнопки (`#A4552A`, 4,6:1) | ✅ | код |
+| L5 / L6 мёртвый код и неиспользуемые файлы | ✅ | код |
+| L10 год в футере, L12 `lastmod` в sitemap — генерируются при сборке | ✅ | код |
+| L11 `aria-controls`, локализованная подпись переключателя | ✅ | код |
+| H2 шрифты на своём сайте, без блокирующего CSS | ✅ | код |
+| H3 WebP 700/1000/1400, ленивые слайд-шоу | ✅ | код |
+| L2 страница 404, L3 README скрыт (`_config.yml`), манифест | ✅ | код |
+| M5 GitHub Actions: тесты на push, еженедельный smoke production | ✅ | `.github/workflows/qa.yml` |
+| M1 заголовки X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy | ✅ применено | Cloudflare → Transform Rules |
+| M2 кэш `/img/*` и `/fonts/*` — 1 месяц (браузер и edge) | ✅ применено | Cloudflare → Cache Rules |
+| L1 минимум TLS 1.2 | ✅ применено | Cloudflare → Edge Certificates |
+| L4 `www` → apex одним редиректом, с сохранением UTM | ✅ применено | Cloudflare → Redirect Rules |
+| HSTS | ⏸ не включено: трудно откатить, решение за владельцем | Cloudflare → SSL/TLS → Edge Certificates |
+| H1 аналитика | ⏸ ждёт ID | `_build/build.py` → `CONFIG` |
+| L7 разные ссылки Telegram, L8 формулировка FAQ, L9 пополнение мероприятий | ⏸ решение по контенту | — |
+
+**Тесты после исправлений (локально):** unit 8/8 (+1 todo — аналитика), E2E 336/336 во всех 8 конфигурациях.
+
+**Lighthouse mobile (локальная сборка):** Performance 95–96, Accessibility 100, вес страницы около 0,6 МБ (было около 3 МБ).
