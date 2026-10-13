@@ -31,6 +31,20 @@ WA = "https://wa.me/66817959110"
 TG = "https://t.me/moychay_phuket"
 
 
+FONTS = json.load(open(os.path.join(HERE, "fonts.json"), encoding="utf-8"))
+
+
+def fonts(families, preload, root):
+    faces = []
+    for fam in families:
+        for f in FONTS[fam]:
+            faces.append(
+                f"@font-face{{font-family:'{fam}';font-style:normal;font-weight:{f['weight']};font-display:swap;"
+                f"src:url({root}fonts/{f['file']}) format('woff2');unicode-range:{f['range']}}}")
+    links = "\n".join(f'<link rel="preload" as="font" type="font/woff2" href="{root}fonts/{n}" crossorigin>' for n in preload)
+    return "\n".join(faces), links
+
+
 def wa(text):
     return f"{WA}?text={quote(text)}"
 
@@ -103,7 +117,7 @@ def footer(items):
 
 # ── EN ───────────────────────────────────────────────────────────
 EN = dict(
-    lang="en", root="", root_href="./", lang_label="Language", head_font="\"Space Grotesk\"", head_font_q="Space+Grotesk:wght@500;600;700", canonical="https://teaphuket.com/", og_locale="en_US", map_lang="en",
+    lang="en", root="", root_href="./", lang_label="Language", head_font="\"Space Grotesk\"", font_families=["Space Grotesk", "Inter"], font_preload_files=["inter-latin.woff2", "space-grotesk-latin.woff2"], canonical="https://teaphuket.com/", og_locale="en_US", map_lang="en",
     cur_en='aria-current="page"', cur_ru="",
     meta_title="Moychay Phuket — Tea House on Boat Avenue, Bangtao",
     meta_desc="Taste 200+ real teas, join a gong fu cha ceremony or just slow down. 2nd floor, Boat Avenue, Bangtao, Phuket. Open daily 11AM–10PM, walk in anytime.",
@@ -228,7 +242,7 @@ EN["ways_cards"] = cards([
 
 # ── RU ───────────────────────────────────────────────────────────
 RU = dict(
-    lang="ru", root="../", root_href="../", lang_label="Язык", head_font="Geologica", head_font_q="Geologica:wght@500;600;700", canonical="https://teaphuket.com/ru/", og_locale="ru_RU", map_lang="ru",
+    lang="ru", root="../", root_href="../", lang_label="Язык", head_font="Geologica", font_families=["Geologica", "Inter"], font_preload_files=["inter-cyrillic.woff2", "geologica-cyrillic.woff2"], canonical="https://teaphuket.com/ru/", og_locale="ru_RU", map_lang="ru",
     cur_en="", cur_ru='aria-current="page"',
     meta_title="Moychay Phuket — чайный клуб на Boat Avenue, Бангтао",
     meta_desc="Более 200 сортов чая, церемонии гунфу ча и тихое место на Пхукете. 2 этаж Boat Avenue, Бангтао. Ежедневно 11:00–22:00, без записи.",
@@ -356,6 +370,7 @@ RU["ways_cards"] = cards([
 def build(data, out):
     html = open(os.path.join(HERE, "template.html"), encoding="utf-8").read()
     values = {**CONFIG, **data, "year": str(datetime.date.today().year)}
+    values["font_faces"], values["font_preload"] = fonts(data["font_families"], data["font_preload_files"], data["root"])
     values["js_i18n"] = json.dumps({**data["js"], "root": data["root"]}, ensure_ascii=False)
     for k, v in values.items():
         if isinstance(v, str):

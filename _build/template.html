@@ -28,10 +28,8 @@
 <link rel="icon" type="image/png" sizes="32x32" href="{{root}}img/favicon-32.png">
 <link rel="apple-touch-icon" href="{{root}}apple-touch-icon.png">
 
-<!-- Fonts: Inter (Latin + Cyrillic) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family={{head_font_q}}&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- Fonts: self-hosted variable woff2 (OFL), only the subsets each page needs -->
+{{font_preload}}
 
 <link rel="preload" as="image" href="{{root}}img/interior/1_shop-hero-m.jpg" media="(max-width: 899px)">
 <link rel="preload" as="image" href="{{root}}img/interior/1_shop-hero-d.jpg" media="(min-width: 900px)">
@@ -138,6 +136,7 @@ window.SITE = {
 <!-- ======================= /ANALYTICS ======================= -->
 
 <style>
+{{font_faces}}
 :root{
   --dark:#2A2826; --dark-2:#23211F; --paper:#EDE7DA; --paper-2:#E4DCCB;
   --on-dark:#F4F0E8; --ink:#211F1D; --clay:#B5602F; --clay-btn:#A4552A; --clay-hover:#8F4A25;
