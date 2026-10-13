@@ -7,6 +7,7 @@ Builds index.html (EN) and ru/index.html (RU) from template.html.
 Edit texts below and analytics IDs in CONFIG, then run the script.
 The _build folder is not published by GitHub Pages.
 """
+import datetime
 import json
 import os
 from urllib.parse import quote
@@ -78,18 +79,18 @@ def tea(items):
     out = []
     for n, (name, text) in enumerate(items, 1):
         out.append(f'''      <li class="cat">
-        <button class="cat-h" type="button" aria-expanded="false"><span class="n">{n:02d}</span><span class="t">{name}</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>{text}</p></div></div>
+        <button class="cat-h" type="button" aria-expanded="false" aria-controls="cat-{n}"><span class="n">{n:02d}</span><span class="t">{name}</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="cat-{n}"><div><p>{text}</p></div></div>
       </li>''')
     return "\n".join(out)
 
 
 def faq(items):
     out = []
-    for q, a in items:
+    for n, (q, a) in enumerate(items, 1):
         out.append(f'''      <li>
-        <button class="faq-q" type="button" aria-expanded="false">{q}<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>{a}</p></div></div>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-{n}">{q}<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="faq-{n}"><div><p>{a}</p></div></div>
       </li>''')
     return "\n".join(out)
 
@@ -102,7 +103,7 @@ def footer(items):
 
 # ── EN ───────────────────────────────────────────────────────────
 EN = dict(
-    lang="en", root="", head_font="\"Space Grotesk\"", head_font_q="Space+Grotesk:wght@500;600;700", canonical="https://teaphuket.com/", og_locale="en_US", map_lang="en",
+    lang="en", root="", root_href="./", lang_label="Language", head_font="\"Space Grotesk\"", head_font_q="Space+Grotesk:wght@500;600;700", canonical="https://teaphuket.com/", og_locale="en_US", map_lang="en",
     cur_en='aria-current="page"', cur_ru="",
     meta_title="Moychay Phuket — Tea House on Boat Avenue, Bangtao",
     meta_desc="Taste 200+ real teas, join a gong fu cha ceremony or just slow down. 2nd floor, Boat Avenue, Bangtao, Phuket. Open daily 11AM–10PM, walk in anytime.",
@@ -112,18 +113,15 @@ EN = dict(
     msg_order_url=wa("Hi! I'd like to order tea with delivery"),
     msg_event="whatsapp",
     hero_alt="Round table and arched window with teaware at Moychay Phuket",
-    hero_eyebrow="Tea house · Boat Avenue, Bangtao",
     hero_h1="Phuket <em class='acc'>tea</em> club",
     hero_sub="A calm spot on the 2nd floor of Boat Avenue where you can taste real tea, learn how it's brewed, or just sit and slow down. No experience needed, walk in anytime.",
     addr_short="2nd floor, Boat Avenue, Bangtao",
     addr_full="2nd floor, Boat Avenue, Bangtao, Phuket",
     hours="Open daily 11AM – 10PM",
     hours_full="Open daily, 11AM – 10PM",
-    parking="Parking on site",
     cta_directions="Get directions",
     cta_directions_sticky="Get directions",
     cta_message="Message us on WhatsApp",
-    cta_message_short="Message us on WhatsApp",
     trust_label="Why guests come",
     trust_items=trust([
         "200+ teas to taste, not just browse",
@@ -140,8 +138,6 @@ EN = dict(
     ]),
     cta_plan="Plan your visit",
     alt_6shop="Rattan peacock chair and calligraphy scrolls on a concrete wall",
-    gal_eyebrow="Inside the tea house",
-    gal_hint="Swipe →",
     alt_8shop="Tea table by the arched window",
     alt_3shop="Shelves of clay teapots and porcelain cups",
     alt_5shop="Long room with concrete walls and wooden tables",
@@ -179,7 +175,6 @@ EN = dict(
     ev_intro="We run tea tastings, ceremonies and other events at the tea house every week – open to everyone, no tea background required.",
     ev_cta="See upcoming events",
     ev_extra="",
-    alt_5people="Guests at a candle-lit tea tasting",
     deliv_label="Delivery — can't make it in?",
     deliv_text="We ship anywhere in Thailand – free over 2000 THB.",
     deliv_cta="Order via WhatsApp",
@@ -201,7 +196,6 @@ EN = dict(
     find_park="Parking on site, no booking needed",
     final_h2="Come <em class='acc'>taste</em> it for yourself",
     final_text="2nd floor, Boat Avenue. Walk in – no booking, no rush.",
-    alt_8people="Guests at the round tea table by the arched window",
     footer_icons=footer([
         ("Google Maps", MAPS, "directions", "i-gm"),
         ("WhatsApp", WA, "whatsapp", "i-wa"),
@@ -234,7 +228,7 @@ EN["ways_cards"] = cards([
 
 # ── RU ───────────────────────────────────────────────────────────
 RU = dict(
-    lang="ru", root="../", head_font="Geologica", head_font_q="Geologica:wght@500;600;700", canonical="https://teaphuket.com/ru/", og_locale="ru_RU", map_lang="ru",
+    lang="ru", root="../", root_href="../", lang_label="Язык", head_font="Geologica", head_font_q="Geologica:wght@500;600;700", canonical="https://teaphuket.com/ru/", og_locale="ru_RU", map_lang="ru",
     cur_en="", cur_ru='aria-current="page"',
     meta_title="Moychay Phuket — чайный клуб на Boat Avenue, Бангтао",
     meta_desc="Более 200 сортов чая, церемонии гунфу ча и тихое место на Пхукете. 2 этаж Boat Avenue, Бангтао. Ежедневно 11:00–22:00, без записи.",
@@ -244,18 +238,15 @@ RU = dict(
     msg_order_url=TG,
     msg_event="telegram",
     hero_alt="Круглый стол и арочное окно с чайной посудой в Moychay Phuket",
-    hero_eyebrow="Чайная · Boat Avenue, Бангтао",
     hero_h1="Чайный <em class='acc'>клуб</em> на Пхукете",
     hero_sub="Находимся на 2 этаже Boat Avenue на Бангтао. У нас можно попробовать настоящий чай, узнать, как его заваривают, или просто посидеть и отдохнуть. Опыт не нужен – заходите в любое время.",
     addr_short="2 этаж, Boat Avenue, Бангтао",
     addr_full="2 этаж, Boat Avenue, Бангтао, Пхукет",
     hours="Ежедневно 11:00 – 22:00",
     hours_full="Открыты каждый день, с 11:00 до 22:00",
-    parking="Парковка на месте",
     cta_directions="Проложить маршрут",
     cta_directions_sticky="Проложить маршрут",
     cta_message="Написать в Telegram",
-    cta_message_short="Написать в Telegram",
     trust_label="Почему к нам приходят",
     trust_items=trust([
         "200+ сортов чая",
@@ -272,8 +263,6 @@ RU = dict(
     ]),
     cta_plan="Запланировать визит",
     alt_6shop="Ротанговое кресло-павлин и свитки с каллиграфией на бетонной стене",
-    gal_eyebrow="Внутри чайной",
-    gal_hint="Листайте →",
     alt_8shop="Чайный стол у арочного окна",
     alt_3shop="Полки с глиняными чайниками и фарфоровыми чашками",
     alt_5shop="Зал с бетонными стенами и деревянными столами",
@@ -310,7 +299,6 @@ RU = dict(
     ev_intro="Мы проводим чайные дегустации, церемонии и другие мероприятия каждую неделю – открыто для всех, чайный опыт не требуется.",
     ev_cta="Смотреть ближайшие мероприятия",
     ev_extra=f'        <a class="tlink" href="{TG}" target="_blank" rel="noopener" data-track="telegram" data-place="events"><svg class="bi" aria-hidden="true"><use href="#i-tg"/></svg>Анонсы в нашем чайном клубе в Telegram</a>',
-    alt_5people="Гости на дегустации при свечах",
     deliv_label="Доставка — если не можете приехать",
     deliv_text="Мы доставляем чай по всему Таиланду – бесплатно при заказе от 2000 ฿.",
     deliv_cta="Заказать в Telegram",
@@ -332,7 +320,6 @@ RU = dict(
     find_park="Парковка на месте, запись не нужна",
     final_h2="Приезжайте и <em class='acc'>попробуйте</em> сами",
     final_text="2 этаж, Boat Avenue. Заходите – без записи, без спешки.",
-    alt_8people="Гости за круглым чайным столом у арочного окна",
     footer_icons=footer([
         ("Google Maps", MAPS, "directions", "i-gm"),
         ("Яндекс Карты", "https://yandex.ru/maps/-/CXQU482P", "directions", "i-ya"),
@@ -368,7 +355,7 @@ RU["ways_cards"] = cards([
 
 def build(data, out):
     html = open(os.path.join(HERE, "template.html"), encoding="utf-8").read()
-    values = {**CONFIG, **data}
+    values = {**CONFIG, **data, "year": str(datetime.date.today().year)}
     values["js_i18n"] = json.dumps({**data["js"], "root": data["root"]}, ensure_ascii=False)
     for k, v in values.items():
         if isinstance(v, str):
@@ -382,5 +369,19 @@ def build(data, out):
     print("built", out)
 
 
+def sitemap():
+    today = datetime.date.today().isoformat()
+    alt = ('    <xhtml:link rel="alternate" hreflang="en" href="https://teaphuket.com/"/>\n'
+           '    <xhtml:link rel="alternate" hreflang="ru" href="https://teaphuket.com/ru/"/>\n')
+    urls = "".join(f"  <url>\n    <loc>{u}</loc>\n    <lastmod>{today}</lastmod>\n{alt}  </url>\n"
+                   for u in ("https://teaphuket.com/", "https://teaphuket.com/ru/"))
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
+           + urls + "</urlset>\n")
+    open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8").write(xml)
+    print("built sitemap.xml")
+
+
 build(EN, "index.html")
 build(RU, "ru/index.html")
+sitemap()

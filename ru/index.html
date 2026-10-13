@@ -140,7 +140,7 @@ window.SITE = {
 <style>
 :root{
   --dark:#2A2826; --dark-2:#23211F; --paper:#EDE7DA; --paper-2:#E4DCCB;
-  --on-dark:#F4F0E8; --ink:#211F1D; --clay:#B5602F; --clay-hover:#A0542A;
+  --on-dark:#F4F0E8; --ink:#211F1D; --clay:#B5602F; --clay-btn:#A4552A; --clay-hover:#8F4A25;
   --amber:#9C6B1F; --walnut:#5B4636;
   --muted-d:rgba(244,240,232,.68); --muted-l:rgba(33,31,29,.68);
   --line-d:rgba(244,240,232,.16); --line-l:rgba(91,70,54,.28);
@@ -176,7 +176,7 @@ p:last-child{margin-bottom:0}
 
 /* Buttons & links */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:56px;padding:0 30px;
-  background:var(--clay);color:#fff;text-decoration:none;font-size:18px;font-weight:600;letter-spacing:.02em;
+  background:var(--clay-btn);color:#fff;text-decoration:none;font-size:18px;font-weight:600;letter-spacing:.02em;
   border-radius:2px;transition:background .2s}
 .btn:hover{background:var(--clay-hover)}
 .btn .ico{width:20px;height:20px}
@@ -249,6 +249,7 @@ p:last-child{margin-bottom:0}
 
 /* Gallery (inside the Why block) */
 .arrows{display:flex;gap:8px}
+.arrows[hidden]{display:none!important}
 .arrows button{width:48px;height:48px;border:1px solid var(--line-l);display:grid;place-items:center;transition:border-color .2s,opacity .2s}
 .dark .arrows button{border-color:var(--line-d)}
 .arrows button:hover{border-color:currentColor}
@@ -444,7 +445,6 @@ p:last-child{margin-bottom:0}
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
   <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
-  <symbol id="i-park" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M10 17V8h3a2.5 2.5 0 0 1 0 5h-3"/></symbol>
   <symbol id="i-jars" viewBox="0 0 24 24"><path d="M3 20h18"/><rect x="5" y="10" width="4" height="10"/><rect x="10" y="5" width="4" height="15"/><rect x="15" y="12" width="4" height="8"/></symbol>
   <symbol id="i-vase" viewBox="0 0 24 24"><path d="M9 3h6"/><path d="M10 3v3.5C7 8 5 10.5 5 14a7 7 0 0 0 14 0c0-3.5-2-6-5-7.5V3"/></symbol>
   <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5V19c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5z"/><path d="M12 6v13.5"/></symbol>
@@ -453,7 +453,6 @@ p:last-child{margin-bottom:0}
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
   <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
-  <symbol id="i-route" viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8z"/></symbol>
   <!-- brand icons: Simple Icons (CC0) -->
   <symbol id="i-wa" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></symbol>
   <symbol id="i-tg" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></symbol>
@@ -469,7 +468,7 @@ p:last-child{margin-bottom:0}
     <nav class="nav" aria-label="Разделы">
       <a href="#why-visit">Визит</a><a href="#prices">Форматы</a><a href="#teas">Чай</a><a href="#events">События</a><a href="#find-us">Как найти</a>
     </nav>
-    <div class="lang" data-cur="ru" role="group" aria-label="Language">
+    <div class="lang" data-cur="ru" role="group" aria-label="Язык">
       <span class="lang-thumb" aria-hidden="true"></span>
       <a href="../" hreflang="en" lang="en" >EN</a>
       <a href="../ru/" hreflang="ru" lang="ru" aria-current="page">RU</a>
@@ -601,44 +600,44 @@ p:last-child{margin-bottom:0}
     </div>
     <ul class="cats" id="cats">
       <li class="cat">
-        <button class="cat-h" type="button" aria-expanded="false"><span class="n">01</span><span class="t">Белый чай</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Лёгкий и деликатный, с нотами мёда и сухих цветов.</p></div></div>
+        <button class="cat-h" type="button" aria-expanded="false" aria-controls="cat-1"><span class="n">01</span><span class="t">Белый чай</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="cat-1"><div><p>Лёгкий и деликатный, с нотами мёда и сухих цветов.</p></div></div>
       </li>
       <li class="cat">
-        <button class="cat-h" type="button" aria-expanded="false"><span class="n">02</span><span class="t">Зелёный чай</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Свежий и травянистый, иногда с бульонными нотами, всегда яркий.</p></div></div>
+        <button class="cat-h" type="button" aria-expanded="false" aria-controls="cat-2"><span class="n">02</span><span class="t">Зелёный чай</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="cat-2"><div><p>Свежий и травянистый, иногда с бульонными нотами, всегда яркий.</p></div></div>
       </li>
       <li class="cat">
-        <button class="cat-h" type="button" aria-expanded="false"><span class="n">03</span><span class="t">Светлые улуны</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Мягкие, цветочные и сладкие – что-то между зелёным и чёрным чаем.</p></div></div>
+        <button class="cat-h" type="button" aria-expanded="false" aria-controls="cat-3"><span class="n">03</span><span class="t">Светлые улуны</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="cat-3"><div><p>Мягкие, цветочные и сладкие – что-то между зелёным и чёрным чаем.</p></div></div>
       </li>
       <li class="cat">
-        <button class="cat-h" type="button" aria-expanded="false"><span class="n">04</span><span class="t">Тёмные улуны</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Обжаренные и насыщенные, с нотами тёмного шоколада и жареных орехов.</p></div></div>
+        <button class="cat-h" type="button" aria-expanded="false" aria-controls="cat-4"><span class="n">04</span><span class="t">Тёмные улуны</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="cat-4"><div><p>Обжаренные и насыщенные, с нотами тёмного шоколада и жареных орехов.</p></div></div>
       </li>
       <li class="cat">
-        <button class="cat-h" type="button" aria-expanded="false"><span class="n">05</span><span class="t">Красный чай (на Западе его называют «чёрным»)</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Согревающий и мягкий, с сухими фруктами и мягкими специями.</p></div></div>
+        <button class="cat-h" type="button" aria-expanded="false" aria-controls="cat-5"><span class="n">05</span><span class="t">Красный чай (на Западе его называют «чёрным»)</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="cat-5"><div><p>Согревающий и мягкий, с сухими фруктами и мягкими специями.</p></div></div>
       </li>
       <li class="cat">
-        <button class="cat-h" type="button" aria-expanded="false"><span class="n">06</span><span class="t">Молодой сырой пуэр (шэн)</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Свежий, яркий и немного травянистый – бодрящий и чистый.</p></div></div>
+        <button class="cat-h" type="button" aria-expanded="false" aria-controls="cat-6"><span class="n">06</span><span class="t">Молодой сырой пуэр (шэн)</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="cat-6"><div><p>Свежий, яркий и немного травянистый – бодрящий и чистый.</p></div></div>
       </li>
       <li class="cat">
-        <button class="cat-h" type="button" aria-expanded="false"><span class="n">07</span><span class="t">Выдержанный сырой пуэр (шэн)</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Тот же чай, но выдержанный 10+ лет во что-то глубокое и сложное.</p></div></div>
+        <button class="cat-h" type="button" aria-expanded="false" aria-controls="cat-7"><span class="n">07</span><span class="t">Выдержанный сырой пуэр (шэн)</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="cat-7"><div><p>Тот же чай, но выдержанный 10+ лет во что-то глубокое и сложное.</p></div></div>
       </li>
       <li class="cat">
-        <button class="cat-h" type="button" aria-expanded="false"><span class="n">08</span><span class="t">Шу пуэр и тёмные чаи</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Землистые и «заземляющие» – хорошо подходят после плотного приёма пищи.</p></div></div>
+        <button class="cat-h" type="button" aria-expanded="false" aria-controls="cat-8"><span class="n">08</span><span class="t">Шу пуэр и тёмные чаи</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="cat-8"><div><p>Землистые и «заземляющие» – хорошо подходят после плотного приёма пищи.</p></div></div>
       </li>
       <li class="cat">
-        <button class="cat-h" type="button" aria-expanded="false"><span class="n">09</span><span class="t">Лао ча (выдержанный чай)</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Годы бережного хранения превращают горечь в мягкую, сложную глубину вкуса.</p></div></div>
+        <button class="cat-h" type="button" aria-expanded="false" aria-controls="cat-9"><span class="n">09</span><span class="t">Лао ча (выдержанный чай)</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="cat-9"><div><p>Годы бережного хранения превращают горечь в мягкую, сложную глубину вкуса.</p></div></div>
       </li>
       <li class="cat">
-        <button class="cat-h" type="button" aria-expanded="false"><span class="n">10</span><span class="t">Травяной чай</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Бескофеиновые настои трав, цветов и фруктов – успокаивающие или бодрящие, на ваш выбор.</p></div></div>
+        <button class="cat-h" type="button" aria-expanded="false" aria-controls="cat-10"><span class="n">10</span><span class="t">Травяной чай</span><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="cat-10"><div><p>Бескофеиновые настои трав, цветов и фруктов – успокаивающие или бодрящие, на ваш выбор.</p></div></div>
       </li>
     </ul>
     <p class="tea-foot rv">Не знаете, что выбрать? <a class="tlink" href="https://t.me/moychay_phuket" target="_blank" rel="noopener" data-track="telegram" data-place="tea"><svg class="bi" aria-hidden="true"><use href="#i-tg"/></svg>Спросите чайного мастера</a></p>
@@ -699,28 +698,28 @@ p:last-child{margin-bottom:0}
     </div>
     <ul class="faq-list rv">
       <li>
-        <button class="faq-q" type="button" aria-expanded="false">Нужно ли записываться заранее?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Нет, просто приходите. А для полной церемонии гунфу-ча или группового мероприятия запись нужна, места ограничены.</p></div></div>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-1">Нужно ли записываться заранее?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="faq-1"><div><p>Нет, просто приходите. А для полной церемонии гунфу-ча или группового мероприятия запись нужна, места ограничены.</p></div></div>
       </li>
       <li>
-        <button class="faq-q" type="button" aria-expanded="false">Нужно ли разбираться в чае?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Нет. Большинство гостей пробуют чайную церемонию впервые.</p></div></div>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-2">Нужно ли разбираться в чае?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="faq-2"><div><p>Нет. Большинство гостей пробуют чайную церемонию впервые.</p></div></div>
       </li>
       <li>
-        <button class="faq-q" type="button" aria-expanded="false">Можно ли купить антиквариат с полок?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Да – это настоящая коллекция, доступная для покупки, а не просто декор.</p></div></div>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-3">Можно ли купить антиквариат с полок?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="faq-3"><div><p>Да – это настоящая коллекция, доступная для покупки, а не просто декор.</p></div></div>
       </li>
       <li>
-        <button class="faq-q" type="button" aria-expanded="false">Есть ли парковка?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Да, на месте, на Boat Avenue.</p></div></div>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-4">Есть ли парковка?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="faq-4"><div><p>Да, на месте, на Boat Avenue.</p></div></div>
       </li>
       <li>
-        <button class="faq-q" type="button" aria-expanded="false">Доставляете за пределы Пхукета?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Да, по всему Таиланду – бесплатно при заказе от 2000 ฿. Действует также платная международная доставка.</p></div></div>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-5">Доставляете за пределы Пхукета?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="faq-5"><div><p>Да, по всему Таиланду – бесплатно при заказе от 2000 ฿. Действует также платная международная доставка.</p></div></div>
       </li>
       <li>
-        <button class="faq-q" type="button" aria-expanded="false">Есть что-то кроме чая?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p"><div><p>Да – безалкогольные коктейли на матче и комбуча, можно остаться или взять с собой.</p></div></div>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-6">Есть что-то кроме чая?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="faq-6"><div><p>Да – безалкогольные коктейли на матче и комбуча, можно остаться или взять с собой.</p></div></div>
       </li>
     </ul>
   </div>
