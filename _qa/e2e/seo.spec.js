@@ -34,7 +34,10 @@ for (const p of PAGES) {
     expect(meta.viewport).toContain('width=device-width');
     expect(meta.ld.length).toBe(1);
     const ld = JSON.parse(meta.ld[0]);
-    expect(ld['@type']).toBe('CafeOrCoffeeShop');
+    expect([].concat(ld['@type'])).toContain('CafeOrCoffeeShop');
+    expect(ld.address.addressCountry).toBe('TH');
+    expect(ld.openingHoursSpecification[0].opens).toBe('11:00');
+    expect([].concat(ld.hasMap).length).toBeGreaterThanOrEqual(2);
     expect(ld.geo.latitude).toBeCloseTo(7.993, 2);
     expect(meta.headings.filter(h => h === 'H1').length).toBe(1);
     expect(meta.headings[0]).toBe('H1');

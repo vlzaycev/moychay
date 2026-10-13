@@ -3,6 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){if(!i)return;w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','{{cfg_gtm}}');</script>
+<!-- End Google Tag Manager -->
+<meta name="google-site-verification" content="{{cfg_gsc}}">
 <title>{{meta_title}}</title>
 <meta name="description" content="{{meta_desc}}">
 <link rel="canonical" href="{{canonical}}">
@@ -38,32 +46,45 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "CafeOrCoffeeShop",
+  "@type": ["CafeOrCoffeeShop", "Store"],
+  "@id": "https://teaphuket.com/#teahouse",
   "name": "Moychay Phuket",
+  "alternateName": "Tea House Moychay Phuket",
   "description": "{{meta_desc}}",
   "url": "{{canonical}}",
-  "image": "https://teaphuket.com/img/og.jpg",
+  "inLanguage": "{{lang}}",
+  "image": ["https://teaphuket.com/img/og.jpg", "https://teaphuket.com/img/interior/1_shop-1400.webp"],
+  "logo": "https://teaphuket.com/img/logo.png",
   "telephone": "+66817959110",
-  "servesCuisine": "Tea",
+  "servesCuisine": ["Tea", "Chinese tea", "Matcha"],
   "priceRange": "฿฿",
+  "currenciesAccepted": "THB",
+  "acceptsReservations": true,
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "Boat Avenue, 2nd floor",
     "addressLocality": "Bang Tao, Choeng Thale",
     "addressRegion": "Phuket",
+    "postalCode": "83110",
     "addressCountry": "TH"
   },
   "geo": { "@type": "GeoCoordinates", "latitude": 7.9930212, "longitude": 98.3050328 },
-  "hasMap": "https://maps.app.goo.gl/uuZkb3YwtNMGQhy18",
+  "hasMap": ["https://maps.app.goo.gl/uuZkb3YwtNMGQhy18", "https://yandex.ru/maps/-/CXQU482P"],
+  "openingHours": "Mo-Su 11:00-22:00",
   "openingHoursSpecification": [{
     "@type": "OpeningHoursSpecification",
     "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
     "opens": "11:00", "closes": "22:00"
   }],
+  "amenityFeature": [
+    { "@type": "LocationFeatureSpecification", "name": "Parking", "value": true },
+    { "@type": "LocationFeatureSpecification", "name": "Board games", "value": true }
+  ],
   "sameAs": [
     "https://www.instagram.com/moychay.phuket",
     "https://www.facebook.com/moychay.phuket/",
-    "https://t.me/moychay_phuket"
+    "https://t.me/moychay_phuket",
+    "https://phuket.moychay.asia/"
   ]
 }
 </script>
@@ -118,6 +139,7 @@ window.SITE = {
   window.track = function (name, place) {
     var params = { place: place || '', lang: document.documentElement.lang };
     try {
+      (window.dataLayer = window.dataLayer || []).push({ event: name, click_place: params.place, page_lang: params.lang });
       if (window.gtag) {
         gtag('event', name, params);
         var conv = name === 'directions' ? S.ADS_CONV.directions
@@ -440,6 +462,10 @@ p:last-child{margin-bottom:0}
 </style>
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{cfg_gtm}}"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 <script>document.documentElement.classList.add('js')</script>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">

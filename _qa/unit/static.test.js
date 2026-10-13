@@ -67,7 +67,7 @@ test('JSON-LD parses and has required LocalBusiness fields', () => {
   for (const f of Object.values(PAGES)) {
     const m = read(f).match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
     const ld = JSON.parse(m[1]);
-    for (const k of ['name', 'address', 'geo', 'openingHoursSpecification', 'telephone', 'url']) assert.ok(ld[k], `${f}: ${k}`);
+    for (const k of ['name', 'address', 'geo', 'openingHoursSpecification', 'telephone', 'url', 'hasMap', 'sameAs']) assert.ok(ld[k], `${f}: ${k}`);
   }
 });
 
@@ -79,9 +79,15 @@ test('no secrets / tokens committed in tracked files', () => {
   assert.deepEqual(hits, []);
 });
 
-test('analytics IDs are configured (needed before running ads)', { todo: 'fill CONFIG in _build/build.py' }, () => {
-  const html = read(PAGES.en);
-  assert.doesNotMatch(html, /GA4_ID:\s+""/, 'GA4 ID is empty');
+test('Google Tag Manager and Search Console verification are on both pages', () => {
+  for (const f of Object.values(PAGES)) {
+    const html = read(f);
+    const head = html.slice(0, html.indexOf('</head>'));
+    assert.match(head, /gtm\.js\?id='\+i\+dl[\s\S]*'GTM-[A-Z0-9]+'/, `${f}: GTM snippet in <head>`);
+    assert.ok(head.indexOf('Google Tag Manager') < head.indexOf('<title>'), `${f}: GTM must be high in <head>`);
+    assert.match(html, /<body>\n<!-- Google Tag Manager \(noscript\) -->/, `${f}: GTM noscript right after <body>`);
+    assert.match(head, /<meta name="google-site-verification" content="[\w-]{20,}">/, `${f}: GSC tag`);
+  }
 });
 
 test('404 page and web manifest are valid', () => {

@@ -110,6 +110,16 @@ for (const p of PAGES) {
       await expect.poll(idx, { timeout: 5000 }).not.toBe(now);
     });
 
+    test('tracked clicks are pushed to the GTM dataLayer', async ({ page }) => {
+      await page.route(/googletagmanager\.com/, r => r.abort()); // don't hit real GTM from tests
+      await page.goto(p.path);
+      await page.evaluate(() => document.querySelectorAll('a[data-track]').forEach(a => a.addEventListener('click', e => e.preventDefault())));
+      await page.locator('#home a[data-track="directions"]').click();
+      await page.locator('#home a.tlink[data-place="hero"]').click();
+      const events = await page.evaluate(() => (window.dataLayer || []).filter(e => e.click_place).map(e => e.event + '@' + e.click_place));
+      expect(events).toEqual(['directions@hero', (p.lang === 'en' ? 'whatsapp' : 'telegram') + '@hero']);
+    });
+
     test('header becomes solid after scrolling', async ({ page }) => {
       await page.evaluate(() => window.scrollTo(0, 400));
       await expect(page.locator('#hdr')).toHaveClass(/solid/);

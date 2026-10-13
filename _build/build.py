@@ -17,6 +17,8 @@ ROOT = os.path.dirname(HERE)
 
 # ── Analytics & data ─────────────────────────────────────────────
 CONFIG = {
+    "cfg_gtm": "GTM-54JDMZL2",  # Google Tag Manager container (GA4, Ads, Pixel etc. are configured inside GTM)
+    "cfg_gsc": "deblMaE7xgGLp7axGkXzbo1mVhtVkWtaBX_rFTN8G8g",  # Google Search Console verification
     "cfg_ga4": "",              # "G-XXXXXXXXXX"
     "cfg_ads": "",              # "AW-XXXXXXXXX"
     "cfg_ads_directions": "",   # conversion label for "Get directions"
@@ -119,8 +121,8 @@ def footer(items):
 EN = dict(
     lang="en", root="", root_href="./", lang_label="Language", head_font="\"Space Grotesk\"", font_families=["Space Grotesk", "Inter"], font_preload_files=["inter-latin.woff2", "space-grotesk-latin.woff2"], canonical="https://teaphuket.com/", og_locale="en_US", map_lang="en",
     cur_en='aria-current="page"', cur_ru="",
-    meta_title="Moychay Phuket — Tea House on Boat Avenue, Bangtao",
-    meta_desc="Taste 200+ real teas, join a gong fu cha ceremony or just slow down. 2nd floor, Boat Avenue, Bangtao, Phuket. Open daily 11AM–10PM, walk in anytime.",
+    meta_title="Tea house in Phuket, tea ceremonies, matcha – Moychay Phuket",
+    meta_desc="Visit Moychay Phuket – tea house in Phuket. Discover Pu-erh, Oolong, Matcha, Gaba, Green, White and Black teas. Chinese tea ceremonies, tastings and premium teas.",
     nav_label="Sections", nav_visit="Visit", nav_ways="Try tea", nav_tea="Teas", nav_events="Events", nav_find="Find us",
     maps=MAPS,
     msg_url=wa("Hi! I found you on teaphuket.com"),
@@ -244,8 +246,8 @@ EN["ways_cards"] = cards([
 RU = dict(
     lang="ru", root="../", root_href="../", lang_label="Язык", head_font="Geologica", font_families=["Geologica", "Inter"], font_preload_files=["inter-cyrillic.woff2", "geologica-cyrillic.woff2"], canonical="https://teaphuket.com/ru/", og_locale="ru_RU", map_lang="ru",
     cur_en="", cur_ru='aria-current="page"',
-    meta_title="Moychay Phuket — чайный клуб на Boat Avenue, Бангтао",
-    meta_desc="Более 200 сортов чая, церемонии гунфу ча и тихое место на Пхукете. 2 этаж Boat Avenue, Бангтао. Ежедневно 11:00–22:00, без записи.",
+    meta_title="Чайная на Пхукете, чайные церемонии, матча – Moychay Phuket",
+    meta_desc="Чайная Moychay Phuket на Пхукете. Пуэр, улун, матча, габа, зелёный, белый и красный китайский чай. Чайные церемонии, дегустации и покупка чая.",
     nav_label="Разделы", nav_visit="Визит", nav_ways="Форматы", nav_tea="Чай", nav_events="События", nav_find="Как найти",
     maps=MAPS,
     msg_url=TG,
