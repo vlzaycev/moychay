@@ -1,0 +1,45 @@
+# Runs the QA suite on every push and pull request. It does NOT deploy:
+# GitHub Pages keeps publishing the main branch on its own.
+name: QA
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 1"   # weekly production smoke check, Mondays 03:00 UTC
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: _qa
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: _qa/package-lock.json
+      - run: npm ci
+      - name: Static checks (build reproducible, assets, SEO files, no secrets)
+        run: npm run unit
+      - run: npx playwright install --with-deps chromium
+      - name: E2E (local copy of the site, Chromium desktop + mobile)
+        if: github.event_name != 'schedule'
+        run: npx playwright test --project=chromium-desktop --project=chromium-mobile --grep-invert @live
+      - name: Production smoke (read-only)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: npm run test:prod
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-results
+          path: _qa/results/
+          retention-days: 7
