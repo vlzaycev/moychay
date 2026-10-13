@@ -42,7 +42,8 @@ for (const p of PAGES) {
       });
       await page.waitForLoadState('networkidle').catch(() => {});
       const broken = await page.evaluate(() => [...document.images]
-        .filter(i => i.complete && i.naturalWidth === 0 && getComputedStyle(i).display !== 'none')
+        // slideshow slides wait in data-src until shown (files themselves are checked by unit/static.test.js)
+        .filter(i => i.getAttribute('src') && i.complete && i.naturalWidth === 0 && getComputedStyle(i).display !== 'none')
         .map(i => i.currentSrc || i.src));
       expect(broken).toEqual([]);
     });

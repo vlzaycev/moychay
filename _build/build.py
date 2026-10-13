@@ -73,7 +73,7 @@ def cards(items, root):
         text = c["text"] + (" " + c["note"] if c.get("note") else "")
         if key == "b-cer":
             out.append(f'''      <article class="card feature {key} rv">
-        <div class="ph"><img src="{root}img/people/8_people-700.jpg" srcset="{root}img/people/8_people-700.jpg 700w, {root}img/people/8_people.jpg 1400w" sizes="(min-width:900px) 40vw, 100vw" loading="lazy" decoding="async" alt="{c["alt"]}"></div>
+        <div class="ph"><img src="{root}img/people/8_people-700.webp" srcset="{root}img/people/8_people-700.webp 700w, {root}img/people/8_people-1000.webp 1000w, {root}img/people/8_people-1400.webp 1400w" sizes="(min-width:900px) 40vw, 100vw" loading="lazy" decoding="async" alt="{c["alt"]}"></div>
         <div class="in">
           <h3>{c["name"]}</h3>
           <p class="price">{price}</p>
