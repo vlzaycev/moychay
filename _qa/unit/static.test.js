@@ -83,3 +83,14 @@ test('analytics IDs are configured (needed before running ads)', { todo: 'fill C
   const html = read(PAGES.en);
   assert.doesNotMatch(html, /GA4_ID:\s+""/, 'GA4 ID is empty');
 });
+
+test('404 page and web manifest are valid', () => {
+  const nf = read('404.html');
+  assert.match(nf, /<meta name="robots" content="noindex">/);
+  for (const m of nf.matchAll(/(?:src|href)="(\/[^"]*)"/g)) {
+    const f = path.join(ROOT, m[1]);
+    assert.ok(m[1] === '/' || m[1] === '/ru/' || fs.existsSync(f), `404.html references missing ${m[1]}`);
+  }
+  const man = JSON.parse(read('site.webmanifest'));
+  for (const i of man.icons) assert.ok(fs.existsSync(path.join(ROOT, i.src)), i.src);
+});

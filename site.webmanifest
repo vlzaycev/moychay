@@ -1,0 +1,12 @@
+{
+  "name": "Moychay Phuket",
+  "short_name": "Moychay",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#2A2826",
+  "theme_color": "#2A2826",
+  "icons": [
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/img/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
