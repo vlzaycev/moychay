@@ -17,7 +17,7 @@ ROOT = os.path.dirname(HERE)
 
 # ── Analytics & data ─────────────────────────────────────────────
 CONFIG = {
-    "cfg_gtm": "GTM-54JDMZL2",  # Google Tag Manager container (GA4, Ads, Pixel etc. are configured inside GTM)
+    "cfg_gtm": "GTM-WJQBWNL9",  # Google Tag Manager container (GA4, Ads, Pixel etc. are configured inside GTM)
     "cfg_gsc": "deblMaE7xgGLp7axGkXzbo1mVhtVkWtaBX_rFTN8G8g",  # Google Search Console verification
     "cfg_ga4": "G-66P7FXHBR0",  # Google Analytics 4 (loaded directly; do not add GA4 again inside GTM)
     "cfg_ads": "",              # "AW-XXXXXXXXX"

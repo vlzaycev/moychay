@@ -21,7 +21,7 @@ _build/             шаблон и тексты (GitHub Pages эту папку
 
 ## Аналитика
 
-**Подключён Google Tag Manager (`GTM-54JDMZL2`).** GA4, Google Ads, Яндекс Метрика и Meta Pixel настраиваются внутри GTM, код сайта при этом менять не нужно.
+**Подключён Google Tag Manager (`GTM-WJQBWNL9`).** GA4, Google Ads, Яндекс Метрика и Meta Pixel настраиваются внутри GTM, код сайта при этом менять не нужно.
 
 Каждый клик по размеченным кнопкам отправляется в `dataLayer` как событие:
 - поля события: `event`, `click_place`, `page_lang`;
