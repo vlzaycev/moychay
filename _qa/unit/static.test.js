@@ -51,8 +51,8 @@ test('EN and RU pages have the same structure (ids, sections, links count)', () 
   const en = shape(read(PAGES.en)), ru = shape(read(PAGES.ru));
   assert.equal(en.ids, ru.ids);
   assert.equal(en.sections, ru.sections);
-  // RU has 1 extra Telegram club link in events + 2 extra footer icons (Yandex Maps, Telegram)
-  assert.equal(ru.tracked - en.tracked, 3);
+  // RU extra: Telegram club link in events, Telegram in contacts, 2 footer icons (Yandex Maps, Telegram)
+  assert.equal(ru.tracked - en.tracked, 4);
 });
 
 test('robots.txt, sitemap.xml and CNAME are valid', () => {

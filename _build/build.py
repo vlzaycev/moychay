@@ -63,8 +63,10 @@ def menu(items):
     out = []
     for m in items:
         out.append(f"""        <li class="menu-i">
-          <div class="menu-h"><h3>{m["name"]}</h3><span class="menu-p">{m["price"]}</span></div>
-          <p>{m["text"]}</p>
+          <h3>{m["name"]}</h3>
+          <p class="menu-p">{m["price"]}</p>
+          <p class="menu-m">{m["meta"]}</p>
+          <p class="menu-d">{m["text"]}</p>
         </li>""")
     return "\n".join(out)
 
@@ -104,11 +106,10 @@ EN = dict(
     msg_url=wa("Hi! I found you on teaphuket.com"),
     msg_book_url=wa("Hi! I'd like to book a tea ceremony"),
     msg_order_url=wa("Hi! I'd like to order tea with delivery"),
-    msg_event="whatsapp", msg_icon="i-wa", msg_name="WhatsApp",
+    msg_event="whatsapp", msg_icon="i-wa",
     sticky_msg_url=wa("Hi! I found you on teaphuket.com"), sticky_msg_label="WhatsApp",
     hero_alt="Round tea table by the arched window at Moychay Phuket",
     hero_sub="Tea house &amp; tea ceremonies in Bangtao, Phuket",
-    hero_lead="Chinese tea, brewed by a tea master, on the 2nd floor of Boat Avenue. Drop in for a tasting or book a full ceremony.",
     addr_short="2nd floor, Boat Avenue, Bangtao",
     addr_full="2nd floor, Boat Avenue, Bangtao, Phuket",
     hours="Open daily 11:00–22:00",
@@ -116,8 +117,8 @@ EN = dict(
     cta_message="Message us on WhatsApp",
     why_h2="A quiet place in Bangtao",
     why_body=paras([
-        "You don't need to know anything about tea to come in. Some guests book a ceremony, some want a quiet corner away from the beach, some come with a laptop for a matcha latte, and some just want to see what a tea house is like.",
-        "Bare concrete, calligraphy on the walls, a rattan peacock chair by the window and shelves of teapots – most of them for sale. The tea master will help you choose: a full ceremony or simply a good cup.",
+        "You don't need to know anything about tea to come in. Guests book a ceremony, work over a matcha latte, or just want a quiet corner away from the beach.",
+        "Concrete walls, calligraphy, a rattan peacock chair and shelves of teapots – most of them for sale. The tea master will help you choose.",
     ]),
     facts_label="About the tea house",
     facts=facts([
@@ -140,13 +141,17 @@ EN = dict(
     ways_h2="Tea ceremonies",
     ways_items=menu([
         dict(name="Walk-in tasting (Pin Cha)", price="300 ฿ <small>+ tea by weight</small>",
-             text="A 10-minute introduction from the tea master, then you stay with the tea you picked. No booking needed."),
+             meta="10 min with the tea master · No booking",
+             text="A short introduction, then you stay with the tea you picked."),
         dict(name="Gong fu cha ceremony", price="600 ฿ <small>per person</small>",
-             text="60 minutes with the tea master: brewing steps, teaware and the tea itself, then up to an hour to stay and relax. Booking required."),
-        dict(name="Group ceremonies", price="<small>Price on request</small>",
-             text="Birthdays, team events, gatherings – up to 30 guests, at the tea house or at your venue."),
+             meta="60 min + up to 60 min to relax · Booking required",
+             text="Brewing steps, teaware and the tea itself, guided by the tea master."),
+        dict(name="Group ceremonies", price="Price on request",
+             meta="Up to 30 guests · At the tea house or your venue",
+             text="Birthdays, team events and gatherings."),
         dict(name="Matcha drinks &amp; kombucha", price="from 250 ฿",
-             text="Non-alcoholic matcha lattes and tonics, kombucha on tap. All available to go."),
+             meta="To stay or to go",
+             text="Non-alcoholic matcha lattes and tonics, kombucha on tap."),
     ]),
     ways_note="Not sure where to start? Ask the tea master – from a light green tea to an aged pu-erh.",
     cta_book="Book a ceremony on WhatsApp",
@@ -171,14 +176,16 @@ EN = dict(
     ev_intro="Tastings, ceremonies and evenings at the tea house every week. Open to everyone, no tea background needed.",
     ev_cta="Events on Instagram",
     ev_extra="",
-    about_h2="Moychay Phuket",
+    about_h2="On Boat Avenue since 2024",
     about_body=paras([
-        "Open on Boat Avenue since 2024. We're part of Moychay, an international tea community with tea houses around the world, so our teas come through suppliers they've worked with for years.",
-        "The tea house itself is small: locals and travellers share the same table, and the tea master is here to explain, not to upsell.",
+        "Moychay Phuket is part of Moychay, an international tea community with tea houses around the world – our teas come from suppliers they have worked with for years.",
+        "The room is small: locals and travellers share one table, and the tea master is here to explain, not to upsell.",
     ]),
     find_h2="Contacts",
     map_title="Moychay Phuket on Google Maps",
-    find_addr_l="Address", find_hours_l="Hours", find_park_l="Parking", find_msg_l="Messages",
+    find_addr_l="Address", find_hours_l="Hours", find_park_l="Parking", find_msg_l="Write to us",
+    find_msgs=f'<a href="{wa("Hi! I found you on teaphuket.com")}" target="_blank" rel="noopener" data-track="whatsapp" data-place="find">WhatsApp</a> · <a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="find">Instagram</a>',
+    ev_more="Show all events", 
     find_park="On site at Boat Avenue",
     faq_h2="Common questions",
     faq_items=faq([
@@ -197,8 +204,7 @@ EN = dict(
     ]),
     shop_link="Online tea shop",
     credit="Website development and marketing",
-    prev_label="Previous", next_label="Next",
-    js=dict(lang="en", evEmpty="New dates are announced every week on Instagram.", evMore="Details"),
+    js=dict(lang="en", evEmpty="New dates are announced every week on Instagram.", evMore="Details", evAll="Show all events"),
 )
 
 # ── RU ───────────────────────────────────────────────────────────
@@ -212,11 +218,10 @@ RU = dict(
     meta_desc="Чайная Moychay Phuket на Пхукете. Пуэр, улун, матча, габа, зелёный, белый и красный китайский чай. Чайные церемонии, дегустации и покупка чая.",
     nav_label="Разделы", nav_1="Церемонии", nav_2="Наш чай", nav_3="Мероприятия", nav_4="Контакты",
     msg_url=TG, msg_book_url=TG, msg_order_url=TG,
-    msg_event="telegram", msg_icon="i-tg", msg_name="Telegram",
+    msg_event="telegram", msg_icon="i-tg",
     sticky_msg_url="https://t.me/moychayphuket", sticky_msg_label="Telegram",
     hero_alt="Круглый чайный стол у арочного окна в Moychay Phuket",
     hero_sub="Чайная и чайные церемонии на Пхукете",
-    hero_lead="Китайский чай, который заваривает чайный мастер, – на втором этаже Boat Avenue в Бангтао. Можно зайти на дегустацию без записи или записаться на церемонию.",
     addr_short="2 этаж, Boat Avenue, Бангтао",
     addr_full="2 этаж, Boat Avenue, Бангтао, Пхукет",
     hours="Ежедневно 11:00–22:00",
@@ -224,8 +229,8 @@ RU = dict(
     cta_message="Написать в Telegram",
     why_h2="Тихое место в Бангтао",
     why_body=paras([
-        "Разбираться в чае не обязательно. Кто-то приходит на церемонию, кто-то – посидеть в тишине подальше от пляжа, кто-то – с ноутбуком и матча-латте, а кто-то просто посмотреть, что такое чайная.",
-        "Бетонные стены, каллиграфия, ротанговое кресло-павлин у окна и полки с сотнями чайников – большинство из них можно купить. Чайный мастер поможет выбрать: полноценную церемонию или просто хороший чай.",
+        "Разбираться в чае не обязательно. К нам приходят на церемонию, поработать за матча-латте или просто посидеть в тишине подальше от пляжа.",
+        "Бетонные стены, каллиграфия, ротанговое кресло-павлин и полки с чайниками – большинство из них можно купить. Чайный мастер поможет выбрать.",
     ]),
     facts_label="О чайной",
     facts=facts([
@@ -248,13 +253,17 @@ RU = dict(
     ways_h2="Чайные церемонии",
     ways_items=menu([
         dict(name="Дегустация без записи (Пин Ча)", price="300 ฿ <small>+ чай по весу</small>",
-             text="Десять минут знакомства с чаем вместе с мастером, потом остаётесь с выбранным чаем. Без записи."),
+             meta="10 минут с чайным мастером · Без записи",
+             text="Короткое знакомство с чаем, потом остаётесь с выбранным сортом."),
         dict(name="Церемония гунфу ча", price="600 ฿ <small>с человека</small>",
-             text="60 минут с чайным мастером: этапы заваривания, посуда и сам чай, а потом до часа отдыха в чайной. Нужна запись."),
-        dict(name="Групповые церемонии", price="<small>Цена по запросу</small>",
-             text="Дни рождения, командные встречи, праздники – до 30 гостей, у нас или на вашей площадке."),
+             meta="60 минут + до 60 минут отдыха · Нужна запись",
+             text="Этапы заваривания, посуда и сам чай – вместе с чайным мастером."),
+        dict(name="Групповые церемонии", price="Цена по запросу",
+             meta="До 30 гостей · У нас или на вашей площадке",
+             text="Дни рождения, командные встречи и праздники."),
         dict(name="Коктейли на матче и комбуча", price="от 250 ฿",
-             text="Безалкогольные матча-латте и тоники, комбуча на разлив. Всё можно взять с собой."),
+             meta="Здесь или с собой",
+             text="Безалкогольные матча-латте и тоники, комбуча на разлив."),
     ]),
     ways_note="Не знаете, с чего начать? Спросите чайного мастера – подберёт что-то от лёгкого зелёного до выдержанного пуэра.",
     cta_book="Записаться в Telegram",
@@ -279,14 +288,16 @@ RU = dict(
     ev_intro="Каждую неделю – дегустации, церемонии и вечера в чайной. Приходить может любой, опыт не нужен.",
     ev_cta="Анонсы в Instagram",
     ev_extra=f'        <a class="tlink" href="{TG}" target="_blank" rel="noopener" data-track="telegram" data-place="events"><svg class="bi" aria-hidden="true"><use href="#i-tg"/></svg>Чайный клуб в Telegram</a>',
-    about_h2="Moychay Phuket",
+    about_h2="На Boat Avenue с 2024 года",
     about_body=paras([
-        "На Boat Avenue с 2024 года. Мы часть Moychay – международного чайного сообщества с чайными домами по всему миру, поэтому чай на наших полках приходит от поставщиков, с которыми работают годами.",
+        "Moychay Phuket – часть Moychay, международного чайного сообщества с чайными домами по всему миру. Чай приходит от поставщиков, с которыми работают годами.",
         "Сама чайная небольшая: местные, экспаты и путешественники садятся за один стол, а чайный мастер рядом, чтобы рассказать о чае, а не продать.",
     ]),
     find_h2="Контакты",
     map_title="Moychay Phuket на Google Картах",
     find_addr_l="Адрес", find_hours_l="Часы работы", find_park_l="Парковка", find_msg_l="Написать",
+    find_msgs=f'<a href="{TG}" target="_blank" rel="noopener" data-track="telegram" data-place="find">Telegram</a> · <a href="{WA}" target="_blank" rel="noopener" data-track="whatsapp" data-place="find">WhatsApp</a> · <a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="find">Instagram</a>',
+    ev_more="Показать все мероприятия", 
     find_park="На месте, на Boat Avenue",
     faq_h2="Частые вопросы",
     faq_items=faq([
@@ -307,8 +318,7 @@ RU = dict(
     ]),
     shop_link="Интернет-магазин чая",
     credit="Разработка сайта и маркетинг",
-    prev_label="Назад", next_label="Вперёд",
-    js=dict(lang="ru", evEmpty="Анонсы появляются каждую неделю – в Telegram-клубе и Instagram.", evMore="Подробнее"),
+    js=dict(lang="ru", evEmpty="Анонсы появляются каждую неделю – в Telegram-клубе и Instagram.", evMore="Подробнее", evAll="Показать все мероприятия"),
 )
 
 

@@ -17,9 +17,8 @@ for (const p of PAGES) {
       expect(titles[1]).toBe(p.lang === 'en' ? 'Sooner event' : 'Раньше');
       expect(titles[2]).toBe(p.lang === 'en' ? 'Later event' : 'Дегустация «Позже»');
       await expect(cards.nth(2).locator('.evc-price')).toHaveText('380 ฿');
-      // arrows only on desktop; phones swipe the row
-      if (page.viewportSize().width >= 900) await expect(page.locator('.ev-nav')).toBeVisible();
-      else await expect(page.locator('.ev-nav')).toBeHidden();
+      await expect(cards.first().locator('.evc-when')).toContainText('18:00');
+      await expect(page.locator('#evAll')).toBeHidden(); // 3 events → no "show all" button
     });
 
     test('sheet content is rendered as text (no XSS), unsafe links dropped', async ({ page }) => {
@@ -35,11 +34,30 @@ for (const p of PAGES) {
       expect(alerted).toBe(false);
     });
 
-    test('empty sheet → friendly message, arrows hidden', async ({ page }) => {
+    test('empty sheet → friendly message, no "show all" button', async ({ page }) => {
       await mockEvents(page, HEADER);
       await page.goto(p.path + '#events');
       await expect(page.locator('#evRow .ev-empty')).toBeVisible();
-      await expect(page.locator('.ev-nav')).toBeHidden();
+      await expect(page.locator('#evAll')).toBeHidden();
+    });
+
+    test('more than 6 events → first 6 shown, "show all" reveals the rest', async ({ page }) => {
+      const rows = Array.from({ length: 9 }, (_, i) => `2099-11-${String(i + 10)},18:00,Event ${i + 1},Событие ${i + 1},t,т,Donation,Донат,https://www.instagram.com/moychay.phuket,yes`);
+      await mockEvents(page, HEADER + rows.join('\n'));
+      await page.goto(p.path + '#events');
+      await expect(page.locator('#evRow .evc:visible')).toHaveCount(6);
+      await page.locator('#evAll').click();
+      await expect(page.locator('#evRow .evc:visible')).toHaveCount(9);
+      await expect(page.locator('#evAll')).toBeHidden();
+    });
+
+    test('event without photo (image = none) renders cleanly', async ({ page }) => {
+      await mockEvents(page, HEADER.replace('show', 'show,image') + '2099-11-01,18:00,No photo,Без фото,t,т,,,,yes,none');
+      await page.goto(p.path + '#events');
+      const card = page.locator('#evRow .evc').first();
+      await expect(card).toHaveClass(/no-ph/);
+      await expect(card.locator('img')).toHaveCount(0);
+      await expect(card.locator('.evc-ph')).toBeHidden();
     });
 
     test('network error → friendly message instead of endless skeleton', async ({ page }) => {

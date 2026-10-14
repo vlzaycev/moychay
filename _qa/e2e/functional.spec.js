@@ -88,16 +88,24 @@ for (const p of PAGES) {
       await expect(bar).not.toHaveClass(/\bon\b/);
     });
 
-    test('gallery shows real photos without autoplay; swipeable strip on mobile', async ({ page }) => {
+    test('gallery: one lead photo + 3 more, real proportions, nothing moves by itself', async ({ page }) => {
       const g = page.locator('#gallery');
       await g.scrollIntoViewIfNeeded();
-      expect(await g.locator('img').count()).toBe(6);
-      const desktop = page.viewportSize().width >= 900;
-      const scrollable = await g.evaluate(e => e.scrollWidth > e.clientWidth + 10);
-      expect(scrollable).toBe(!desktop);
-      const before = await g.evaluate(e => e.scrollLeft);
-      await page.waitForTimeout(3500);
-      expect(await g.evaluate(e => e.scrollLeft)).toBe(before); // nothing moves by itself
+      expect(await g.locator('img').count()).toBe(4);
+      const sizes = await g.locator('figure').evaluateAll(fs => fs.map(f => { const r = f.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; }));
+      // no thumbnail narrower than 140px, lead photo is the largest
+      expect(Math.min(...sizes.map(s => s[0]))).toBeGreaterThanOrEqual(140);
+      expect(sizes[0][0] * sizes[0][1]).toBe(Math.max(...sizes.map(s => s[0] * s[1])));
+      expect(await g.evaluate(e => e.scrollWidth <= e.clientWidth + 1)).toBe(true);
+    });
+
+    test('contacts: compact block, all ways to reach us, no embedded map', async ({ page }) => {
+      const c = page.locator('#find-us');
+      await expect(c.locator('iframe')).toHaveCount(0);
+      await expect(c.locator('a[data-track="directions"]')).toHaveAttribute('href', MAPS);
+      expect(await c.locator('dd a[data-track]').count()).toBeGreaterThanOrEqual(2);
+      const h = await c.evaluate(e => e.getBoundingClientRect().height);
+      expect(h).toBeLessThan(page.viewportSize().width < 600 ? 1100 : 700);
     });
 
     test('tracked clicks are pushed to the GTM dataLayer', async ({ page }) => {
