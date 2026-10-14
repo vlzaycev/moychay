@@ -11,7 +11,7 @@ for (const p of PAGES) {
 
     test('every directions button goes to Google Maps, opens in new tab, has Maps icon', async ({ page }) => {
       const btns = page.locator('a[data-track="directions"].btn');
-      expect(await btns.count()).toBeGreaterThanOrEqual(4); // hero, find, final, sticky
+      expect(await btns.count()).toBe(3); // hero, contacts, sticky – no duplicates
       for (const b of await btns.all()) {
         await expect(b).toHaveAttribute('href', MAPS);
         await expect(b).toHaveAttribute('target', '_blank');
@@ -63,21 +63,11 @@ for (const p of PAGES) {
       await expect(page.locator('.faq-list li.open')).toHaveCount(0);
     });
 
-    test('tea categories: accordion on mobile (single open), carousel on desktop', async ({ page }) => {
-      const desktop = (page.viewportSize().width >= 900);
-      const heads = page.locator('.cat-h');
-      await expect(heads).toHaveCount(10);
-      if (desktop) {
-        await expect(page.locator('[data-for="cats"]')).toBeVisible();
-        const before = await page.locator('#cats').evaluate(e => e.scrollLeft);
-        await page.locator('[data-for="cats"] [data-dir="1"]').click();
-        await expect.poll(() => page.locator('#cats').evaluate(e => e.scrollLeft)).toBeGreaterThan(before);
-      } else {
-        await heads.nth(1).click();
-        await heads.nth(4).click();
-        await expect(page.locator('.cat.open')).toHaveCount(1);
-        await expect(heads.nth(4)).toHaveAttribute('aria-expanded', 'true');
-      }
+    test('tea catalogue lists all 10 categories as plain text, no numbering', async ({ page }) => {
+      const items = page.locator('#teas .tea-list li');
+      await expect(items).toHaveCount(10);
+      for (const t of await items.locator('h3').allTextContents()) expect(t).not.toMatch(/^\s*\d/);
+      await expect(page.locator('#teas a[data-track="catalog"]')).toHaveAttribute('href', 'https://phuket.moychay.asia/');
     });
 
     test('language switch navigates to the other version', async ({ page }) => {
@@ -91,23 +81,23 @@ for (const p of PAGES) {
     test('sticky bar: hidden on hero, shown mid-page, hidden at Find us', async ({ page }) => {
       const bar = page.locator('#bar');
       await expect(bar).not.toHaveClass(/\bon\b/);
-      await page.locator('#teas .cats').scrollIntoViewIfNeeded();
+      await page.locator('#teas .tea-list').scrollIntoViewIfNeeded();
       await page.evaluate(() => window.scrollBy(0, 200));
       await expect(bar).toHaveClass(/\bon\b/);
       await page.locator('#find-us').evaluate(e => window.scrollTo(0, e.offsetTop));
       await expect(bar).not.toHaveClass(/\bon\b/);
     });
 
-    test('gallery slideshow advances by itself (~3s) and on tap', async ({ page }) => {
+    test('gallery shows real photos without autoplay; swipeable strip on mobile', async ({ page }) => {
       const g = page.locator('#gallery');
       await g.scrollIntoViewIfNeeded();
-      const idx = () => g.evaluate(e => [...e.querySelectorAll('img')].findIndex(i => i.classList.contains('on')));
-      const start = await idx();
-      await expect.poll(idx, { timeout: 6000 }).not.toBe(start);
-      const now = await idx();
-      await g.click();
-      // the slide switches once the next photo has loaded (instant locally, network-dependent on production)
-      await expect.poll(idx, { timeout: 5000 }).not.toBe(now);
+      expect(await g.locator('img').count()).toBe(6);
+      const desktop = page.viewportSize().width >= 900;
+      const scrollable = await g.evaluate(e => e.scrollWidth > e.clientWidth + 10);
+      expect(scrollable).toBe(!desktop);
+      const before = await g.evaluate(e => e.scrollLeft);
+      await page.waitForTimeout(3500);
+      expect(await g.evaluate(e => e.scrollLeft)).toBe(before); // nothing moves by itself
     });
 
     test('tracked clicks are pushed to the GTM dataLayer', async ({ page }) => {

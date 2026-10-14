@@ -17,7 +17,9 @@ for (const p of PAGES) {
       expect(titles[1]).toBe(p.lang === 'en' ? 'Sooner event' : 'Раньше');
       expect(titles[2]).toBe(p.lang === 'en' ? 'Later event' : 'Дегустация «Позже»');
       await expect(cards.nth(2).locator('.evc-price')).toHaveText('380 ฿');
-      await expect(page.locator('.ev-nav')).toBeVisible();
+      // arrows only on desktop; phones swipe the row
+      if (page.viewportSize().width >= 900) await expect(page.locator('.ev-nav')).toBeVisible();
+      else await expect(page.locator('.ev-nav')).toBeHidden();
     });
 
     test('sheet content is rendered as text (no XSS), unsafe links dropped', async ({ page }) => {

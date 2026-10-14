@@ -10,7 +10,8 @@ for (const p of PAGES) {
       expect(res.status()).toBe(200);
       await expect(page.locator('html')).toHaveAttribute('lang', p.lang);
       await expect(page.locator('h1')).toHaveCount(1);
-      await expect(page.locator('h1')).toHaveText(p.h1);
+      await expect(page.locator('h1 .h1-name')).toHaveText(p.h1);
+      await expect(page.locator('h1 .h1-sub')).toHaveText(p.h1sub);
       expect((await page.title()).length).toBeGreaterThan(10);
     });
 
@@ -31,6 +32,17 @@ for (const p of PAGES) {
       await page.goto(p.path);
       const { sw, cw } = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
       expect(sw, `scrollWidth ${sw} > clientWidth ${cw}`).toBeLessThanOrEqual(cw + 1);
+    });
+
+    test('no forced CAPS LOCK and no decorative eyebrow labels', async ({ page }) => {
+      await mockEvents(page);
+      await page.goto(p.path);
+      const caps = await page.evaluate(() => [...document.querySelectorAll('body *')]
+        .filter(e => e.childNodes.length && [...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim()))
+        .filter(e => getComputedStyle(e).textTransform === 'uppercase')
+        .map(e => e.tagName + '.' + e.className + ': ' + e.textContent.trim().slice(0, 30)));
+      expect(caps).toEqual([]);
+      expect(await page.locator('.eyebrow').count()).toBe(0);
     });
 
     test('all images on page load (no broken images)', async ({ page }) => {

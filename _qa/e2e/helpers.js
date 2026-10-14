@@ -24,8 +24,8 @@ function watchErrors(page) {
 }
 
 const PAGES = [
-  { lang: 'en', path: '/', h1: 'Phuket tea club', directions: 'Get directions', msg: /wa\.me\/66817959110/, msgIcon: '#i-wa' },
-  { lang: 'ru', path: '/ru/', h1: 'Чайный клуб на Пхукете', directions: 'Проложить маршрут', msg: /t\.me\//, msgIcon: '#i-tg' },
+  { lang: 'en', path: '/', h1: 'Moychay Phuket', h1sub: 'Tea house & tea ceremonies in Bangtao, Phuket', directions: 'Get directions', msg: /wa\.me\/66817959110/, msgIcon: '#i-wa' },
+  { lang: 'ru', path: '/ru/', h1: 'Moychay Phuket', h1sub: 'Чайная и чайные церемонии на Пхукете', directions: 'Проложить маршрут', msg: /t\.me\//, msgIcon: '#i-tg' },
 ];
 
 module.exports = { mockEvents, watchErrors, PAGES, CSV_FIXTURE, EXPORT_URL };
