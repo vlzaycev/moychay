@@ -410,18 +410,29 @@ figure{margin:0}
 @media (min-width:900px){.faq .wrap{grid-template-columns:5fr 7fr;gap:72px}}
 
 /* Footer */
-.ftr{background:var(--dark-2);color:var(--on-dark);padding:64px 0 calc(40px + var(--bar-h));font-size:15px}
-.ftr .wrap{display:grid;gap:32px}
+.ftr{background:var(--dark-2);color:var(--on-dark);padding:56px 0 calc(24px + var(--bar-h));font-size:15px}
+.ftr-top{display:grid;gap:36px;padding-bottom:40px}
 .ftr-logo img{height:52px;width:auto}
-.ftr-main{display:grid;gap:20px;justify-items:start}
+.ftr-brand p{margin:16px 0 20px;max-width:34ch;color:rgba(243,236,225,.78)}
 .soc{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .soc a{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--line-d);border-radius:50%;transition:background .2s,border-color .2s}
 .soc a:hover{background:var(--clay-btn);border-color:var(--clay-btn)}
-.ftr .meta{font-size:15px;color:rgba(243,236,225,.8)}
-.ftr .meta p{margin:0 0 8px}
-.credit{color:rgba(243,236,225,.8);border-bottom:1px solid var(--line-d);transition:color .2s}
-.credit:hover{color:var(--on-dark)}
-@media (min-width:900px){.ftr .wrap{grid-template-columns:3fr 5fr 4fr;align-items:start}}
+.ftr-col{display:flex;flex-direction:column;align-items:flex-start}
+.ftr-col a{display:inline-flex;align-items:center;gap:8px;min-height:44px;color:rgba(243,236,225,.9);transition:color .2s}
+.ftr-col a:hover{color:var(--clay-soft)}
+.ftr-col .ico{width:14px;height:14px}
+.ftr-contact p{margin:0 0 6px;color:rgba(243,236,225,.78)}
+.ftr-contact a{margin-top:4px}
+.ftr-bottom{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 32px;padding-top:20px;border-top:1px solid var(--line-d);font-size:14px;color:rgba(243,236,225,.66)}
+.ftr-bottom p{margin:0}
+.credit{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-height:44px;color:rgba(243,236,225,.66);transition:color .2s}
+.credit-brand{display:inline-flex;align-items:center;gap:8px;font-weight:500;color:rgba(243,236,225,.92);transition:color .2s}
+.credit-brand img{width:22px;height:22px}
+.credit-arr{font-size:13px;opacity:.7;transition:transform .2s}
+.credit:hover .credit-brand{color:#fff}
+.credit:hover .credit-arr{transform:translate(2px,-2px);opacity:1}
+@media (max-width:599px){.ftr-bottom{flex-direction:column;align-items:flex-start;gap:4px}}
+@media (min-width:900px){.ftr-top{grid-template-columns:5fr 3fr 4fr;gap:48px}.ftr-top nav.ftr-col{margin-top:-11px}}
 
 /* Sticky directions bar (mobile-first; static, no animation) */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(33,28,25,.96);color:var(--on-dark);border-top:1px solid var(--line-d);
@@ -683,20 +694,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <footer class="ftr" id="contacts">
   <div class="wrap">
-    <a class="ftr-logo" href="#home" aria-label="Moychay Phuket"><img src="img/logo.png" width="800" height="494" loading="lazy" alt="Moychay Phuket"></a>
-    <div class="ftr-main">
-      <ul class="soc">
+    <div class="ftr-top">
+      <div class="ftr-brand">
+        <a class="ftr-logo" href="#home" aria-label="Moychay Phuket"><img src="img/logo.png" width="800" height="494" loading="lazy" alt="Moychay Phuket"></a>
+        <p>Tea house and tea ceremonies in Bangtao, Phuket. Part of Moychay, an international tea community.</p>
+        <ul class="soc">
         <li><a href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" aria-label="Google Maps" title="Google Maps" data-track="directions" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg></a></li>
         <li><a href="https://wa.me/66817959110" target="_blank" rel="noopener" aria-label="WhatsApp" title="WhatsApp" data-track="whatsapp" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-wa"/></svg></a></li>
         <li><a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram" data-track="instagram" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-ig"/></svg></a></li>
         <li><a href="https://www.facebook.com/moychay.phuket/" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook" data-track="facebook" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-fb"/></svg></a></li>
-      </ul>
-      <a class="tlink" href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="footer">Online tea shop<svg class="ico"><use href="#i-arrow"/></svg></a>
+        </ul>
+      </div>
+      <nav class="ftr-col" aria-label="Footer">
+        <a href="#prices">Tea ceremonies</a>
+        <a href="#teas">Our teas</a>
+        <a href="#events">Events</a>
+        <a href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="footer">Online shop<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </nav>
+      <div class="ftr-col ftr-contact">
+        <p>2nd floor, Boat Avenue, Bangtao, Phuket</p>
+        <p>Open daily 11:00–22:00</p>
+        <a href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Get directions</a>
+      </div>
     </div>
-    <div class="meta">
-      <p>2nd floor, Boat Avenue, Bangtao, Phuket<br>Open daily 11:00–22:00</p>
+    <div class="ftr-bottom">
       <p>© 2024–2026 Moychay Thai Co. LTD</p>
-      <p><a class="credit" href="https://vlad.marketing/" target="_blank" rel="noopener">Website development and marketing</a></p>
+      <a class="credit" href="https://vlad.marketing/?utm_source=teaphuket.com&amp;utm_medium=referral&amp;utm_campaign=website_credit" target="_blank" rel="noopener noreferrer" aria-label="Website & marketing by vlad.marketing (opens in a new tab)">
+        <span class="credit-by">Website & marketing by</span>
+        <span class="credit-brand"><img src="img/vlad-marketing.svg" width="120" height="120" loading="lazy" alt="">vlad.marketing<span class="credit-arr" aria-hidden="true">↗</span></span>
+      </a>
     </div>
   </div>
 </footer>

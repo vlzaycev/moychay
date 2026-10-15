@@ -151,6 +151,35 @@ for (const p of PAGES) {
       expect(events).toEqual(['directions@hero', (p.lang === 'en' ? 'whatsapp' : 'telegram') + '@hero']);
     });
 
+    test('footer: brand, navigation, contacts and vlad.marketing credit', async ({ page }) => {
+      const f = page.locator('footer.ftr');
+      await expect(f.locator('.ftr-logo img')).toHaveAttribute('src', /logo\.png$/);
+      expect(await f.locator('.soc a').count()).toBeGreaterThanOrEqual(2);
+      const nav = await f.locator('nav.ftr-col a').evaluateAll(as => as.map(a => a.getAttribute('href')));
+      expect(nav).toEqual(['#prices', '#teas', '#events', 'https://phuket.moychay.asia/']);
+      for (const h of nav.slice(0, 3)) await expect(page.locator(h)).toHaveCount(1);
+      await expect(f.locator('.ftr-contact a[data-track="directions"]')).toHaveAttribute('href', MAPS);
+      await expect(f.locator('.ftr-bottom')).toContainText('Moychay Thai Co. LTD');
+      const c = f.locator('a.credit');
+      await expect(c).toHaveCount(1);
+      await expect(c).toHaveAttribute('href', 'https://vlad.marketing/?utm_source=teaphuket.com&utm_medium=referral&utm_campaign=website_credit');
+      await expect(c).toHaveAttribute('target', '_blank');
+      await expect(c).toHaveAttribute('rel', 'noopener noreferrer');
+      await expect(c).toContainText('vlad.marketing');
+      await expect(c).toContainText(p.lang === 'en' ? 'Website & marketing by' : 'Сайт и маркетинг –');
+      await expect(c).not.toContainText(/Vlad Zaycev|Зайцев/);
+      await c.scrollIntoViewIfNeeded();
+      const logo = c.locator('img');
+      await expect(logo).toHaveAttribute('src', /vlad-marketing\.svg$/);
+      const box = await logo.boundingBox();
+      expect(box.width).toBe(box.height);                 // proportions kept
+      expect(box.height).toBeGreaterThanOrEqual(18); expect(box.height).toBeLessThanOrEqual(24);
+      await expect.poll(() => logo.evaluate(i => i.complete && i.naturalWidth > 0)).toBe(true);
+      // credit is smaller than the Moychay logo
+      const main = await f.locator('.ftr-logo img').boundingBox();
+      expect(box.height).toBeLessThan(main.height);
+    });
+
     test('header becomes solid after scrolling', async ({ page }) => {
       await page.evaluate(() => window.scrollTo(0, 400));
       await expect(page.locator('#hdr')).toHaveClass(/solid/);
