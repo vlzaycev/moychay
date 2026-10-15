@@ -344,7 +344,9 @@ figure{margin:0}
 .evc-when{margin:0 0 4px;font-size:15px;font-weight:600;color:var(--clay-text)}
 .evc h3{font-size:19px;line-height:1.3;margin-bottom:4px}
 .evc-text{margin:0 0 6px;font-size:15.5px;color:var(--muted-l)}
-.evc-foot{display:flex;flex-wrap:wrap;align-items:center;gap:0 18px;font-size:15px}
+.evc{align-content:start}
+.evc-in{display:flex;flex-direction:column;min-width:0}
+.evc-foot{display:flex;flex-wrap:wrap;align-items:center;gap:0 18px;font-size:15px;margin-top:auto}
 .evc-price{font-weight:600}
 .evc .tlink{font-size:15px;min-height:40px}
 .evc-skel{min-height:132px;background:linear-gradient(90deg,transparent,rgba(58,44,34,.06),transparent);background-size:200% 100%;animation:sk 1.4s infinite}
@@ -357,7 +359,7 @@ figure{margin:0}
 @media (min-width:900px){
   .ev-head{grid-template-columns:1fr auto;align-items:end}
   .ev-list{grid-template-columns:repeat(3,1fr);gap:40px 28px;border-top:0}
-  .evc{grid-template-columns:1fr;gap:14px;padding:0;border:0}
+  .evc{grid-template-columns:1fr;grid-template-rows:auto 1fr;gap:14px;padding:0;border:0}
   .evc-ph{aspect-ratio:3/2}
   .evc-skel{min-height:320px}
 }
@@ -747,15 +749,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   function nicePrice(p) {
     var m = p.match(/^([\d\s.,]+)\s*(thb|฿|бат\S*)?$/i);
-    return m ? Math.round(parseFloat(m[1].replace(/[\s,]/g, ''))) + ' ฿' : p;
+    return m ? Math.round(parseFloat(m[1].replace(/[\s,]/g, ''))) + '฿' : p;  // house style: 380฿, 2000฿
   }
   // Photo per event: "image" column wins; otherwise matched by keywords, no repeats.
   var RULES = [
-    [/letter|письм/i, 'people/9_people'], [/\bdj\b|party|вечерин/i, 'people/2_people'],
-    [/cocktail|коктейл/i, 'people/7_people'], [/dating|знакомств/i, 'people/6_people'],
-    [/detective|blind|слеп/i, 'people/4_people'], [/aged|выдерж|lao cha|лао ча/i, 'interior/2_shop'],
-    [/yunnan|юннан/i, 'interior/3_shop'], [/experiment|эксперимент/i, 'people/3_people'],
-    [/pairing|идеальная пара/i, 'people/5_people'], [/sense of taste|понимать вкус/i, 'interior/4_shop'],
+    [/letter|письм/i, 'events/letters'], [/\bdj\b|party|вечерин/i, 'events/dj-tea'],
+    [/cocktail|коктейл/i, 'events/cocktails'], [/dating|знакомств/i, 'events/slow-dating'],
+    [/detective|blind|слеп/i, 'events/tea-detective'], [/aged|выдерж|lao cha|лао ча/i, 'events/aged-tea'],
+    [/yunnan|юннан/i, 'events/yunnan'], [/experiment|эксперимент/i, 'events/experimental'],
+    [/pairing|идеальная пара/i, 'events/perfect-pair'], [/sense of taste|понимать вкус/i, 'events/taste'],
     [/ceremon|церемон/i, 'people/8_people']
   ];
   var POOL = ['people/5_people', 'interior/8_shop', 'people/7_people', 'interior/3_shop', 'people/3_people',
@@ -766,8 +768,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var img = r.image;
       if (/^(none|no|нет|-)$/i.test(img)) { r.src = ''; return; }
       if (img && !/^https?:\/\//.test(img)) {
-        img = img.replace(/\.(jpe?g|png)$/i, '').replace(/^.*\//, '');
-        img = (/_people$/.test(img) ? 'people/' : 'interior/') + img;
+        img = img.replace(/\.(jpe?g|png|webp)$/i, '').replace(/-(400|700|1000)$/, '');
+        var dir = (img.match(/^(events|people|interior)\//) || [])[1];
+        img = img.replace(/^.*\//, '');
+        img = (dir || (/_people$/.test(img) ? 'people' : /_shop$/.test(img) ? 'interior' : 'events')) + '/' + img;
       }
       if (!img) {
         for (var i = 0; i < RULES.length && !img; i++) if (RULES[i][0].test(r.hay) && !used[RULES[i][1]]) img = RULES[i][1];
@@ -776,6 +780,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
       used[img] = true;
       r.src = /^https?:\/\//.test(img) ? img : IMG + img + '-700.webp';
+      r.srcset = /^events\//.test(img) ? IMG + img + '-400.webp 400w, ' + IMG + img + '-700.webp 700w, ' + IMG + img + '-1000.webp 1000w' : '';
     });
   }
   function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt) e.textContent = txt; return e; }
@@ -795,7 +800,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var ph = el('div', 'evc-ph');
       if (r.src) {
         var img = el('img');
-        img.src = r.src; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
+        img.src = r.src; img.alt = '';
+        if (r.srcset) { img.srcset = r.srcset; img.sizes = '(min-width:900px) 31vw, (min-width:600px) 140px, 96px'; } img.loading = 'lazy'; img.decoding = 'async';
         img.onerror = function () { card.classList.add('no-ph'); };
         ph.appendChild(img);
       } else card.classList.add('no-ph');

@@ -16,7 +16,7 @@ for (const p of PAGES) {
       // 28.12 (xss row) → 30.12 → 31.12
       expect(titles[1]).toBe(p.lang === 'en' ? 'Sooner event' : 'Раньше');
       expect(titles[2]).toBe(p.lang === 'en' ? 'Later event' : 'Дегустация «Позже»');
-      await expect(cards.nth(2).locator('.evc-price')).toHaveText('380 ฿');
+      await expect(cards.nth(2).locator('.evc-price')).toHaveText('380฿');
       await expect(cards.first().locator('.evc-when')).toContainText('18:00');
       await expect(page.locator('#evAll')).toBeHidden(); // 3 events → no "show all" button
     });
@@ -58,6 +58,25 @@ for (const p of PAGES) {
       await expect(card).toHaveClass(/no-ph/);
       await expect(card.locator('img')).toHaveCount(0);
       await expect(card.locator('.evc-ph')).toBeHidden();
+    });
+
+    test('cards in a row line up: dates on one line, price/link row on one line', async ({ page }) => {
+      const long = 'A much longer description that wraps onto several lines so this card is taller than its neighbours in the row.';
+      await mockEvents(page, HEADER +
+        `16.10.2099,18:00,Tea detective,Tea Detective,${long},${long},Donation,Донат,https://example.com/a,\n` +
+        '17.10.2099,18:00,Aged tea tasting,Дегустация «Выдержанный чай» с длинным названием,Short.,Коротко.,380,380,https://example.com/b,\n' +
+        '23.10.2099,19:00,DJ tea,DJ TEA,Short.,Коротко.,Donation,Донат,https://example.com/c,\n');
+      await page.goto(p.path + '#events');
+      const cards = page.locator('#evRow .evc:not(.evc-skel)');
+      await expect(cards).toHaveCount(3);
+      await expect(cards.first().locator('img')).toHaveAttribute('src', /events\/tea-detective-700\.webp/);
+      await expect(cards.nth(2).locator('.evc-price')).toHaveText(p.lang === 'en' ? 'Donation' : 'Донат');
+      if (page.viewportSize().width < 900) return; // one card per row on smaller screens
+      const pos = await cards.evaluateAll(cs => cs.map(c => ({
+        when: Math.round(c.querySelector('.evc-when').getBoundingClientRect().top),
+        foot: Math.round(c.querySelector('.evc-foot').getBoundingClientRect().bottom) })));
+      expect(new Set(pos.map(x => x.when)).size).toBe(1);
+      expect(new Set(pos.map(x => x.foot)).size).toBe(1);
     });
 
     test('network error → friendly message instead of endless skeleton', async ({ page }) => {
