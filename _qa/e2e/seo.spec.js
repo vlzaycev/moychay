@@ -33,7 +33,9 @@ for (const p of PAGES) {
     expect(meta.ogUrl).toBe(meta.canonical);
     expect(meta.viewport).toContain('width=device-width');
     expect(meta.ld.length).toBe(1);
-    const ld = JSON.parse(meta.ld[0]);
+    const graph = JSON.parse(meta.ld[0])['@graph'];
+    expect(graph.find(n => n['@type'] === 'WebSite').url).toBe('https://teaphuket.com/');
+    const ld = graph.find(n => n['@id'] === 'https://teaphuket.com/#teahouse');
     expect([].concat(ld['@type'])).toContain('CafeOrCoffeeShop');
     expect(ld.address.addressCountry).toBe('TH');
     expect(ld.openingHoursSpecification[0].opens).toBe('11:00');

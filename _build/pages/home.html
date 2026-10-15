@@ -1,0 +1,138 @@
+<!-- Hero -->
+<section class="hero" id="home">
+  <picture class="hero-bg">
+    <source media="(min-width: 900px)" srcset="{{root}}img/interior/1_shop-hero-d.webp">
+    <img src="{{root}}img/interior/1_shop-hero-m.webp" alt="{{hero_alt}}" fetchpriority="high" decoding="async">
+  </picture>
+  <div class="wrap">
+    <h1><span class="h1-name">Moychay Phuket</span><span class="h1-sub">{{hero_sub}}</span></h1>
+    <div class="actions">
+      <a class="btn" href="{{maps}}" target="_blank" rel="noopener" data-track="directions" data-place="hero"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>{{cta_directions}}</a>
+      <a class="tlink" href="{{msg_url}}" target="_blank" rel="noopener" data-track="{{msg_event}}" data-place="hero"><svg class="bi" aria-hidden="true"><use href="#{{msg_icon}}"/></svg>{{cta_message}}</a>
+    </div>
+  </div>
+</section>
+
+<!-- The tea house: text + photographs -->
+<section class="atm" id="why-visit">
+  <div class="wrap atm-text">
+    <h2 class="rv">{{why_h2}}</h2>
+    <div class="copy rv">
+{{why_body}}
+      <ul class="facts" id="highlights" aria-label="{{facts_label}}">
+{{facts}}
+      </ul>
+    </div>
+  </div>
+  <div class="gallery" id="gallery" role="group" aria-label="{{gallery_label}}">
+    <figure class="ph g1"><img src="{{root}}img/interior/5_shop-1000.webp" srcset="{{root}}img/interior/5_shop-700.webp 700w, {{root}}img/interior/5_shop-1000.webp 1000w, {{root}}img/interior/5_shop-1400.webp 1400w" sizes="(min-width:900px) 64vw, 100vw" loading="lazy" decoding="async" alt="{{alt_5shop}}"></figure>
+    <figure class="ph g2"><img src="{{root}}img/interior/6_shop-700.webp" srcset="{{root}}img/interior/6_shop-700.webp 700w, {{root}}img/interior/6_shop-1000.webp 1000w" sizes="(min-width:900px) 32vw, 50vw" loading="lazy" decoding="async" alt="{{alt_6shop}}"></figure>
+    <figure class="ph g3"><img src="{{root}}img/interior/3_shop-700.webp" srcset="{{root}}img/interior/3_shop-700.webp 700w, {{root}}img/interior/3_shop-1000.webp 1000w" sizes="(min-width:900px) 32vw, 50vw" loading="lazy" decoding="async" alt="{{alt_3shop}}"></figure>
+    <figure class="ph g4"><img src="{{root}}img/interior/8_shop-1000.webp" srcset="{{root}}img/interior/8_shop-700.webp 700w, {{root}}img/interior/8_shop-1000.webp 1000w" sizes="(min-width:900px) 32vw, 100vw" loading="lazy" decoding="async" alt="{{alt_8shop}}"></figure>
+  </div>
+</section>
+
+<!-- Tea ceremonies: a price list, not cards -->
+<section class="cer" id="prices">
+  <div class="wrap">
+    <figure class="ph cer-ph"><img src="{{root}}img/people/8_people-1000.webp" srcset="{{root}}img/people/8_people-700.webp 700w, {{root}}img/people/8_people-1000.webp 1000w, {{root}}img/people/8_people-1400.webp 1400w" sizes="(min-width:900px) 42vw, 100vw" loading="lazy" decoding="async" alt="{{alt_8people}}"></figure>
+    <div>
+      <h2 class="rv">{{ways_h2}}</h2>
+      <ul class="menu">
+{{ways_items}}
+      </ul>
+      <div class="cer-foot">
+        <p>{{ways_note}}</p>
+        <a class="btn" href="{{msg_book_url}}" target="_blank" rel="noopener" data-track="{{msg_event}}" data-place="ways"><svg class="bi" aria-hidden="true"><use href="#{{msg_icon}}"/></svg>{{cta_book}}</a>
+      </div>
+      <a class="tlink more" href="{{lp}}ceremonies/">{{more_cer}}<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<!-- Our teas: a typographic catalogue -->
+<section class="teas wood" id="teas">
+  <div class="wrap">
+    <div class="teas-top">
+      <div class="rv">
+        <h2>{{tea_h2}}</h2>
+        <p class="lead">{{tea_intro}}</p>
+      </div>
+      <figure class="ph teas-ph"><img src="{{root}}img/interior/2_shop-1000.webp" srcset="{{root}}img/interior/2_shop-700.webp 700w, {{root}}img/interior/2_shop-1000.webp 1000w, {{root}}img/interior/2_shop-1400.webp 1400w" sizes="(min-width:900px) 58vw, 100vw" loading="lazy" decoding="async" alt="{{alt_2shop}}"></figure>
+    </div>
+    <ul class="tea-list">
+{{tea_items}}
+    </ul>
+    <a class="tlink more" href="{{lp}}tea/">{{more_tea}}<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+  </div>
+</section>
+
+<!-- Online shop: delivery across Thailand and abroad -->
+<section class="shop" id="delivery" aria-labelledby="shop-h">
+  <div class="wrap">
+    <figure class="ph shop-ph"><img src="{{root}}img/interior/4_shop-1000.webp" srcset="{{root}}img/interior/4_shop-700.webp 700w, {{root}}img/interior/4_shop-1000.webp 1000w, {{root}}img/interior/4_shop-1400.webp 1400w" sizes="(min-width:900px) 56vw, 100vw" loading="lazy" decoding="async" width="834" height="1280" alt="{{alt_4shop}}"></figure>
+    <div class="shop-copy rv">
+      <h2 id="shop-h">{{shop_h2}}</h2>
+      <p class="lead">{{shop_text}}</p>
+      <div class="shop-act">
+        <a class="btn" href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="shop_section">{{shop_cta}}<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a class="tlink" href="{{msg_order_url}}" target="_blank" rel="noopener" data-track="{{msg_event}}" data-place="delivery"><svg class="bi" aria-hidden="true"><use href="#{{msg_icon}}"/></svg>{{deliv_cta}}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Events: cards load from Google Sheets (see SITE.EVENTS_SHEET) -->
+<section class="ev" id="events">
+  <div class="wrap">
+    <div class="ev-head">
+      <div class="rv">
+        <h2>{{ev_h2}}</h2>
+        <p class="lead">{{ev_intro}}</p>
+      </div>
+      <div class="ev-links">
+        <a class="tlink" href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="events"><svg class="bi" aria-hidden="true"><use href="#i-ig"/></svg>{{ev_cta}}</a>
+{{ev_extra}}
+      </div>
+    </div>
+    <div class="ev-list" id="evRow" data-limit="6" aria-live="polite">
+      <div class="evc evc-skel"></div><div class="evc evc-skel"></div><div class="evc evc-skel"></div>
+    </div>
+    <a class="tlink more" href="{{lp}}events/" id="evAll" hidden>{{ev_more}}<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+  </div>
+</section>
+
+<!-- About -->
+<section class="about" id="about">
+  <div class="wrap">
+    <figure class="ph about-ph"><img src="{{root}}img/interior/7_shop-1000.webp" srcset="{{root}}img/interior/7_shop-700.webp 700w, {{root}}img/interior/7_shop-1000.webp 1000w, {{root}}img/interior/7_shop-1400.webp 1400w" sizes="(min-width:900px) 60vw, 100vw" loading="lazy" decoding="async" alt="{{alt_7shop}}"></figure>
+    <div class="copy rv">
+      <h2>{{about_h2}}</h2>
+{{about_body}}
+    </div>
+  </div>
+</section>
+
+<!-- Contacts -->
+<section class="find dark" id="find-us">
+  <div class="wrap" id="visit">
+    <h2 class="rv">{{find_h2}}</h2>
+    <dl>
+      <div><dt>{{find_addr_l}}</dt><dd>Moychay Phuket<br>{{addr_full}}</dd></div>
+      <div><dt>{{find_hours_l}}</dt><dd>{{hours}}</dd></div>
+      <div><dt>{{find_park_l}}</dt><dd>{{find_park}}</dd></div>
+      <div><dt>{{find_msg_l}}</dt><dd>{{find_msgs}}</dd></div>
+    </dl>
+    <div class="act"><a class="btn" href="{{maps}}" target="_blank" rel="noopener" data-track="directions" data-place="find"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>{{cta_directions}}</a><a class="tlink" href="{{lp}}contact/">{{more_contact}}<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="wrap">
+    <h2 class="rv">{{faq_h2}}</h2>
+    <ul class="faq-list">
+{{faq_items}}
+    </ul>
+  </div>
+</section>

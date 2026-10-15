@@ -9,13 +9,16 @@ const { execFileSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
-const PAGES = { en: 'index.html', ru: 'ru/index.html' };
+const SLUGS = ['', 'ceremonies/', 'tea/', 'matcha/', 'events/', 'contact/', 'wholesale/'];
+const HOME = { en: 'index.html', ru: 'ru/index.html' };
+const PAGES = Object.fromEntries(SLUGS.flatMap(s => [['en:' + s, s + 'index.html'], ['ru:' + s, 'ru/' + s + 'index.html']]));
+const graph = (html) => JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph'];
 
 test('build is reproducible: _build/build.py output == committed HTML', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tp-build-'));
   fs.cpSync(path.join(ROOT, '_build'), path.join(tmp, '_build'), { recursive: true });
   execFileSync('python3', [path.join(tmp, '_build', 'build.py')], { stdio: 'pipe' });
-  for (const f of Object.values(PAGES)) {
+  for (const f of [...Object.values(PAGES), '404.html', 'sitemap.xml']) {
     assert.equal(fs.readFileSync(path.join(tmp, f), 'utf8'), read(f), `${f} differs from build output — someone edited HTML by hand or forgot to rebuild`);
   }
 });
@@ -34,7 +37,7 @@ test('every local asset referenced by the pages exists', () => {
     for (const m of html.matchAll(/srcset="([^"]+)"/g)) m[1].split(',').forEach(s => refs.add(s.trim().split(/\s+/)[0]));
     for (const r of refs) {
       if (/^(https?:|mailto:|tel:|data:|\/\/)/.test(r)) continue;
-      const target = path.resolve(base, r);
+      const target = r.startsWith('/') ? path.join(ROOT, r) : path.resolve(base, r);
       const ok = fs.existsSync(target) && (fs.statSync(target).isFile() || fs.existsSync(path.join(target, 'index.html')));
       if (!ok) missing.push(`${lang}: ${r}`);
     }
@@ -48,9 +51,11 @@ test('EN and RU pages have the same structure (ids, sections, links count)', () 
     sections: (html.match(/<section/g) || []).length,
     tracked: (html.match(/data-track=/g) || []).length,
   });
-  const en = shape(read(PAGES.en)), ru = shape(read(PAGES.ru));
-  assert.equal(en.ids, ru.ids);
-  assert.equal(en.sections, ru.sections);
+  for (const s of SLUGS) {
+    const a = shape(read(PAGES['en:' + s])), b = shape(read(PAGES['ru:' + s]));
+    assert.equal(a.ids, b.ids, s); assert.equal(a.sections, b.sections, s);
+  }
+  const en = shape(read(HOME.en)), ru = shape(read(HOME.ru));
   // RU extra: Telegram club link in events, Telegram in contacts, 2 footer icons (Yandex Maps, Telegram)
   assert.equal(ru.tracked - en.tracked, 4);
 });
@@ -59,15 +64,33 @@ test('robots.txt, sitemap.xml and CNAME are valid', () => {
   assert.match(read('robots.txt'), /Sitemap: https:\/\/teaphuket\.com\/sitemap\.xml/);
   const sm = read('sitemap.xml');
   assert.match(sm, /<loc>https:\/\/teaphuket\.com\/<\/loc>/);
-  assert.match(sm, /<loc>https:\/\/teaphuket\.com\/ru\/<\/loc>/);
+  const locs = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
+  assert.equal(locs.length, 14);
+  for (const s of SLUGS) for (const u of ['https://teaphuket.com/' + s, 'https://teaphuket.com/ru/' + s]) assert.ok(locs.includes(u), u);
+  assert.doesNotMatch(sm, /404/);
   assert.equal(read('CNAME').trim(), 'teaphuket.com');
 });
 
 test('JSON-LD parses and has required LocalBusiness fields', () => {
-  for (const f of Object.values(PAGES)) {
-    const m = read(f).match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
-    const ld = JSON.parse(m[1]);
+  for (const f of [...Object.values(HOME), 'contact/index.html', 'ru/contact/index.html']) {
+    const ld = graph(read(f)).find(n => n['@id'] === 'https://teaphuket.com/#teahouse');
     for (const k of ['name', 'address', 'geo', 'openingHoursSpecification', 'telephone', 'url', 'hasMap', 'sameAs']) assert.ok(ld[k], `${f}: ${k}`);
+  }
+});
+
+test('inner pages: BreadcrumbList, unique titles, one h1, self canonical', () => {
+  const titles = new Set();
+  for (const [key, f] of Object.entries(PAGES)) {
+    const html = read(f), [lang, slug] = key.split(':');
+    const title = html.match(/<title>([^<]+)<\/title>/)[1];
+    assert.ok(!titles.has(title), `duplicate title ${title}`); titles.add(title);
+    assert.equal((html.match(/<h1[\s>]/g) || []).length, 1, f);
+    const url = 'https://teaphuket.com/' + (lang === 'ru' ? 'ru/' : '') + slug;
+    assert.match(html, new RegExp(`<link rel="canonical" href="${url}">`), f);
+    assert.match(html, new RegExp(`hreflang="en" href="https://teaphuket.com/${slug}"`), f);
+    assert.match(html, new RegExp(`hreflang="ru" href="https://teaphuket.com/ru/${slug}"`), f);
+    assert.doesNotMatch(html, /noindex/, f);
+    if (slug) assert.ok(graph(html).some(n => n['@type'] === 'BreadcrumbList'), f);
   }
 });
 
@@ -79,7 +102,7 @@ test('no secrets / tokens committed in tracked files', () => {
   assert.deepEqual(hits, []);
 });
 
-test('Google Tag Manager and Search Console verification are on both pages', () => {
+test('Google Tag Manager and Search Console verification are on every page', () => {
   for (const f of Object.values(PAGES)) {
     const html = read(f);
     const head = html.slice(0, html.indexOf('</head>'));

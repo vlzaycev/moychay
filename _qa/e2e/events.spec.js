@@ -18,7 +18,8 @@ for (const p of PAGES) {
       expect(titles[2]).toBe(p.lang === 'en' ? 'Later event' : 'Дегустация «Позже»');
       await expect(cards.nth(2).locator('.evc-price')).toHaveText('380฿');
       await expect(cards.first().locator('.evc-when')).toContainText('18:00');
-      await expect(page.locator('#evAll')).toBeHidden(); // 3 events → no "show all" button
+      await expect(page.locator('#evAll')).toHaveAttribute('href', p.lang === 'en' ? '/events/' : '/ru/events/');
+      await expect(page.locator('#evAll')).toBeVisible();  // link to the full schedule page
     });
 
     test('sheet content is rendered as text (no XSS), unsafe links dropped', async ({ page }) => {
@@ -41,14 +42,19 @@ for (const p of PAGES) {
       await expect(page.locator('#evAll')).toBeHidden();
     });
 
-    test('more than 6 events → first 6 shown, "show all" reveals the rest', async ({ page }) => {
-      const rows = Array.from({ length: 9 }, (_, i) => `2099-11-${String(i + 10)},18:00,Event ${i + 1},Событие ${i + 1},t,т,Donation,Донат,https://www.instagram.com/moychay.phuket,yes`);
+    test('more than 6 events → home shows 6, the events page shows all with schema.org Event', async ({ page }) => {
+      const rows = Array.from({ length: 9 }, (_, i) => `2099-11-${String(i + 10)},18:00,Event ${i + 1},Событие ${i + 1},t,т,${i ? 380 : 'Donation'},${i ? 380 : 'Донат'},https://www.instagram.com/moychay.phuket,yes`);
       await mockEvents(page, HEADER + rows.join('\n'));
       await page.goto(p.path + '#events');
       await expect(page.locator('#evRow .evc:visible')).toHaveCount(6);
       await page.locator('#evAll').click();
+      await expect(page).toHaveURL(new RegExp(p.path + 'events/$'));
       await expect(page.locator('#evRow .evc:visible')).toHaveCount(9);
-      await expect(page.locator('#evAll')).toBeHidden();
+      const ld = JSON.parse(await page.locator('#ev-ld').textContent())['@graph'];
+      expect(ld).toHaveLength(9);
+      expect(ld[1]).toMatchObject({ '@type': 'Event', startDate: '2099-11-11T18:00:00+07:00',
+        offers: { price: 380, priceCurrency: 'THB' }, location: { name: 'Moychay Phuket' } });
+      expect(ld[0].offers).toBeUndefined();               // "Donation" → no invented price
     });
 
     test('event without photo (image = none) renders cleanly', async ({ page }) => {

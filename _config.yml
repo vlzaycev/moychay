@@ -2,3 +2,5 @@
 # Folders starting with "_" (_build, _qa) and dotfiles are never published.
 exclude:
   - README.md
+  - SEO_IMPLEMENTATION_REPORT.md
+  - TELEGRAM_INTEGRATION_TODO.md

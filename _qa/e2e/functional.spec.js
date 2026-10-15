@@ -156,8 +156,8 @@ for (const p of PAGES) {
       await expect(f.locator('.ftr-logo img')).toHaveAttribute('src', /logo\.png$/);
       expect(await f.locator('.soc a').count()).toBeGreaterThanOrEqual(2);
       const nav = await f.locator('nav.ftr-col a').evaluateAll(as => as.map(a => a.getAttribute('href')));
-      expect(nav).toEqual(['#prices', '#teas', '#events', 'https://phuket.moychay.asia/']);
-      for (const h of nav.slice(0, 3)) await expect(page.locator(h)).toHaveCount(1);
+      const lp = p.lang === 'en' ? '/' : '/ru/';
+      expect(nav).toEqual(['ceremonies/', 'tea/', 'matcha/', 'events/', 'contact/', 'wholesale/'].map(s => lp + s).concat('https://phuket.moychay.asia/'));
       await expect(f.locator('.ftr-contact a[data-track="directions"]')).toHaveAttribute('href', MAPS);
       await expect(f.locator('.ftr-bottom')).toContainText('Moychay Thai Co. LTD');
       const c = f.locator('a.credit');

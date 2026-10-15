@@ -10,6 +10,9 @@ The _build folder is not published by GitHub Pages.
 import datetime
 import json
 import os
+import re
+
+from pages import BUILDERS, PAGES, SLUGS
 from urllib.parse import quote
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -26,6 +29,9 @@ CONFIG = {
     "cfg_ym": "",               # Yandex Metrika counter ID
     "cfg_pixel": "",            # Meta Pixel ID
     "cfg_sheet": "1zcA3xGzhUeQvWD2pFi1obgOf8mC2gi32D0l_q4tw_es",  # events Google Sheet
+    # Contact & wholesale forms: URL of the server handler (_server/contact-worker), e.g. "/api/contact".
+    # Empty = forms are shown disabled with a note to use WhatsApp/Telegram (nothing is sent anywhere).
+    "cfg_form_endpoint": "",
 }
 
 MAPS = "https://maps.app.goo.gl/uuZkb3YwtNMGQhy18"
@@ -92,6 +98,34 @@ def footer(items):
         for name, u, t, icon in items)
 
 
+# Tea categories: home page catalogue and /tea/
+TEA_EN = [
+        ("White tea", "Light and delicate, with notes of honey and dried flowers."),
+        ("Green tea", "Fresh and grassy, sometimes brothy, always bright."),
+        ("Light oolongs", "Soft, floral and sweet – halfway between green and black tea."),
+        ("Dark oolongs", "Roasted and rich, with notes of dark chocolate and toasted nuts."),
+        ("Red tea (what the West calls black tea)", "Warming and smooth, with dried fruit and soft spice."),
+        ("Young raw pu-erh (sheng)", "Fresh, vivid and a little grassy – energizing and clean."),
+        ("Aged raw pu-erh (sheng)", "The same tea, matured for 10+ years into something deep and complex."),
+        ("Shu pu-erh &amp; dark tea", "Earthy and grounding – a good match after a heavy meal."),
+        ("Lao cha (aged tea)", "Years of careful storage turn bitterness into smooth, layered depth."),
+        ("Herbal tea", "Caffeine-free infusions of herbs, flowers and fruit – calming or energizing."),
+    ]
+
+TEA_RU = [
+        ("Белый чай", "Лёгкий и деликатный, с нотами мёда и сухих цветов."),
+        ("Зелёный чай", "Свежий и травянистый, иногда с бульонными нотами, всегда яркий."),
+        ("Светлые улуны", "Мягкие, цветочные и сладкие – что-то между зелёным и чёрным чаем."),
+        ("Тёмные улуны", "Обжаренные и насыщенные, с нотами тёмного шоколада и жареных орехов."),
+        ("Красный чай (на Западе его называют «чёрным»)", "Согревающий и мягкий, с сухофруктами и мягкими специями."),
+        ("Молодой сырой пуэр (шэн)", "Свежий, яркий, немного травянистый – бодрит и оставляет чистое послевкусие."),
+        ("Выдержанный сырой пуэр (шэн)", "Тот же чай после 10+ лет выдержки – глубокий и сложный."),
+        ("Шу пуэр и тёмные чаи", "Землистые и плотные – хорошо идут после сытной еды."),
+        ("Лао ча (выдержанный чай)", "Годы бережного хранения убирают горечь и дают мягкий, многослойный вкус."),
+        ("Травяной чай", "Без кофеина: травы, цветы и фрукты – успокаивают или бодрят, на ваш выбор."),
+    ]
+
+
 COMMON = dict(maps=MAPS, head_font="Geologica", font_families=["Geologica", "Inter"])
 
 # ── EN ───────────────────────────────────────────────────────────
@@ -101,8 +135,8 @@ EN = dict(
     font_preload_files=["inter-latin.woff2", "geologica-latin.woff2"],
     canonical="https://teaphuket.com/", og_locale="en_US", map_lang="en",
     cur_en='aria-current="page"', cur_ru="",
-    meta_title="Tea house in Phuket, tea ceremonies, matcha – Moychay Phuket",
-    meta_desc="Visit Moychay Phuket – tea house in Phuket. Discover Pu-erh, Oolong, Matcha, Gaba, Green, White and Black teas. Chinese tea ceremonies, tastings and premium teas.",
+    meta_title="Moychay Phuket – Tea House &amp; Tea Ceremonies in Bangtao",
+    meta_desc="Moychay Phuket – tea house on Boat Avenue, Bangtao. Chinese tea ceremonies, tastings, 200+ teas, matcha drinks and weekly tea events. Open daily 11:00–22:00.",
     nav_label="Sections", nav_1="Tea ceremonies", nav_2="Our teas", nav_3="Events", nav_4="Contacts", nav_shop="Online shop",
     msg_url=wa("Hi! I found you on teaphuket.com"),
     msg_book_url=wa("Hi! I'd like to book a tea ceremony"),
@@ -152,24 +186,13 @@ EN = dict(
              text="Birthdays, team events and gatherings."),
         dict(name="Matcha drinks &amp; kombucha", price="from 250฿",
              meta="To stay or to go",
-             text="Non-alcoholic matcha lattes and tonics, kombucha on tap."),
+             text='Non-alcoholic matcha lattes and tonics, kombucha on tap. <a href="{{lp}}matcha/">More about matcha</a>'),
     ]),
     ways_note="Not sure where to start? Ask the tea master – from a light green tea to an aged pu-erh.",
     cta_book="Book a ceremony on WhatsApp",
     tea_h2="Our teas",
     tea_intro="No need to know any of this before you come. Point at a jar, and the tea master will brew it for you.",
-    tea_items=tea([
-        ("White tea", "Light and delicate, with notes of honey and dried flowers."),
-        ("Green tea", "Fresh and grassy, sometimes brothy, always bright."),
-        ("Light oolongs", "Soft, floral and sweet – halfway between green and black tea."),
-        ("Dark oolongs", "Roasted and rich, with notes of dark chocolate and toasted nuts."),
-        ("Red tea (what the West calls black tea)", "Warming and smooth, with dried fruit and soft spice."),
-        ("Young raw pu-erh (sheng)", "Fresh, vivid and a little grassy – energizing and clean."),
-        ("Aged raw pu-erh (sheng)", "The same tea, matured for 10+ years into something deep and complex."),
-        ("Shu pu-erh &amp; dark tea", "Earthy and grounding – a good match after a heavy meal."),
-        ("Lao cha (aged tea)", "Years of careful storage turn bitterness into smooth, layered depth."),
-        ("Herbal tea", "Caffeine-free infusions of herbs, flowers and fruit – calming or energizing."),
-    ]),
+    tea_items=tea(TEA_EN), tea_list=TEA_EN,
     shop_h2="Your favorite tea, delivered",
     shop_text="Explore our selection of tea and teaware. Free delivery across Thailand on orders over 2000฿. International shipping available.",
     shop_cta="Visit online shop",
@@ -187,7 +210,7 @@ EN = dict(
     map_title="Moychay Phuket on Google Maps",
     find_addr_l="Address", find_hours_l="Hours", find_park_l="Parking", find_msg_l="Write to us",
     find_msgs=f'<a href="{wa("Hi! I found you on teaphuket.com")}" target="_blank" rel="noopener" data-track="whatsapp" data-place="find">WhatsApp</a> · <a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="find">Instagram</a>',
-    ev_more="Show all events", 
+    ev_more="All events", 
     find_park="On site at Boat Avenue",
     faq_h2="Common questions",
     faq_items=faq([
@@ -205,9 +228,25 @@ EN = dict(
         ("Facebook", "https://www.facebook.com/moychay.phuket/", "facebook", "i-fb"),
     ]),
     ftr_about="Tea house and tea ceremonies in Bangtao, Phuket. Part of Moychay, an international tea community.",
-    ftr_nav_label="Footer", ftr_nav_1="Tea ceremonies", ftr_nav_2="Our teas", ftr_nav_3="Events", ftr_nav_4="Online shop",
+    ftr_h_explore="Explore", ftr_h_partners="Partnerships", ftr_h_visit="Visit us",
+    ftr_ceremonies="Tea ceremonies", ftr_tea="Chinese tea", ftr_matcha="Matcha", ftr_events="Events", ftr_contact="Contact",
+    ftr_wholesale="Wholesale &amp; partnerships", ftr_shop="Online shop",
+    more_cer="All ceremony formats", more_tea="More about our teas", more_contact="Contact page and form",
+    crumbs_label="Breadcrumbs", home_name="Home",
+    form=dict(name="Name", company="Company / Business name", email="Email", contact="WhatsApp number",
+              contact_hint="International format, e.g. +66 81 234 5678", message="Message",
+              message_wh="Tell us about your venue and what tea you need", optional="(optional)",
+              hp="Leave this field empty", submit="Send message",
+              note="* Required fields. We use your contact details only to reply to your message.",
+              offline=f'The online form is being connected and will work soon. For now the quickest way to reach us is <a href="{WA}" target="_blank" rel="noopener" data-track="whatsapp" data-place="form_offline">WhatsApp</a>.'),
     credit_by="Website & marketing by", credit_label="Website & marketing by vlad.marketing (opens in a new tab)",
-    js=dict(lang="en", evEmpty="New dates are announced every week on Instagram.", evMore="Details", evFree="Free", evAll="Show all events"),
+    js=dict(lang="en", evEmpty="New dates are announced every week on Instagram.", evMore="Details", evFree="Free", evAll="Show all events",
+            form=dict(required="Please fill in this field.", email="Please enter a valid email, e.g. name@example.com.",
+                      phone="Please enter the number in international format, e.g. +66 81 234 5678.",
+                      tg="Telegram username: 5–32 Latin letters, digits or _.", short="Please write a little more.",
+                      fix="Please check the highlighted fields.", sending="Sending…",
+                      ok="Thank you! Your message has been delivered – we'll reply by email soon.",
+                      fail="Sorry, the message could not be sent. Please try again or message us on WhatsApp.")),
 )
 
 # ── RU ───────────────────────────────────────────────────────────
@@ -217,8 +256,8 @@ RU = dict(
     font_preload_files=["inter-cyrillic.woff2", "geologica-cyrillic.woff2"],
     canonical="https://teaphuket.com/ru/", og_locale="ru_RU", map_lang="ru",
     cur_en="", cur_ru='aria-current="page"',
-    meta_title="Чайная на Пхукете, чайные церемонии, матча – Moychay Phuket",
-    meta_desc="Чайная Moychay Phuket на Пхукете. Пуэр, улун, матча, габа, зелёный, белый и красный китайский чай. Чайные церемонии, дегустации и покупка чая.",
+    meta_title="Moychay Phuket – Чайная и чайные церемонии на Пхукете",
+    meta_desc="Moychay Phuket (Мойчай) – чайная на Boat Avenue в Бангтао, Пхукет. Китайские чайные церемонии, дегустации, 200+ сортов чая, матча и мероприятия. Ежедневно 11:00–22:00.",
     nav_label="Разделы", nav_1="Церемонии", nav_2="Наш чай", nav_3="Мероприятия", nav_4="Контакты", nav_shop="Магазин",
     msg_url=TG, msg_book_url=TG, msg_order_url=TG,
     msg_event="telegram", msg_icon="i-tg",
@@ -266,24 +305,13 @@ RU = dict(
              text="Дни рождения, командные встречи и праздники."),
         dict(name="Коктейли на матче и комбуча", price="от 250฿",
              meta="Здесь или с собой",
-             text="Безалкогольные матча-латте и тоники, комбуча на разлив."),
+             text='Безалкогольные матча-латте и тоники, комбуча на разлив. <a href="{{lp}}matcha/">Подробнее о матче</a>'),
     ]),
     ways_note="Не знаете, с чего начать? Спросите чайного мастера – подберёт что-то от лёгкого зелёного до выдержанного пуэра.",
     cta_book="Записаться в Telegram",
     tea_h2="Наш чай",
     tea_intro="Заранее разбираться не нужно. Покажите на банку – и чайный мастер заварит.",
-    tea_items=tea([
-        ("Белый чай", "Лёгкий и деликатный, с нотами мёда и сухих цветов."),
-        ("Зелёный чай", "Свежий и травянистый, иногда с бульонными нотами, всегда яркий."),
-        ("Светлые улуны", "Мягкие, цветочные и сладкие – что-то между зелёным и чёрным чаем."),
-        ("Тёмные улуны", "Обжаренные и насыщенные, с нотами тёмного шоколада и жареных орехов."),
-        ("Красный чай (на Западе его называют «чёрным»)", "Согревающий и мягкий, с сухофруктами и мягкими специями."),
-        ("Молодой сырой пуэр (шэн)", "Свежий, яркий, немного травянистый – бодрит и оставляет чистое послевкусие."),
-        ("Выдержанный сырой пуэр (шэн)", "Тот же чай после 10+ лет выдержки – глубокий и сложный."),
-        ("Шу пуэр и тёмные чаи", "Землистые и плотные – хорошо идут после сытной еды."),
-        ("Лао ча (выдержанный чай)", "Годы бережного хранения убирают горечь и дают мягкий, многослойный вкус."),
-        ("Травяной чай", "Без кофеина: травы, цветы и фрукты – успокаивают или бодрят, на ваш выбор."),
-    ]),
+    tea_items=tea(TEA_RU), tea_list=TEA_RU,
     shop_h2="Любимый чай – с доставкой",
     shop_text="Выбирайте китайский чай, посуду и аксессуары в нашем интернет-магазине. Бесплатная доставка по Таиланду при заказе от 2000฿. Отправляем заказы по всему миру.",
     shop_cta="Перейти в магазин",
@@ -301,7 +329,7 @@ RU = dict(
     map_title="Moychay Phuket на Google Картах",
     find_addr_l="Адрес", find_hours_l="Часы работы", find_park_l="Парковка", find_msg_l="Написать",
     find_msgs=f'<a href="{TG}" target="_blank" rel="noopener" data-track="telegram" data-place="find">Telegram</a> · <a href="{WA}" target="_blank" rel="noopener" data-track="whatsapp" data-place="find">WhatsApp</a> · <a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="find">Instagram</a>',
-    ev_more="Показать все мероприятия", 
+    ev_more="Все мероприятия", 
     find_park="На месте, на Boat Avenue",
     faq_h2="Частые вопросы",
     faq_items=faq([
@@ -321,10 +349,100 @@ RU = dict(
         ("Facebook", "https://www.facebook.com/moychay.phuket/", "facebook", "i-fb"),
     ]),
     ftr_about="Чайная и чайные церемонии в Бангтао, Пхукет. Часть международного чайного сообщества Moychay.",
-    ftr_nav_label="Футер", ftr_nav_1="Чайные церемонии", ftr_nav_2="Наш чай", ftr_nav_3="Мероприятия", ftr_nav_4="Интернет-магазин",
+    ftr_h_explore="Разделы", ftr_h_partners="Сотрудничество", ftr_h_visit="Как нас найти",
+    ftr_ceremonies="Чайные церемонии", ftr_tea="Китайский чай", ftr_matcha="Матча", ftr_events="Мероприятия", ftr_contact="Контакты",
+    ftr_wholesale="Оптовые поставки", ftr_shop="Интернет-магазин",
+    more_cer="Все форматы церемоний", more_tea="Подробнее о нашем чае", more_contact="Страница контактов и форма",
+    crumbs_label="Навигационная цепочка", home_name="Главная",
+    form=dict(name="Имя", company="Название компании", email="Email", contact="Telegram username",
+              contact_hint="Например, moychay_phuket – символ @ не обязателен", message="Сообщение",
+              message_wh="Расскажите о заведении и о том, какой чай вам нужен", optional="(необязательно)",
+              hp="Оставьте это поле пустым", submit="Отправить сообщение",
+              note="* Обязательные поля. Контактные данные используем только для ответа на ваше обращение.",
+              offline=f'Онлайн-форма подключается и скоро заработает. Пока быстрее всего написать нам в <a href="{TG}" target="_blank" rel="noopener" data-track="telegram" data-place="form_offline">Telegram</a> или <a href="{WA}" target="_blank" rel="noopener" data-track="whatsapp" data-place="form_offline">WhatsApp</a>.'),
     credit_by="Сайт и маркетинг –", credit_label="Сайт и маркетинг – vlad.marketing (откроется в новой вкладке)",
-    js=dict(lang="ru", evEmpty="Анонсы появляются каждую неделю – в Telegram-клубе и Instagram.", evMore="Подробнее", evFree="Бесплатно", evAll="Показать все мероприятия"),
+    js=dict(lang="ru", evEmpty="Анонсы появляются каждую неделю – в Telegram-клубе и Instagram.", evMore="Подробнее", evFree="Бесплатно", evAll="Показать все мероприятия",
+            form=dict(required="Заполните это поле.", email="Укажите корректный email, например name@example.com.",
+                      phone="Укажите номер в международном формате, например +66 81 234 5678.",
+                      tg="Telegram username: 5–32 латинские буквы, цифры или _.", short="Напишите чуть подробнее.",
+                      fix="Проверьте отмеченные поля.", sending="Отправляем…",
+                      ok="Спасибо! Сообщение доставлено – скоро ответим на email.",
+                      fail="Не получилось отправить сообщение. Попробуйте ещё раз или напишите нам в Telegram.")),
 )
+
+
+SITE_URL = "https://teaphuket.com"
+
+
+def url(lang, slug=""):
+    return f"{SITE_URL}/{'ru/' if lang == 'ru' else ''}{slug + '/' if slug else ''}"
+
+
+def business(data):
+    """LocalBusiness: the tea house itself (home and contact pages)."""
+    return {
+        "@type": ["CafeOrCoffeeShop", "Store"], "@id": f"{SITE_URL}/#teahouse",
+        "name": "Moychay Phuket", "alternateName": ["Tea House Moychay Phuket", "Мойчай Пхукет"],
+        "description": data["meta_desc"], "url": url(data["lang"]), "inLanguage": data["lang"],
+        "image": [f"{SITE_URL}/img/og.jpg", f"{SITE_URL}/img/interior/1_shop-1400.webp"],
+        "logo": f"{SITE_URL}/img/logo.png", "telephone": "+66817959110",
+        "servesCuisine": ["Tea", "Chinese tea", "Matcha"], "priceRange": "฿฿", "currenciesAccepted": "THB",
+        "acceptsReservations": True,
+        "address": {"@type": "PostalAddress", "streetAddress": "Boat Avenue, 2nd floor",
+                    "addressLocality": "Bang Tao, Choeng Thale", "addressRegion": "Phuket",
+                    "postalCode": "83110", "addressCountry": "TH"},
+        "geo": {"@type": "GeoCoordinates", "latitude": 7.9930212, "longitude": 98.3050328},
+        "hasMap": [MAPS, "https://yandex.ru/maps/-/CXQU482P"],
+        "openingHours": "Mo-Su 11:00-22:00",
+        "openingHoursSpecification": [{"@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            "opens": "11:00", "closes": "22:00"}],
+        "amenityFeature": [{"@type": "LocationFeatureSpecification", "name": "Parking", "value": True},
+                           {"@type": "LocationFeatureSpecification", "name": "Board games", "value": True}],
+        "sameAs": ["https://www.instagram.com/moychay.phuket", "https://www.facebook.com/moychay.phuket/",
+                   TG, TG_CLUB, "https://phuket.moychay.asia/"],
+    }
+
+
+def jsonld(graph):
+    return ('<script type="application/ld+json">\n'
+            + json.dumps({"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False, indent=1)
+            + "\n</script>")
+
+
+def home_page(data):
+    lang = data["lang"]
+    website = {"@type": "WebSite", "@id": f"{SITE_URL}/#website", "url": f"{SITE_URL}/", "name": "Moychay Phuket",
+               "alternateName": ["Moychay Phuket tea house", "Мойчай Пхукет"], "inLanguage": ["en", "ru"]}
+    return {**data,
+            "main": open(os.path.join(HERE, "pages", "home.html"), encoding="utf-8").read(),
+            "canonical": url(lang), "url_en": url("en"), "url_ru": url("ru"),
+            "home_href": "#home", "nb": "", "lp": "/ru/" if lang == "ru" else "/",
+            "href_en": data["root_href"] if lang == "en" else "../", "href_ru": "ru/" if lang == "en" else "./",
+            "head_extra": (f'<link rel="preload" as="image" href="{data["root"]}img/interior/1_shop-hero-m.webp" media="(max-width: 899px)">\n'
+                           f'<link rel="preload" as="image" href="{data["root"]}img/interior/1_shop-hero-d.webp" media="(min-width: 900px)">'),
+            "jsonld": jsonld([business(data), website])}
+
+
+def inner_page(data, slug):
+    lang = data["lang"]
+    P = PAGES[slug][lang]
+    lp = "/ru/" if lang == "ru" else "/"
+    d = {**data, "root": "../../" if lang == "ru" else "../", "lp": lp, "nb": lp, "home_href": lp,
+         "meta_title": P["title"], "meta_desc": P["desc"],
+         "canonical": url(lang, slug), "url_en": url("en", slug), "url_ru": url("ru", slug),
+         "href_en": f"/{slug}/", "href_ru": f"/ru/{slug}/", "head_extra": ""}
+    crumbs = {"@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Moychay Phuket", "item": url(lang)},
+        {"@type": "ListItem", "position": 2, "name": P["crumb"], "item": url(lang, slug)}]}
+    graph = [crumbs] + ([business(d)] if slug == "contact" else [])
+    d["jsonld"] = jsonld(graph)
+    d["main"] = BUILDERS[slug](d, P, CONFIG)
+    # preload the hero photo (LCP) with the same srcset/sizes as the <img>
+    m = re.search(r'class="ph phero-ph"><img src="([^"]+)" srcset="([^"]+)" sizes="([^"]+)"', d["main"])
+    if m:
+        d["head_extra"] = f'<link rel="preload" as="image" href="{m[1]}" imagesrcset="{m[2]}" imagesizes="{m[3]}" fetchpriority="high">'
+    return d
 
 
 def build(data, out):
@@ -337,12 +455,14 @@ def build(data, out):
 
 def render(data, out="404.html"):
     html = open(os.path.join(HERE, "template.html"), encoding="utf-8").read()
-    values = {**CONFIG, **data, "year": str(datetime.date.today().year)}
+    values = {**CONFIG, **data, "year": str(datetime.date.today().year), "og_image": f"{SITE_URL}/img/og.jpg"}
     values["font_faces"], values["font_preload"] = fonts(data["font_families"], data["font_preload_files"], data["root"])
     values["js_i18n"] = json.dumps({**data["js"], "root": data["root"]}, ensure_ascii=False)
-    for k, v in values.items():
-        if isinstance(v, str):
-            html = html.replace("{{" + k + "}}", v)
+    html = html.replace("{{main}}", values.pop("main", ""))
+    for _ in range(2):   # second pass: placeholders inside inserted values ({{lp}}, {{root}}…)
+        for k, v in values.items():
+            if isinstance(v, str):
+                html = html.replace("{{" + k + "}}", v)
     left = [p for p in html.split("{{")[1:] if "}}" in p]
     if left:
         raise SystemExit(f"Unfilled placeholders in {out}: " + ", ".join(p.split("}}")[0] for p in left))
@@ -351,10 +471,12 @@ def render(data, out="404.html"):
 
 def sitemap():
     today = datetime.date.today().isoformat()
-    alt = ('    <xhtml:link rel="alternate" hreflang="en" href="https://teaphuket.com/"/>\n'
-           '    <xhtml:link rel="alternate" hreflang="ru" href="https://teaphuket.com/ru/"/>\n')
-    urls = "".join(f"  <url>\n    <loc>{u}</loc>\n    <lastmod>{today}</lastmod>\n{alt}  </url>\n"
-                   for u in ("https://teaphuket.com/", "https://teaphuket.com/ru/"))
+    urls = ""
+    for slug in [""] + SLUGS:
+        alt = "".join(f'    <xhtml:link rel="alternate" hreflang="{h}" href="{url(l, slug)}"/>\n'
+                      for h, l in (("en", "en"), ("ru", "ru"), ("x-default", "en")))
+        for lang in ("en", "ru"):
+            urls += f"  <url>\n    <loc>{url(lang, slug)}</loc>\n    <lastmod>{today}</lastmod>\n{alt}  </url>\n"
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
            + urls + "</urlset>\n")
@@ -378,7 +500,8 @@ def page_404():
     before the page scripts run. No redirect, so the URL and the 404 status stay as they are."""
     region = {}
     for lang, data in (("en", EN), ("ru", RU)):
-        html = render({**data, "root": "/", "root_href": "/"})   # absolute paths: works at any depth
+        html = render({**home_page(data), "root": "/", "root_href": "/", "home_href": NF[lang]["home"],
+                       "nb": NF[lang]["home"], "href_en": "/", "href_ru": "/ru/"})   # absolute paths: works at any depth
         t = NF[lang]
         a, b = html.index('<header class="hdr"'), html.index("</footer>") + len("</footer>")
         part = html[a:b]
@@ -394,7 +517,6 @@ def page_404():
     html, en = region["en"]
     ru = region["ru"][1]
     head, rest = html.split("</head>", 1)
-    import re
     head = re.sub(r"<title>.*?</title>", f"<title>{NF['en']['title']}</title>", head, flags=re.S)
     head = re.sub(r'<meta name="description"[^>]*>', '<meta name="robots" content="noindex">', head)
     head = re.sub(r'\s*<link rel="(canonical|alternate)"[^>]*>', "", head)
@@ -420,7 +542,10 @@ def page_404():
     print("built 404.html")
 
 
-build(EN, "index.html")
-build(RU, "ru/index.html")
+build(home_page(EN), "index.html")
+build(home_page(RU), "ru/index.html")
+for slug in SLUGS:
+    build(inner_page(EN, slug), f"{slug}/index.html")
+    build(inner_page(RU, slug), f"ru/{slug}/index.html")
 page_404()
 sitemap()

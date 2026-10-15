@@ -27,8 +27,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-latin.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/fonts/geologica-latin.woff2" crossorigin>
 
-<link rel="preload" as="image" href="/img/interior/1_shop-hero-m.webp" media="(max-width: 899px)">
-<link rel="preload" as="image" href="/img/interior/1_shop-hero-d.webp" media="(min-width: 900px)">
+<link rel="preload" as="image" href="img/interior/1_shop-hero-m.webp" media="(max-width: 899px)">
+<link rel="preload" as="image" href="img/interior/1_shop-hero-d.webp" media="(min-width: 900px)">
 
 <!-- ============================================================
      ANALYTICS — fill in the IDs below; empty = not loaded.
@@ -239,7 +239,7 @@ figure{margin:0}
 @media (min-width:600px){
   .menu-i{grid-template-columns:1fr auto;column-gap:32px}
   .menu-i h3{grid-column:1}.menu-p{grid-column:2;grid-row:1;text-align:right;margin:0}
-  .menu-m,.menu-d{grid-column:1}
+  .menu-m,.menu-d,.menu-c,.menu-i .tlink{grid-column:1}
 }
 @media (min-width:900px){
   .cer .wrap{grid-template-columns:5fr 7fr;gap:72px;align-items:start}
@@ -262,6 +262,81 @@ figure{margin:0}
   .teas-ph{margin:0 calc(var(--bleed) * -1) 0 0;aspect-ratio:16/9}
   .tea-list{grid-template-columns:1fr 1fr}
   }
+
+/* Inner pages: short hero, editorial sections, forms */
+.phero{background:var(--dark);color:var(--on-dark);padding:100px 0 clamp(48px,7vw,88px);overflow:hidden}
+.phero .wrap{display:grid;gap:36px}
+.crumbs{display:flex;flex-wrap:wrap;gap:4px 8px;list-style:none;margin:0 0 18px;padding:0;font-size:14px;color:var(--muted-d)}
+.crumbs li+li::before{content:"/";margin-right:8px;opacity:.6}
+.crumbs a{display:inline-block;padding:10px 0;margin:-10px 0;transition:color .2s}.crumbs a:hover{color:var(--clay-soft)}
+.phero h1{font-size:clamp(40px,6.2vw,80px);line-height:1;letter-spacing:-.03em;margin-bottom:22px;max-width:13ch}
+.phero .lead{color:rgba(243,236,225,.84);max-width:44ch;margin-bottom:32px}
+.phero-ph{aspect-ratio:4/3;margin:0 calc(var(--gut) * -1)}
+@media (max-width:599px){.phero .btn{width:100%}.phero .tlink{min-height:48px}}
+@media (min-width:900px){
+  .phero{padding-top:148px}
+  .phero .wrap{grid-template-columns:6fr 6fr;gap:64px;align-items:center}
+  .phero-ph{margin:0 calc(var(--bleed) * -1) 0 0;aspect-ratio:auto;height:clamp(420px,42vw,580px)}
+}
+.sec{padding:clamp(72px,10vw,128px) 0}
+.sec:not(.sand)+.sec:not(.sand){padding-top:0}
+.sand{background:var(--sand)}
+.split{display:grid;gap:20px 64px}
+.split .copy p,.split .copy li{max-width:60ch}
+.split h2{max-width:13ch}
+@media (min-width:900px){.split{grid-template-columns:5fr 7fr;align-items:start}}
+.more{margin-top:20px}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s;border-top:1px solid var(--line-l)}
+.steps li{counter-increment:s;display:grid;grid-template-columns:44px 1fr;gap:2px 14px;padding:22px 0;border-bottom:1px solid var(--line-l)}
+.steps li::before{content:counter(s,decimal-leading-zero);grid-row:span 2;padding-top:2px;font-family:var(--head);font-size:18px;color:var(--clay-text)}
+.steps h3{font-size:20px}
+.steps p{margin:0;color:var(--muted-l);max-width:56ch}
+.info{margin:0;border-top:1px solid var(--line-l)}
+.info>div{display:grid;gap:2px 32px;padding:18px 0;border-bottom:1px solid var(--line-l)}
+.info dt{font-weight:600}
+.info dd{margin:0;color:var(--muted-l)}
+.info dd a{color:var(--clay-text);border-bottom:1px solid currentColor}
+@media (min-width:600px){.info>div{grid-template-columns:minmax(150px,2fr) 5fr}}
+.list2{list-style:none;margin:0;padding:0;display:grid;gap:0 48px;border-top:1px solid var(--line-l)}
+.list2 li{padding:16px 0;border-bottom:1px solid var(--line-l);font-size:18px}
+@media (min-width:700px){.list2{grid-template-columns:1fr 1fr}}
+.menu-c{margin:6px 0 0;font-size:15px;color:var(--muted-l)}
+.menu-i .tlink{justify-self:start;margin-top:6px;font-size:15px;font-weight:600}
+.cer-page{margin-top:0}.cer-page .menu{margin:0}
+.master{display:grid;gap:32px}
+.master-ph{aspect-ratio:4/5;margin:0 calc(var(--gut) * -1)}
+.master-role{margin:-12px 0 20px;font-weight:500;color:var(--clay-text)}
+@media (min-width:700px){.master-ph{margin:0}}
+@media (min-width:900px){.master{grid-template-columns:5fr 7fr;gap:72px;align-items:center}}
+.map{aspect-ratio:4/3;background:var(--sand);margin:0 calc(var(--gut) * -1)}
+.map iframe{display:block;width:100%;height:100%;border:0;filter:grayscale(.25) sepia(.12)}
+@media (min-width:700px){.map{margin:0;aspect-ratio:16/10}}
+/* Forms */
+.form{display:grid;gap:22px;max-width:640px}
+.form fieldset{display:grid;gap:22px;min-width:0;margin:0;padding:0;border:0}
+.form fieldset[disabled]{opacity:.5}
+.fld{display:grid;gap:4px}
+.fld label{font-size:15px;font-weight:600}
+.fld .opt{font-weight:400;color:var(--muted-l)}
+.fld input,.fld textarea{width:100%;min-height:48px;padding:10px 0;font:inherit;font-size:17px;color:var(--ink);background:transparent;
+  border:0;border-bottom:1px solid rgba(58,44,34,.45);border-radius:0;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
+.fld textarea{min-height:140px;resize:vertical;line-height:1.5}
+.fld input:focus,.fld textarea:focus{outline:none;border-bottom-color:var(--clay);box-shadow:0 1px 0 var(--clay)}
+.fld [aria-invalid="true"]{border-bottom-color:#9B2C17;box-shadow:0 1px 0 #9B2C17}
+.fld-hint{font-size:14px;color:var(--muted-l)}
+.fld-err{font-size:14px;font-weight:500;color:#9B2C17}
+.fld-err:empty{display:none}
+.hp{position:absolute!important;left:-9999px;width:1px;height:1px;overflow:hidden}
+.form-note{margin:0;font-size:14px;color:var(--muted-l);max-width:54ch}
+.form .btn{justify-self:start}
+.form .btn[aria-busy="true"]{opacity:.7;cursor:progress}
+@media (max-width:599px){.form .btn{width:100%}}
+.form-msg{margin:0;padding:14px 18px;border-left:3px solid var(--clay);background:rgba(255,255,255,.4);font-size:16px}
+.form-msg.err{border-color:#9B2C17}
+.form-msg[hidden]{display:none}
+.form-off{display:grid;gap:12px;margin:0 0 8px;padding:18px 20px;border-left:3px solid var(--clay);background:rgba(255,255,255,.4)}
+.form-off p{margin:0}
+.form-off .act{display:flex;flex-wrap:wrap;gap:0 24px}
 
 /* 404 */
 .nf{background:var(--dark);color:var(--on-dark);min-height:78svh;display:flex;align-items:center;padding:132px 0 88px}
@@ -307,13 +382,13 @@ figure{margin:0}
 .evc-foot{display:flex;justify-content:space-between;align-items:center;gap:0 16px;min-height:40px;font-size:15px;margin-top:auto}
 .evc-foot .tlink{margin-left:auto;white-space:nowrap}
 .evc-price{font-weight:600;color:var(--ink)}
-.evc .tlink{font-size:15px;min-height:40px}
+.evc .tlink{font-size:15px;font-weight:600;min-height:40px}
 .evc-skel{min-height:132px;background:linear-gradient(90deg,transparent,rgba(58,44,34,.06),transparent);background-size:200% 100%;animation:sk 1.4s infinite}
 @keyframes sk{to{background-position:-200% 0}}
 .ev-empty{padding:24px 0;margin:0;color:var(--muted-l);border-bottom:1px solid var(--line-l)}
-.ev-all{margin-top:24px;min-height:48px;padding:0 22px;border:1px solid var(--line-l);border-radius:3px;font-weight:500}
-.ev-all:hover{border-color:var(--ink)}
-.ev-all[hidden]{display:none}
+.tlink[hidden]{display:none}
+.menu-d a{color:var(--clay-text);border-bottom:1px solid currentColor}
+.find .act{display:flex;flex-wrap:wrap;align-items:center;gap:8px 28px}
 @media (min-width:600px){.evc{grid-template-columns:140px 1fr;gap:22px}}
 @media (min-width:900px){
   .ev-head{grid-template-columns:1fr auto;align-items:end}
@@ -394,7 +469,10 @@ figure{margin:0}
 .credit:hover .credit-brand{color:#fff}
 .credit:hover .credit-arr{transform:translate(2px,-2px);opacity:1}
 @media (max-width:599px){.ftr-bottom{flex-direction:column;align-items:flex-start;gap:4px}}
-@media (min-width:900px){.ftr-top{grid-template-columns:5fr 3fr 4fr;gap:48px}.ftr-top nav.ftr-col{margin-top:-11px}}
+.ftr-h{margin:0 0 6px;font-size:14px;color:rgba(243,236,225,.6)}
+.ftr-col .ftr-h+a{margin-top:-6px}
+@media (min-width:600px){.ftr-top{grid-template-columns:1fr 1fr;gap:40px 48px}.ftr-brand{grid-column:1/-1}}
+@media (min-width:1100px){.ftr-top{grid-template-columns:4fr 3fr 3fr 3fr}.ftr-brand{grid-column:auto}}
 
 /* Sticky directions bar (mobile-first; static, no animation) */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(33,28,25,.96);color:var(--on-dark);border-top:1px solid var(--line-d);
@@ -480,13 +558,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <li><a href="https://www.facebook.com/moychay.phuket/" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook" data-track="facebook" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-fb"/></svg></a></li>
         </ul>
       </div>
-      <nav class="ftr-col" aria-label="Footer">
-        <a href="/#prices">Tea ceremonies</a>
-        <a href="/#teas">Our teas</a>
-        <a href="/#events">Events</a>
+      <nav class="ftr-col" aria-labelledby="ftr-h1">
+        <p class="ftr-h" id="ftr-h1">Explore</p>
+        <a href="/ceremonies/">Tea ceremonies</a>
+        <a href="/tea/">Chinese tea</a>
+        <a href="/matcha/">Matcha</a>
+        <a href="/events/">Events</a>
+        <a href="/contact/">Contact</a>
+      </nav>
+      <nav class="ftr-col" aria-labelledby="ftr-h2">
+        <p class="ftr-h" id="ftr-h2">Partnerships</p>
+        <a href="/wholesale/">Wholesale &amp; partnerships</a>
         <a href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="footer">Online shop<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
       </nav>
       <div class="ftr-col ftr-contact">
+        <p class="ftr-h">Visit us</p>
         <p>2nd floor, Boat Avenue, Bangtao, Phuket</p>
         <p>Open daily 11:00–22:00</p>
         <a href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Get directions</a>
@@ -544,13 +630,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <li><a href="https://www.facebook.com/moychay.phuket/" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook" data-track="facebook" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-fb"/></svg></a></li>
         </ul>
       </div>
-      <nav class="ftr-col" aria-label="Футер">
-        <a href="/ru/#prices">Чайные церемонии</a>
-        <a href="/ru/#teas">Наш чай</a>
-        <a href="/ru/#events">Мероприятия</a>
+      <nav class="ftr-col" aria-labelledby="ftr-h1">
+        <p class="ftr-h" id="ftr-h1">Разделы</p>
+        <a href="/ru/ceremonies/">Чайные церемонии</a>
+        <a href="/ru/tea/">Китайский чай</a>
+        <a href="/ru/matcha/">Матча</a>
+        <a href="/ru/events/">Мероприятия</a>
+        <a href="/ru/contact/">Контакты</a>
+      </nav>
+      <nav class="ftr-col" aria-labelledby="ftr-h2">
+        <p class="ftr-h" id="ftr-h2">Сотрудничество</p>
+        <a href="/ru/wholesale/">Оптовые поставки</a>
         <a href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="footer">Интернет-магазин<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
       </nav>
       <div class="ftr-col ftr-contact">
+        <p class="ftr-h">Как нас найти</p>
         <p>2 этаж, Boat Avenue, Бангтао, Пхукет</p>
         <p>Ежедневно 11:00–22:00</p>
         <a href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Проложить маршрут</a>
@@ -572,7 +666,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
 (function () {
-  var I18N = {"lang": "en", "evEmpty": "New dates are announced every week on Instagram.", "evMore": "Details", "evFree": "Free", "evAll": "Show all events", "root": "/"};
+  var I18N = {"lang": "en", "evEmpty": "New dates are announced every week on Instagram.", "evMore": "Details", "evFree": "Free", "evAll": "Show all events", "form": {"required": "Please fill in this field.", "email": "Please enter a valid email, e.g. name@example.com.", "phone": "Please enter the number in international format, e.g. +66 81 234 5678.", "tg": "Telegram username: 5–32 Latin letters, digits or _.", "short": "Please write a little more.", "fix": "Please check the highlighted fields.", "sending": "Sending…", "ok": "Thank you! Your message has been delivered – we'll reply by email soon.", "fail": "Sorry, the message could not be sent. Please try again or message us on WhatsApp."}, "root": "/"};
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -596,7 +690,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   });
 
   /* Header + sticky bar */
-  var hdr = $('#hdr'), bar = $('#bar'), barLinks = $$('a', bar), hero = $('#home'), find = $('#find-us');
+  var hdr = $('#hdr'), bar = $('#bar'), barLinks = $$('a', bar), hero = $('#home'), find = $('#find-us') || $('.ftr');
   var ticking = false, btnsInView = [];
   // Hide the bar while another primary button is on screen (one main CTA at a time)
   if ('IntersectionObserver' in window) {
@@ -646,7 +740,61 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
   });
 
-  if (!$('#evRow')) return;                           // pages without events (404)
+  /* Contact & wholesale forms. Data goes only to our own endpoint (data-endpoint, set in build.py);
+     success is shown only after the server confirms delivery. Analytics gets the fact of sending, never the content. */
+  $$('form[data-form]').forEach(function (f) {
+    var kind = f.getAttribute('data-form'), endpoint = f.getAttribute('data-endpoint');
+    if (!endpoint) return;                            // not connected yet: the fieldset is disabled in the HTML
+    var T = I18N.form, btn = $('button[type=submit]', f), btnText = btn.textContent, msg = $('.form-msg', f);
+    var started = Date.now(), fields = $$('input[name]:not([type=hidden]):not([name=website]), textarea[name]', f);
+    function show(text, bad) { msg.textContent = text; msg.classList.toggle('err', !!bad); msg.hidden = !text; }
+    function setErr(inp, text) {
+      var e = document.getElementById(inp.id + '-err');
+      if (text) inp.setAttribute('aria-invalid', 'true'); else inp.removeAttribute('aria-invalid');
+      if (e) e.textContent = text || '';
+    }
+    function check(inp) {
+      var v = inp.value.trim(), n = inp.name, how = f.elements.contact_method.value, err = '';
+      if (inp.required && !v) err = T.required;
+      else if (n === 'email' && v && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) err = T.email;
+      else if (n === 'contact_value' && v && how === 'whatsapp' && !/^\+?[1-9]\d{7,14}$/.test(v.replace(/[\s().-]/g, ''))) err = T.phone;
+      else if (n === 'contact_value' && v && how === 'telegram' && !/^@?[A-Za-z][A-Za-z0-9_]{4,31}$/.test(v.replace(/^(https?:\/\/)?t\.me\//i, ''))) err = T.tg;
+      else if (n === 'message' && v && v.length < 5) err = T.short;
+      setErr(inp, err);
+      return !err;
+    }
+    fields.forEach(function (inp) {
+      inp.addEventListener('blur', function () { if (inp.value.trim() || inp.hasAttribute('aria-invalid')) check(inp); });
+      inp.addEventListener('input', function () { if (inp.hasAttribute('aria-invalid')) check(inp); });
+    });
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (btn.getAttribute('aria-busy') === 'true') return;
+      var bad = fields.filter(function (inp) { return !check(inp); });
+      if (bad.length) { show(T.fix, true); bad[0].focus(); return; }
+      var data = { inquiry_type: kind, page_language: I18N.lang, page_path: location.pathname,
+                   submitted_at: new Date().toISOString(), elapsed_ms: Date.now() - started,
+                   contact_method: f.elements.contact_method.value, website: f.elements.website.value };
+      fields.forEach(function (inp) { data[inp.name] = inp.value.trim(); });
+      btn.setAttribute('aria-busy', 'true'); btn.textContent = T.sending; show('', false);
+      fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+        .then(function (r) {
+          return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || !j.ok) throw j; });
+        })
+        .then(function () {
+          f.reset(); started = Date.now(); show(T.ok, false);
+          if (window.track) window.track(kind === 'wholesale' ? 'wholesale_form_submit' : 'contact_form_submit', kind + '_form');
+        })
+        .catch(function (j) {
+          var errs = (j && j.errors) || {};
+          fields.forEach(function (inp) { if (errs[inp.name]) setErr(inp, T[errs[inp.name]] || T.fix); });
+          show(errs && Object.keys(errs).length ? T.fix : T.fail, true);
+        })
+        .then(function () { btn.removeAttribute('aria-busy'); btn.textContent = btnText; });
+    });
+  });
+
+  if (!$('#evRow')) return;                           // pages without events (404, inner pages)
 
   /* Events from Google Sheets (CSV export — keeps every cell as typed text):
      columns → date | time | title_en | title_ru | text_en | text_ru | price_en | price_ru | link | show | image (optional)
@@ -716,11 +864,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
   }
   function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt) e.textContent = txt; return e; }
-  var allBtn = $('#evAll'), FIRST = 6;
-  allBtn.addEventListener('click', function () {
-    $$('.evc[hidden]', row).forEach(function (c) { c.hidden = false; }); allBtn.hidden = true;
-  });
-  function renderEmpty() { row.innerHTML = ''; row.appendChild(el('p', 'ev-empty', I18N.evEmpty)); allBtn.hidden = true; }
+  // Home shows the nearest few with a link to /events/; the events page shows the whole schedule
+  var allLink = $('#evAll'), LIMIT = +row.getAttribute('data-limit') || 6;
+  function renderEmpty() { row.innerHTML = ''; row.appendChild(el('p', 'ev-empty', I18N.evEmpty)); if (allLink) allLink.hidden = true; }
   function render(rows) {
     row.innerHTML = '';
     if (!rows.length) return renderEmpty();
@@ -728,7 +874,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     rows.forEach(function (r, i) {
       var d = new Date(r.date + 'T12:00:00');
       var card = el('article', 'evc');
-      card.hidden = i >= FIRST;
       var ph = el('div', 'evc-ph');
       if (r.src) {
         var img = el('img');
@@ -755,7 +900,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       body.appendChild(foot);
       card.appendChild(ph); card.appendChild(body); row.appendChild(card);
     });
-    allBtn.hidden = rows.length <= FIRST;
+    if (allLink) allLink.hidden = false;
+    if (row.hasAttribute('data-ld')) eventsLD(rows);
+  }
+  // schema.org Event for each upcoming event (events page only; real rows from the sheet)
+  function eventsLD(rows) {
+    var place = { '@type': 'Place', name: 'Moychay Phuket', address: { '@type': 'PostalAddress',
+      streetAddress: 'Boat Avenue, 2nd floor', addressLocality: 'Bang Tao, Choeng Thale', addressRegion: 'Phuket',
+      postalCode: '83110', addressCountry: 'TH' } };
+    var list = rows.map(function (r) {
+      var t = (r.time.match(/(\d{1,2})[:.](\d{2})/) || []);
+      var e = { '@type': 'Event', name: r.title, startDate: r.date + (t[0] ? 'T' + pad(+t[1]) + ':' + t[2] + ':00+07:00' : ''),
+        eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+        location: place, organizer: { '@type': 'Organization', name: 'Moychay Phuket', url: 'https://teaphuket.com/' } };
+      if (r.text) e.description = r.text;
+      if (r.src) e.image = new URL(r.src, location.href).href;
+      if (/^https?:\/\//.test(r.link)) e.url = r.link;
+      var p = nicePrice(r.price || '');
+      if (/^\d+฿$/.test(p)) e.offers = { '@type': 'Offer', price: parseInt(p, 10), priceCurrency: 'THB', availability: 'https://schema.org/InStock', url: e.url || location.href };
+      else if (p === I18N.evFree) e.isAccessibleForFree = true;
+      return e;
+    });
+    var s = document.getElementById('ev-ld') || document.head.appendChild(el('script'));
+    s.id = 'ev-ld'; s.type = 'application/ld+json'; s.textContent = JSON.stringify({ '@context': 'https://schema.org', '@graph': list });
   }
   function loadEvents() {
     var id = window.SITE && window.SITE.EVENTS_SHEET;
@@ -781,7 +948,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         };
       }).filter(function (r) {
         return r.date && r.title && r.date >= today && ['no', 'нет', '0', 'false', 'hide'].indexOf(r.show) < 0;
-      }).sort(function (a, b) { return (a.date + a.time).localeCompare(b.date + b.time); }).slice(0, 12);
+      }).sort(function (a, b) { return (a.date + a.time).localeCompare(b.date + b.time); }).slice(0, LIMIT);
       render(rows);
     }).catch(function () { clearTimeout(to); if (!finished) renderEmpty(); finished = true; });
   }
