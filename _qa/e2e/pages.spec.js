@@ -73,7 +73,7 @@ async function enableForm(page, path) {
 for (const f of FORMS) {
   test(`${f.path} form: not connected yet → disabled, honest note, messenger link`, async ({ page }) => {
     const posts = [];
-    page.on('request', r => { if (r.method() === 'POST') posts.push(r.url()); });
+    page.on('request', r => { if (r.method() === 'POST' && !/\/cdn-cgi\//.test(r.url())) posts.push(r.url()); });   // Cloudflare's own RUM beacon is not the form
     await page.goto(f.path);
     const form = page.locator(`#${f.kind}-form`);
     await expect(form.locator('[name=name]')).toBeDisabled();
