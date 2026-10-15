@@ -8,7 +8,7 @@
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-WJQBWNL9');</script>
+})(window,document,'script','gtmDataLayer','GTM-WJQBWNL9');</script>
 <!-- End Google Tag Manager -->
 <meta name="google-site-verification" content="deblMaE7xgGLp7axGkXzbo1mVhtVkWtaBX_rFTN8G8g">
 <title>Чайная на Пхукете, чайные церемонии, матча – Moychay Phuket</title>
@@ -149,7 +149,9 @@ window.SITE = {
       dl.link_url = params.link_url; dl.link_location = params.link_location; dl.page_language = params.page_language;
     }
     try {
-      (window.dataLayer = window.dataLayer || []).push(dl);
+      // GTM has its own data layer: gtag() (GA4) also writes to window.dataLayer, and GTM would
+      // otherwise treat that gtag event as a second click and fire Google Ads conversion tags twice.
+      (window.gtmDataLayer = window.gtmDataLayer || []).push(dl);
       if (window.gtag) {
         gtag('event', name, params);
         var conv = name === 'directions' ? S.ADS_CONV.directions

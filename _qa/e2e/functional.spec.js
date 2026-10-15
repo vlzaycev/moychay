@@ -98,7 +98,7 @@ for (const p of PAGES) {
       await cta.focus();
       await expect(cta).toBeFocused();
       await page.keyboard.press('Enter');
-      const ev = await page.evaluate(() => (window.dataLayer || []).filter(e => e.event === 'online_shop_click'));
+      const ev = await page.evaluate(() => (window.gtmDataLayer || []).filter(e => e.event === 'online_shop_click'));
       expect(ev).toHaveLength(1);
       expect(ev[0]).toMatchObject({ link_url: 'https://phuket.moychay.asia/', link_location: 'shop_section', page_language: p.lang });
     });
@@ -141,13 +141,13 @@ for (const p of PAGES) {
       expect(h).toBeLessThan(page.viewportSize().width < 600 ? 1100 : 700);
     });
 
-    test('tracked clicks are pushed to the GTM dataLayer', async ({ page }) => {
+    test('tracked clicks are pushed to the GTM data layer (gtmDataLayer)', async ({ page }) => {
       await page.route(/googletagmanager\.com/, r => r.abort()); // don't hit real GTM from tests
       await page.goto(p.path);
       await page.evaluate(() => document.querySelectorAll('a[data-track]').forEach(a => a.addEventListener('click', e => e.preventDefault())));
       await page.locator('#home a[data-track="directions"]').click();
       await page.locator('#home a.tlink[data-place="hero"]').click();
-      const events = await page.evaluate(() => (window.dataLayer || []).filter(e => e.click_place).map(e => e.event + '@' + e.click_place));
+      const events = await page.evaluate(() => (window.gtmDataLayer || []).filter(e => e.click_place).map(e => e.event + '@' + e.click_place));
       expect(events).toEqual(['directions@hero', (p.lang === 'en' ? 'whatsapp' : 'telegram') + '@hero']);
     });
 
@@ -200,6 +200,17 @@ for (const p of PAGES) {
         await expect(page.locator('#bar .bar-msg')).toHaveAttribute('href', 'https://t.me/moychay_phuket');
         expect(pairs.filter(x => x[0] === 'telegram_club').map(x => x[2]).sort()).toEqual(['events', 'footer']);
       }
+    });
+
+    test('each tracked click reaches GTM exactly once (separate gtmDataLayer, no gtag echo)', async ({ page }) => {
+      await page.evaluate(() => document.querySelectorAll('a[data-track]').forEach(a => a.addEventListener('click', e => e.preventDefault())));
+      await page.locator('#home a[data-track="directions"]').click();
+      const r = await page.evaluate(() => ({
+        gtm: (window.gtmDataLayer || []).filter(e => e.event === 'directions').length,
+        shared: (window.dataLayer || []).filter(e => e && e.event === 'directions').length }));
+      expect(r).toEqual({ gtm: 1, shared: 0 });
+      const html = await page.content();
+      expect(html).toContain("'script','gtmDataLayer','GTM-");
     });
 
     test('header becomes solid after scrolling', async ({ page }) => {
