@@ -94,8 +94,10 @@ test('404 page and web manifest are valid', () => {
   const nf = read('404.html');
   assert.match(nf, /<meta name="robots" content="noindex">/);
   for (const m of nf.matchAll(/(?:src|href)="(\/[^"]*)"/g)) {
-    const f = path.join(ROOT, m[1]);
-    assert.ok(m[1] === '/' || m[1] === '/ru/' || fs.existsSync(f), `404.html references missing ${m[1]}`);
+    const [file, hash] = m[1].split('#');
+    const f = path.join(ROOT, file, file.endsWith('/') ? 'index.html' : '');
+    assert.ok(fs.existsSync(f), `404.html references missing ${m[1]}`);
+    if (hash) assert.match(read(path.relative(ROOT, f)), new RegExp(`id="${hash}"`), `404.html anchor ${m[1]} not found`);
   }
   const man = JSON.parse(read('site.webmanifest'));
   for (const i of man.icons) assert.ok(fs.existsSync(path.join(ROOT, i.src)), i.src);

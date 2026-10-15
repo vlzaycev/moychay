@@ -327,6 +327,14 @@ RU = dict(
 
 
 def build(data, out):
+    html = render(data, out)
+    path = os.path.join(ROOT, out)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    open(path, "w", encoding="utf-8").write(html)
+    print("built", out)
+
+
+def render(data, out="404.html"):
     html = open(os.path.join(HERE, "template.html"), encoding="utf-8").read()
     values = {**CONFIG, **data, "year": str(datetime.date.today().year)}
     values["font_faces"], values["font_preload"] = fonts(data["font_families"], data["font_preload_files"], data["root"])
@@ -337,10 +345,7 @@ def build(data, out):
     left = [p for p in html.split("{{")[1:] if "}}" in p]
     if left:
         raise SystemExit(f"Unfilled placeholders in {out}: " + ", ".join(p.split("}}")[0] for p in left))
-    path = os.path.join(ROOT, out)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    open(path, "w", encoding="utf-8").write(html)
-    print("built", out)
+    return html
 
 
 def sitemap():
@@ -356,6 +361,65 @@ def sitemap():
     print("built sitemap.xml")
 
 
+NF = dict(
+    en=dict(title="Page not found – Moychay Phuket", h1="This page has gone cold.",
+            text="Looks like this page doesn't exist. There's always fresh tea waiting back at the tea house.",
+            btn="Back to home", home="/"),
+    ru=dict(title="Страница не найдена – Moychay Phuket", h1="Кажется, этот чай уже выпили.",
+            text="Страница не найдена. Но хороший чай по-прежнему ждёт вас в нашей чайной.",
+            btn="На главную", home="/ru/"),
+)
+
+
+def page_404():
+    """One 404.html for every missing URL (GitHub Pages serves it with status 404, also under /ru/).
+    It holds the EN page and a RU copy in <template>; on /ru/… URLs the RU copy is swapped in
+    before the page scripts run. No redirect, so the URL and the 404 status stay as they are."""
+    region = {}
+    for lang, data in (("en", EN), ("ru", RU)):
+        html = render({**data, "root": "/", "root_href": "/"})   # absolute paths: works at any depth
+        t = NF[lang]
+        a, b = html.index('<header class="hdr"'), html.index("</footer>") + len("</footer>")
+        part = html[a:b]
+        m1, m2 = part.index("<main>"), part.index("</main>") + len("</main>")
+        part = (part[:m1] + '<main>\n<section class="nf" id="home">\n  <div class="wrap">\n'
+                f'    <p class="nf-code" aria-hidden="true">404</p>\n    <h1>{t["h1"]}</h1>\n'
+                f'    <p class="lead">{t["text"]}</p>\n'
+                f'    <a class="btn" href="{t["home"]}">{t["btn"]}</a>\n  </div>\n</section>\n</main>' + part[m2:])
+        part = part.replace('href="#home"', f'href="{t["home"]}"')
+        for sec in ("prices", "teas", "events", "find-us"):
+            part = part.replace(f'href="#{sec}"', f'href="{t["home"]}#{sec}"')
+        region[lang] = (html, part)
+    html, en = region["en"]
+    ru = region["ru"][1]
+    head, rest = html.split("</head>", 1)
+    import re
+    head = re.sub(r"<title>.*?</title>", f"<title>{NF['en']['title']}</title>", head, flags=re.S)
+    head = re.sub(r'<meta name="description"[^>]*>', '<meta name="robots" content="noindex">', head)
+    head = re.sub(r'\s*<link rel="(canonical|alternate)"[^>]*>', "", head)
+    head = re.sub(r'\s*<meta (property|name)="(og|twitter):[^"]*"[^>]*>', "", head)
+    head = re.sub(r'\s*<script type="application/ld\+json">.*?</script>', "", head, flags=re.S)
+    a, b = rest.index('<header class="hdr"'), rest.index("</footer>") + len("</footer>")
+    swap = ("<script>(function(){if(!/^\\/ru(\\/|$)/.test(location.pathname))return;"
+            "var t=document.getElementById('nf-ru'),p=document.getElementById('nf-page');"
+            "p.replaceChildren(t.content.cloneNode(true));document.documentElement.lang='ru';"
+            f"document.title={json.dumps(NF['ru']['title'], ensure_ascii=False)};}})();</script>")
+    rest = (rest[:a] + '<div id="nf-page">\n' + en + '\n</div>\n<template id="nf-ru">\n' + ru
+            + "\n</template>\n" + swap + rest[b:])
+    # no sticky bar on the 404
+    s1 = rest.find("<!-- Sticky bar")
+    if s1 > -1:
+        s2 = rest.index("</div>\n</div>", s1) + len("</div>\n</div>")
+        rest = rest[:s1] + rest[s2:]
+    out = head + "</head>" + rest
+    left = [x for x in out.split("{{")[1:] if "}}" in x]
+    if left:
+        raise SystemExit("Unfilled placeholders in 404.html")
+    open(os.path.join(ROOT, "404.html"), "w", encoding="utf-8").write(out)
+    print("built 404.html")
+
+
 build(EN, "index.html")
 build(RU, "ru/index.html")
+page_404()
 sitemap()
