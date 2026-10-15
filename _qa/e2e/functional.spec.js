@@ -67,7 +67,40 @@ for (const p of PAGES) {
       const items = page.locator('#teas .tea-list li');
       await expect(items).toHaveCount(10);
       for (const t of await items.locator('h3').allTextContents()) expect(t).not.toMatch(/^\s*\d/);
-      await expect(page.locator('#teas a[data-track="catalog"]')).toHaveAttribute('href', 'https://phuket.moychay.asia/');
+    });
+
+    test('online shop: own section after Our teas, links in header, section and footer', async ({ page }) => {
+      const order = await page.evaluate(() => [...document.querySelectorAll('main > section')].map(s => s.id));
+      expect(order.indexOf('delivery')).toBe(order.indexOf('teas') + 1);
+      expect(order.indexOf('events')).toBe(order.indexOf('delivery') + 1);
+      const sec = page.locator('#delivery');
+      await expect(sec.locator('h2')).toHaveText(p.lang === 'en' ? 'Your favorite tea, delivered' : 'Любимый чай\u00a0– с доставкой');
+      await expect(sec).toContainText(p.lang === 'en' ? '฿2,000' : '2\u00a0000\u00a0฿');
+      await expect(sec.locator('a.btn')).toHaveCount(1);
+      const links = page.locator('a[data-track="online_shop_click"]');
+      const places = await links.evaluateAll(as => as.map(a => a.dataset.place).sort());
+      expect(places).toEqual(['footer', 'header', 'header', 'shop_section']);
+      for (const a of await links.all()) {
+        await expect(a).toHaveAttribute('href', 'https://phuket.moychay.asia/');
+        await expect(a).toHaveAttribute('target', '_blank');
+        await expect(a).toHaveAttribute('rel', /noopener/);
+      }
+      // exactly one header shop link is visible at any width
+      expect(await page.locator('#hdr a[data-track="online_shop_click"]:visible').count()).toBe(1);
+      await expect(page.locator('h1')).toHaveCount(1);
+    });
+
+    test('online shop CTA is reachable by keyboard and sends online_shop_click', async ({ page }) => {
+      await page.route(/googletagmanager\.com/, r => r.abort());
+      await page.goto(p.path);
+      await page.evaluate(() => document.querySelectorAll('a[data-track]').forEach(a => a.addEventListener('click', e => e.preventDefault())));
+      const cta = page.locator('#delivery a.btn');
+      await cta.focus();
+      await expect(cta).toBeFocused();
+      await page.keyboard.press('Enter');
+      const ev = await page.evaluate(() => (window.dataLayer || []).filter(e => e.event === 'online_shop_click'));
+      expect(ev).toHaveLength(1);
+      expect(ev[0]).toMatchObject({ link_url: 'https://phuket.moychay.asia/', link_location: 'shop_section', page_language: p.lang });
     });
 
     test('language switch navigates to the other version', async ({ page }) => {

@@ -92,7 +92,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <!-- ============================================================
      ANALYTICS — fill in the IDs below; empty = not loaded.
-     Every click on "Get directions", WhatsApp, Telegram, catalog
+     Every click on "Get directions", WhatsApp, Telegram, online shop
      and Instagram is sent as an event to all connected systems.
      ============================================================ -->
 <script>
@@ -136,11 +136,17 @@ window.SITE = {
     document,'script','https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', S.PIXEL_ID); fbq('track', 'PageView');
   }
-  // One call → all systems. Event names: directions, whatsapp, telegram, catalog, instagram, facebook
-  window.track = function (name, place) {
+  // One call → all systems. Event names: directions, whatsapp, telegram, online_shop_click, instagram, facebook
+  window.track = function (name, place, url) {
     var params = { place: place || '', lang: document.documentElement.lang };
+    var dl = { event: name, click_place: params.place, page_lang: params.lang };
+    // Online shop clicks: link_url / link_location (shop_section, header, footer) / page_language
+    if (name === 'online_shop_click') {
+      params = { link_url: url || '', link_location: params.place, page_language: params.lang };
+      dl.link_url = params.link_url; dl.link_location = params.link_location; dl.page_language = params.page_language;
+    }
     try {
-      (window.dataLayer = window.dataLayer || []).push({ event: name, click_place: params.place, page_lang: params.lang });
+      (window.dataLayer = window.dataLayer || []).push(dl);
       if (window.gtag) {
         gtag('event', name, params);
         var conv = name === 'directions' ? S.ADS_CONV.directions
@@ -231,6 +237,11 @@ figure{margin:0}
 .lang-thumb{position:absolute;top:3px;bottom:3px;left:3px;width:46px;border-radius:999px;background:var(--on-dark);transition:transform .38s cubic-bezier(.3,1.35,.5,1)}
 .lang[data-cur="ru"] .lang-thumb{transform:translateX(46px)}
 .lang a:not([aria-current]):hover{opacity:1}
+.nav-shop{display:inline-flex;align-items:center;gap:6px;padding-left:28px;border-left:1px solid rgba(243,236,225,.28)}
+.nav-shop .ico{width:14px;height:14px}
+.hdr-shop{margin-left:auto;white-space:nowrap;margin-right:-8px;padding:12px 4px;font-size:15px;opacity:.88}
+.hdr-shop:hover{opacity:1}
+@media (min-width:1000px){.hdr-shop{display:none}}
 @media (min-width:1000px){.nav{display:flex}.hdr .wrap{height:76px}.hdr-logo img{height:50px}}
 
 /* Hero */
@@ -303,14 +314,26 @@ figure{margin:0}
 .tea-list li{padding:20px 0;border-top:1px solid var(--line-d)}
 .tea-list h3{font-size:22px;color:#fff;margin-bottom:6px}
 .tea-list p{color:rgba(243,236,225,.8);font-size:16px;line-height:1.55}
-.teas-foot{display:grid;gap:14px;margin-top:36px;padding-top:28px;border-top:1px solid var(--line-d)}
-.teas-foot p{margin:0;color:rgba(243,236,225,.82)}
-.teas-foot .links{display:flex;flex-wrap:wrap;gap:4px 28px}
 @media (min-width:900px){
   .teas-top{grid-template-columns:5fr 7fr;align-items:end;gap:64px}
   .teas-ph{margin:0 calc(var(--bleed) * -1) 0 0;aspect-ratio:16/9}
   .tea-list{grid-template-columns:1fr 1fr}
-  .teas-foot{grid-template-columns:1fr auto;align-items:center}
+  }
+
+/* Online shop */
+.shop{background:var(--sand);padding:clamp(72px,10vw,128px) 0}
+.shop .wrap{display:grid;gap:36px}
+.shop-ph{aspect-ratio:4/3;margin:0 calc(var(--gut) * -1)}
+.shop-ph img{object-position:50% 72%}
+.shop-copy h2{max-width:12ch}
+.shop-copy .lead{color:var(--muted-l);max-width:42ch}
+.shop-act{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin-top:32px}
+.shop-act .btn .ico{width:16px;height:16px;margin-left:2px}
+@media (max-width:599px){.shop-act .btn{width:100%}}
+@media (min-width:900px){
+  .shop .wrap{grid-template-columns:5fr 7fr;gap:72px;align-items:center}
+  .shop-copy{grid-column:1;grid-row:1}
+  .shop-ph{grid-column:2;grid-row:1;margin:0 calc(var(--bleed) * -1) 0 0;aspect-ratio:auto;height:clamp(480px,48vw,640px)}
 }
 
 /* Events */
@@ -446,8 +469,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="wrap">
     <a class="hdr-logo" href="#home" aria-label="Moychay Phuket"><img src="../img/logo.png" width="800" height="494" alt="Moychay Phuket"></a>
     <nav class="nav" aria-label="Разделы">
-      <a href="#prices">Церемонии</a><a href="#teas">Наш чай</a><a href="#events">Мероприятия</a><a href="#find-us">Контакты</a>
+      <a href="#prices">Церемонии</a><a href="#teas">Наш чай</a><a href="#events">Мероприятия</a><a href="#find-us">Контакты</a><a class="nav-shop" href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="header">Магазин<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
     </nav>
+    <a class="hdr-shop" href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="header">Магазин</a>
     <div class="lang" data-cur="ru" role="group" aria-label="Язык">
       <span class="lang-thumb" aria-hidden="true"></span>
       <a href="../" hreflang="en" lang="en" >EN</a>
@@ -557,10 +581,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <li><h3>Лао ча (выдержанный чай)</h3><p>Годы бережного хранения убирают горечь и дают мягкий, многослойный вкус.</p></li>
         <li><h3>Травяной чай</h3><p>Без кофеина: травы, цветы и фрукты – успокаивают или бодрят, на ваш выбор.</p></li>
     </ul>
-    <div class="teas-foot" id="delivery">
-      <p>Доставка по всему Таиланду, бесплатно от 2000 ฿. Есть платная международная доставка.</p>
-      <div class="links">
-        <a class="tlink" href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="catalog" data-place="teas">Весь ассортимент в интернет-магазине<svg class="ico"><use href="#i-arrow"/></svg></a>
+  </div>
+</section>
+
+<!-- Online shop: delivery across Thailand and abroad -->
+<section class="shop" id="delivery" aria-labelledby="shop-h">
+  <div class="wrap">
+    <figure class="ph shop-ph"><img src="../img/interior/4_shop-1000.webp" srcset="../img/interior/4_shop-700.webp 700w, ../img/interior/4_shop-1000.webp 1000w, ../img/interior/4_shop-1400.webp 1400w" sizes="(min-width:900px) 56vw, 100vw" loading="lazy" decoding="async" width="834" height="1280" alt="Круглый чайный стол с посудой и книгами"></figure>
+    <div class="shop-copy rv">
+      <h2 id="shop-h">Любимый чай – с доставкой</h2>
+      <p class="lead">Выбирайте китайский чай, посуду и аксессуары в нашем интернет-магазине. Бесплатная доставка по Таиланду при заказе от 2 000 ฿. Отправляем заказы по всему миру.</p>
+      <div class="shop-act">
+        <a class="btn" href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="shop_section">Перейти в магазин<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
         <a class="tlink" href="https://t.me/moychay_phuket" target="_blank" rel="noopener" data-track="telegram" data-place="delivery"><svg class="bi" aria-hidden="true"><use href="#i-tg"/></svg>Заказать в Telegram</a>
       </div>
     </div>
@@ -636,7 +668,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </li>
       <li>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-5">Доставляете за пределы Пхукета?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p" id="faq-5"><div><p>Да, по всему Таиланду – бесплатно от 2000 ฿. Есть и платная международная доставка.</p></div></div>
+        <div class="acc-p" id="faq-5"><div><p>Да – по всему Таиланду и за рубеж. Заказать можно в интернет-магазине или написать нам.</p></div></div>
       </li>
       <li>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-6">Есть что-то кроме чая?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
@@ -659,7 +691,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <li><a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram" data-track="instagram" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-ig"/></svg></a></li>
         <li><a href="https://www.facebook.com/moychay.phuket/" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook" data-track="facebook" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-fb"/></svg></a></li>
       </ul>
-      <a class="tlink" href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="catalog" data-place="footer">Интернет-магазин чая<svg class="ico"><use href="#i-arrow"/></svg></a>
+      <a class="tlink" href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="footer">Интернет-магазин чая<svg class="ico"><use href="#i-arrow"/></svg></a>
     </div>
     <div class="meta">
       <p>2 этаж, Boat Avenue, Бангтао, Пхукет<br>Ежедневно 11:00–22:00</p>
@@ -702,7 +734,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   /* Click tracking → analytics */
   document.addEventListener('click', function (e) {
     var a = e.target.closest('[data-track]');
-    if (a && window.track) window.track(a.getAttribute('data-track'), a.getAttribute('data-place'));
+    if (a && window.track) window.track(a.getAttribute('data-track'), a.getAttribute('data-place'), a.href);
   });
 
   /* Header + sticky bar */
