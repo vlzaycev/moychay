@@ -27,7 +27,8 @@ CONFIG = {
     "cfg_ads_directions": "",   # conversion label for "Get directions"
     "cfg_ads_message": "",      # conversion label for WhatsApp / Telegram
     "cfg_ym": "",               # Yandex Metrika counter ID
-    "cfg_pixel": "",            # Meta Pixel ID
+    "cfg_pixel": "2041380899914040",  # Meta Pixel ID (loaded in window.SITE below; skipped for automated browsers)
+    "cfg_fb_verify": "2xbz3ulgnxnpw9oo6wmnhndoz5n8xl",  # Meta Business domain verification
     "cfg_sheet": "1zcA3xGzhUeQvWD2pFi1obgOf8mC2gi32D0l_q4tw_es",  # events Google Sheet
     # Contact & wholesale forms: URL of the server handler (_server/contact-worker), e.g. "/api/contact".
     # Empty = forms are shown disabled with a note to use WhatsApp/Telegram (nothing is sent anywhere).
@@ -458,6 +459,9 @@ def render(data, out="404.html"):
     values = {**CONFIG, **data, "year": str(datetime.date.today().year), "og_image": f"{SITE_URL}/img/og.jpg"}
     values["font_faces"], values["font_preload"] = fonts(data["font_families"], data["font_preload_files"], data["root"])
     values["js_i18n"] = json.dumps({**data["js"], "root": data["root"]}, ensure_ascii=False)
+    px = CONFIG["cfg_pixel"]
+    values["pixel_noscript"] = (f'<noscript><img height="1" width="1" style="display:none" alt="" '
+                                f'src="https://www.facebook.com/tr?id={px}&amp;ev=PageView&amp;noscript=1"></noscript>' if px else "")
     html = html.replace("{{main}}", values.pop("main", ""))
     for _ in range(2):   # second pass: placeholders inside inserted values ({{lp}}, {{root}}…)
         for k, v in values.items():

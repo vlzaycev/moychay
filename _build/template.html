@@ -11,6 +11,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','gtmDataLayer','{{cfg_gtm}}');</script>
 <!-- End Google Tag Manager -->
 <meta name="google-site-verification" content="{{cfg_gsc}}">
+<meta name="facebook-domain-verification" content="{{cfg_fb_verify}}">
 <title>{{meta_title}}</title>
 <meta name="description" content="{{meta_desc}}">
 <link rel="canonical" href="{{canonical}}">
@@ -114,6 +115,7 @@ window.SITE = {
       if (window.fbq) {
         if (name === 'directions') fbq('track', 'FindLocation');
         else if (name === 'whatsapp' || name === 'telegram') fbq('track', 'Contact');
+        else if (/_form_submit$/.test(name)) fbq('track', 'Lead');
         else fbq('trackCustom', name, params);
       }
     } catch (e) {}
@@ -512,6 +514,7 @@ figure{margin:0}
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{cfg_gtm}}"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
+{{pixel_noscript}}
 <script>document.documentElement.classList.add('js')</script>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">

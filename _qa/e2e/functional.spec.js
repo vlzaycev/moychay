@@ -182,7 +182,7 @@ for (const p of PAGES) {
 
     test('automated browsers (tests, CI) never hit GA4/GTM, so they do not count as visitors', async ({ page }) => {
       const hits = [];
-      page.on('request', r => { if (/googletagmanager\.com|google-analytics\.com|analytics\.google\.com/.test(r.url())) hits.push(r.url()); });
+      page.on('request', r => { if (/googletagmanager\.com|google-analytics\.com|analytics\.google\.com|connect\.facebook\.net|facebook\.com\/tr/.test(r.url())) hits.push(r.url()); });
       await page.goto(p.path, { waitUntil: 'networkidle' });
       await page.locator('#home a[data-track="directions"]').evaluate(a => a.addEventListener('click', e => e.preventDefault()));
       await page.locator('#home a[data-track="directions"]').click();

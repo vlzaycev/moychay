@@ -110,6 +110,9 @@ test('Google Tag Manager and Search Console verification are on every page', () 
     assert.ok(head.indexOf('Google Tag Manager') < head.indexOf('<title>'), `${f}: GTM must be high in <head>`);
     assert.match(html, /<body>\n<!-- Google Tag Manager \(noscript\) -->/, `${f}: GTM noscript right after <body>`);
     assert.match(head, /<meta name="google-site-verification" content="[\w-]{20,}">/, `${f}: GSC tag`);
+    assert.match(head, /<meta name="facebook-domain-verification" content="2xbz3ulgnxnpw9oo6wmnhndoz5n8xl">/, `${f}: Meta domain verification`);
+    assert.match(head, /PIXEL_ID:\s+"2041380899914040"/, `${f}: Meta Pixel ID`);
+    assert.match(html, /<noscript><img [^>]*facebook\.com\/tr\?id=2041380899914040&amp;ev=PageView&amp;noscript=1"><\/noscript>/, `${f}: Pixel noscript`);
   }
 });
 
