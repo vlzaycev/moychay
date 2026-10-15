@@ -30,7 +30,8 @@ CONFIG = {
 
 MAPS = "https://maps.app.goo.gl/uuZkb3YwtNMGQhy18"
 WA = "https://wa.me/66817959110"
-TG = "https://t.me/moychay_phuket"
+TG = "https://t.me/moychay_phuket"          # chat: write to the tea house (bookings, orders)
+TG_CLUB = "https://t.me/moychayphuket"     # channel «За чашкой чая»: tea club announcements
 
 
 FONTS = json.load(open(os.path.join(HERE, "fonts.json"), encoding="utf-8"))
@@ -221,7 +222,7 @@ RU = dict(
     nav_label="Разделы", nav_1="Церемонии", nav_2="Наш чай", nav_3="Мероприятия", nav_4="Контакты", nav_shop="Магазин",
     msg_url=TG, msg_book_url=TG, msg_order_url=TG,
     msg_event="telegram", msg_icon="i-tg",
-    sticky_msg_url="https://t.me/moychayphuket", sticky_msg_label="Telegram",
+    sticky_msg_url=TG, sticky_msg_label="Telegram",
     hero_alt="Круглый чайный стол у арочного окна в Moychay Phuket",
     hero_sub="Чайная и чайные церемонии на Пхукете",
     addr_short="2 этаж, Boat Avenue, Бангтао",
@@ -290,7 +291,7 @@ RU = dict(
     ev_h2="Ближайшие мероприятия",
     ev_intro="Каждую неделю – дегустации, церемонии и вечера в чайной. Приходить может любой, опыт не нужен.",
     ev_cta="Анонсы в Instagram",
-    ev_extra=f'        <a class="tlink" href="{TG}" target="_blank" rel="noopener" data-track="telegram" data-place="events"><svg class="bi" aria-hidden="true"><use href="#i-tg"/></svg>Чайный клуб в Telegram</a>',
+    ev_extra=f'        <a class="tlink" href="{TG_CLUB}" target="_blank" rel="noopener" data-track="telegram_club" data-place="events"><svg class="bi" aria-hidden="true"><use href="#i-tg"/></svg>Чайный клуб в Telegram</a>',
     about_h2="На Boat Avenue с 2024 года",
     about_body=paras([
         "Moychay Phuket – часть Moychay, международного чайного сообщества с чайными домами по всему миру. Чай приходит от поставщиков, с которыми работают годами.",
@@ -315,7 +316,7 @@ RU = dict(
         ("Google Maps", MAPS, "directions", "i-gm"),
         ("Яндекс Карты", "https://yandex.ru/maps/-/CXQU482P", "directions", "i-ya"),
         ("WhatsApp", WA, "whatsapp", "i-wa"),
-        ("Чайный клуб в Telegram", TG, "telegram", "i-tg"),
+        ("Чайный клуб в Telegram", TG_CLUB, "telegram_club", "i-tg"),
         ("Instagram", "https://www.instagram.com/moychay.phuket", "instagram", "i-ig"),
         ("Facebook", "https://www.facebook.com/moychay.phuket/", "facebook", "i-fb"),
     ]),

@@ -190,6 +190,18 @@ for (const p of PAGES) {
       expect(await page.evaluate(() => /GTM-[A-Z0-9]+/.test(document.head.innerHTML))).toBe(true); // tag is still on the page for real visitors
     });
 
+    test('Telegram: "write to us" links go to the chat, tea club links go to the channel', async ({ page }) => {
+      const pairs = await page.locator('a[href^="https://t.me/"]').evaluateAll(as => as.map(a => [a.dataset.track, a.getAttribute('href'), a.dataset.place]));
+      for (const [track, href, place] of pairs) {
+        if (track === 'telegram') expect(href, place).toBe('https://t.me/moychay_phuket');
+        else expect([track, href], place).toEqual(['telegram_club', 'https://t.me/moychayphuket']);
+      }
+      if (p.lang === 'ru') {
+        await expect(page.locator('#bar .bar-msg')).toHaveAttribute('href', 'https://t.me/moychay_phuket');
+        expect(pairs.filter(x => x[0] === 'telegram_club').map(x => x[2]).sort()).toEqual(['events', 'footer']);
+      }
+    });
+
     test('header becomes solid after scrolling', async ({ page }) => {
       await page.evaluate(() => window.scrollTo(0, 400));
       await expect(page.locator('#hdr')).toHaveClass(/solid/);
