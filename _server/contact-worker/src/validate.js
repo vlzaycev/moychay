@@ -1,10 +1,22 @@
 // Server-side validation of contact / wholesale enquiries from teaphuket.com.
 // Pure functions, no I/O: used by the Worker and by the unit tests (_qa/unit/contact.test.mjs).
+// Nothing from the client is trusted: unknown fields, wrong types and oversize values are rejected, not trimmed.
 
-export const LIMITS = { name: 100, company: 150, email: 200, contact_value: 64, message: 3000, page_path: 200 };
-export const MIN_FILL_MS = 3000;   // a human needs more than 3 s to fill the form
+export const LIMITS = { name: 100, company: 150, email: 254, contact_value: 64, message: 3000, page_path: 100 };
+export const MIN_MESSAGE = 5;
+export const MAX_LINKS = 3;                 // more links than this in one message looks like spam
+export const MIN_FILL_MS = 3000;            // soft signal only: sent by the client, Turnstile is the real check
 
-const EMAIL = /^[^\s@<>()"',;:]+@[^\s@<>()"',;:]+\.[^\s@<>()"',;:]{2,}$/;
+const FIELDS = new Set(['inquiry_type', 'name', 'company', 'email', 'contact_method', 'contact_value', 'message',
+  'page_language', 'page_path', 'submitted_at', 'elapsed_ms', 'website', 'turnstile_token']);
+
+const EMAIL = /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*\.[A-Za-z]{2,63}$/;
+// control characters (line breaks are allowed only in the message), bidi overrides and zero-width characters:
+// they can hide or reorder text in the Telegram notification
+const CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/;
+const INVISIBLE = /[​-‏‪-‮⁠-⁤⁦-⁩﻿]/g;
+const URLS = /(https?:\/\/|www\.)\S+/gi;
+const HAS_URL = /(https?:\/\/|www\.)\S+/i;
 
 // WhatsApp: international format, digits only after an optional "+", 8–15 digits (E.164)
 export function normalizeWhatsapp(v) {
@@ -19,49 +31,64 @@ export function normalizeTelegram(v) {
   return /^[A-Za-z][A-Za-z0-9_]{4,31}$/.test(u) ? u : null;
 }
 
-function clean(v, max) {
-  // strip control characters (keep line breaks in messages), trim, cut to the limit
-  return String(v ?? '').replace(/[\u0000-\u0009\u000B\u000C\u000E-\u001F\u007F]/g, '').trim().slice(0, max);
-}
-
 /**
  * @returns {{ok:true, data:object} | {ok:false, spam?:true, errors:object}}
- * errors: { field: code } with codes matching the site's i18n keys: required, email, phone, tg, short
+ * errors: { field: code } – codes match the site's i18n keys: required, email, phone, tg, short, too_long, links, invalid
  */
 export function validate(body, now = Date.now()) {
-  if (!body || typeof body !== 'object') return { ok: false, errors: { form: 'invalid' } };
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { ok: false, errors: { form: 'invalid' } };
+  for (const k of Object.keys(body)) if (!FIELDS.has(k)) return { ok: false, errors: { form: 'invalid' } };
+  for (const [k, v] of Object.entries(body)) {
+    if (k === 'elapsed_ms') { if (typeof v !== 'number') return { ok: false, errors: { form: 'invalid' } }; }
+    else if (typeof v !== 'string') return { ok: false, errors: { form: 'invalid' } };
+  }
 
   // Bots: the hidden "website" field is filled, or the form was sent faster than a human could type
-  if (clean(body.website, 200) || (Number(body.elapsed_ms) || 0) < MIN_FILL_MS) return { ok: false, spam: true, errors: {} };
+  if (body.website || (body.elapsed_ms || 0) < MIN_FILL_MS) return { ok: false, spam: true, errors: {} };
 
-  const kind = body.inquiry_type === 'wholesale' ? 'wholesale' : 'contact';
-  const lang = body.page_language === 'ru' ? 'ru' : 'en';
-  const method = body.contact_method === 'telegram' ? 'telegram' : 'whatsapp';
-  const d = {
-    inquiry_type: kind,
-    name: clean(body.name, LIMITS.name),
-    company: kind === 'wholesale' ? clean(body.company, LIMITS.company) : '',
-    email: clean(body.email, LIMITS.email).toLowerCase(),
-    contact_method: method,
-    contact_value: clean(body.contact_value, LIMITS.contact_value),
-    message: clean(body.message, LIMITS.message),
-    page_language: lang,
-    page_path: /^\/[\w\-/]*$/.test(String(body.page_path || '')) ? String(body.page_path).slice(0, LIMITS.page_path) : '/',
-    submitted_at: new Date(now).toISOString(),   // server time is the source of truth
-  };
+  if (!['contact', 'wholesale'].includes(body.inquiry_type)) return { ok: false, errors: { form: 'invalid' } };
+  if (!['en', 'ru'].includes(body.page_language)) return { ok: false, errors: { form: 'invalid' } };
+  if (!['whatsapp', 'telegram'].includes(body.contact_method)) return { ok: false, errors: { form: 'invalid' } };
+  const kind = body.inquiry_type;
 
   const errors = {};
-  if (!d.name) errors.name = 'required';
-  if (kind === 'wholesale' && !d.company) errors.company = 'required';
-  if (!d.email) errors.email = 'required';
-  else if (!EMAIL.test(d.email)) errors.email = 'email';
-  if (d.contact_value) {
-    const v = method === 'whatsapp' ? normalizeWhatsapp(d.contact_value) : normalizeTelegram(d.contact_value);
-    if (!v) errors.contact_value = method === 'whatsapp' ? 'phone' : 'tg';
+  const text = (name, { multiline = false } = {}) => {
+    let v = String(body[name] ?? '').normalize('NFC').replace(INVISIBLE, '').replace(/\r\n?/g, '\n');
+    v = multiline ? v.replace(/\n{3,}/g, '\n\n').trim() : v.trim();
+    if (v.length > LIMITS[name]) errors[name] = 'too_long';
+    else if (CONTROL.test(v) || (!multiline && /\n/.test(v))) errors[name] = 'invalid';
+    return v;
+  };
+
+  const d = {
+    inquiry_type: kind,
+    name: text('name'),
+    company: kind === 'wholesale' ? text('company') : '',
+    email: text('email').toLowerCase(),
+    contact_method: body.contact_method,
+    contact_value: text('contact_value'),
+    message: text('message', { multiline: true }),
+    page_language: body.page_language,
+    page_path: String(body.page_path || ''),
+    submitted_at: new Date(now).toISOString(),   // server time is the source of truth
+  };
+  // the form lives only on /contact/ and /wholesale/ (+ /ru/): path, kind and language must agree
+  const m = d.page_path.match(/^\/(ru\/)?(contact|wholesale)\/$/);
+  if (!m || m[2] !== kind || (m[1] ? 'ru' : 'en') !== d.page_language) return { ok: false, errors: { form: 'invalid' } };
+
+  if (!errors.name && !d.name) errors.name = 'required';
+  if (!errors.name && HAS_URL.test(d.name)) errors.name = 'invalid';
+  if (kind === 'wholesale' && !errors.company && !d.company) errors.company = 'required';
+  if (!errors.email && !d.email) errors.email = 'required';
+  else if (!errors.email && !EMAIL.test(d.email)) errors.email = 'email';
+  if (!errors.contact_value && d.contact_value) {
+    const v = d.contact_method === 'whatsapp' ? normalizeWhatsapp(d.contact_value) : normalizeTelegram(d.contact_value);
+    if (!v) errors.contact_value = d.contact_method === 'whatsapp' ? 'phone' : 'tg';
     else d.contact_value = v;
   }
-  if (!d.message) errors.message = 'required';
-  else if (d.message.length < 5) errors.message = 'short';
+  if (!errors.message && !d.message) errors.message = 'required';
+  else if (!errors.message && d.message.length < MIN_MESSAGE) errors.message = 'short';
+  else if (!errors.message && (d.message.match(URLS) || []).length > MAX_LINKS) errors.message = 'links';
 
   return Object.keys(errors).length ? { ok: false, errors } : { ok: true, data: d };
 }

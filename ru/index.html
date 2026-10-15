@@ -445,6 +445,7 @@ figure{margin:0}
 .fld-hint{font-size:14px;color:var(--muted-l)}
 .fld-err{font-size:14px;font-weight:500;color:#9B2C17}
 .fld-err:empty{display:none}
+.ts:empty{display:none}
 .hp{position:absolute!important;left:-9999px;width:1px;height:1px;overflow:hidden}
 .form-note{margin:0;font-size:14px;color:var(--muted-l);max-width:54ch}
 .form .btn{justify-self:start}
@@ -913,7 +914,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
 (function () {
-  var I18N = {"lang": "ru", "evEmpty": "Анонсы появляются каждую неделю – в Telegram-клубе и Instagram.", "evMore": "Подробнее", "evFree": "Бесплатно", "evAll": "Показать все мероприятия", "form": {"required": "Заполните это поле.", "email": "Укажите корректный email, например name@example.com.", "phone": "Укажите номер в международном формате, например +66 81 234 5678.", "tg": "Telegram username: 5–32 латинские буквы, цифры или _.", "short": "Напишите чуть подробнее.", "fix": "Проверьте отмеченные поля.", "sending": "Отправляем…", "ok": "Спасибо! Сообщение доставлено – скоро ответим на email.", "fail": "Не получилось отправить сообщение. Попробуйте ещё раз или напишите нам в Telegram."}, "root": "../"};
+  var I18N = {"lang": "ru", "evEmpty": "Анонсы появляются каждую неделю – в Telegram-клубе и Instagram.", "evMore": "Подробнее", "evFree": "Бесплатно", "evAll": "Показать все мероприятия", "form": {"required": "Заполните это поле.", "email": "Укажите корректный email, например name@example.com.", "phone": "Укажите номер в международном формате, например +66 81 234 5678.", "tg": "Telegram username: 5–32 латинские буквы, цифры или _.", "short": "Напишите чуть подробнее.", "fix": "Проверьте отмеченные поля.", "sending": "Отправляем…", "ok": "Спасибо! Сообщение доставлено – скоро ответим на email.", "fail": "Не получилось отправить сообщение. Попробуйте ещё раз или напишите нам в Telegram.", "too_long": "Слишком длинно – сократите, пожалуйста.", "links": "Пожалуйста, не больше 3 ссылок.", "invalid": "Проверьте это поле.", "captcha": "Дождитесь окончания проверки безопасности и попробуйте ещё раз.", "rate": "Слишком много сообщений за короткое время. Попробуйте позже или напишите нам в Telegram."}, "root": "../"};
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -989,9 +990,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   /* Contact & wholesale forms. Data goes only to our own endpoint (data-endpoint, set in build.py);
      success is shown only after the server confirms delivery. Analytics gets the fact of sending, never the content. */
+  // Cloudflare Turnstile (anti-bot check): loaded only on pages with a live form, rendered invisibly
+  // ("interaction-only"); a visible challenge appears only for suspicious visitors. The server verifies the token.
+  var tsQueue = [];
+  function withTurnstile(cb) {
+    if (window.turnstile) return cb(window.turnstile);
+    tsQueue.push(cb);
+    if (tsQueue.length > 1) return;
+    window.onTurnstileLoad = function () { tsQueue.splice(0).forEach(function (f) { f(window.turnstile); }); };
+    var s = document.createElement('script');
+    s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad';
+    s.async = true; s.defer = true;
+    document.head.appendChild(s);
+  }
+
   $$('form[data-form]').forEach(function (f) {
-    var kind = f.getAttribute('data-form'), endpoint = f.getAttribute('data-endpoint');
-    if (!endpoint) return;                            // not connected yet: the fieldset is disabled in the HTML
+    var kind = f.getAttribute('data-form'), endpoint = f.getAttribute('data-endpoint'), sitekey = f.getAttribute('data-sitekey');
+    if (!endpoint || !sitekey) return;                // not connected yet: the fieldset is disabled in the HTML
+    var widget = null;
+    withTurnstile(function (ts) {
+      widget = ts.render($('.ts', f), { sitekey: sitekey, action: kind, language: I18N.lang,
+                                        appearance: 'interaction-only', 'refresh-expired': 'auto' });
+    });
     var T = I18N.form, btn = $('button[type=submit]', f), btnText = btn.textContent, msg = $('.form-msg', f);
     var started = Date.now(), fields = $$('input[name]:not([type=hidden]):not([name=website]), textarea[name]', f);
     function show(text, bad) { msg.textContent = text; msg.classList.toggle('err', !!bad); msg.hidden = !text; }
@@ -1007,6 +1027,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       else if (n === 'contact_value' && v && how === 'whatsapp' && !/^\+?[1-9]\d{7,14}$/.test(v.replace(/[\s().-]/g, ''))) err = T.phone;
       else if (n === 'contact_value' && v && how === 'telegram' && !/^@?[A-Za-z][A-Za-z0-9_]{4,31}$/.test(v.replace(/^(https?:\/\/)?t\.me\//i, ''))) err = T.tg;
       else if (n === 'message' && v && v.length < 5) err = T.short;
+      else if (n === 'message' && (v.match(/(https?:\/\/|www\.)\S+/gi) || []).length > 3) err = T.links;
+      else if (v.length > (+inp.getAttribute('maxlength') || 3000)) err = T.too_long;
       setErr(inp, err);
       return !err;
     }
@@ -1019,7 +1041,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if (btn.getAttribute('aria-busy') === 'true') return;
       var bad = fields.filter(function (inp) { return !check(inp); });
       if (bad.length) { show(T.fix, true); bad[0].focus(); return; }
-      var data = { inquiry_type: kind, page_language: I18N.lang, page_path: location.pathname,
+      var token = widget !== null && window.turnstile ? window.turnstile.getResponse(widget) : '';
+      if (!token) { show(T.captcha, true); return; }
+      var data = { inquiry_type: kind, page_language: I18N.lang, page_path: location.pathname, turnstile_token: token,
                    submitted_at: new Date().toISOString(), elapsed_ms: Date.now() - started,
                    contact_method: f.elements.contact_method.value, website: f.elements.website.value };
       fields.forEach(function (inp) { data[inp.name] = inp.value.trim(); });
@@ -1033,11 +1057,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           if (window.track) window.track(kind === 'wholesale' ? 'wholesale_form_submit' : 'contact_form_submit', kind + '_form');
         })
         .catch(function (j) {
-          var errs = (j && j.errors) || {};
-          fields.forEach(function (inp) { if (errs[inp.name]) setErr(inp, T[errs[inp.name]] || T.fix); });
-          show(errs && Object.keys(errs).length ? T.fix : T.fail, true);
+          var errs = (j && j.errors) || {}, code = j && j.error;
+          fields.forEach(function (inp) { if (errs[inp.name]) setErr(inp, T[errs[inp.name]] || T.invalid); });
+          show(Object.keys(errs).length ? T.fix : code === 'rate_limited' ? T.rate : code === 'captcha' ? T.captcha : T.fail, true);
         })
-        .then(function () { btn.removeAttribute('aria-busy'); btn.textContent = btnText; });
+        .then(function () {
+          btn.removeAttribute('aria-busy'); btn.textContent = btnText;
+          if (widget !== null && window.turnstile) window.turnstile.reset(widget);   // tokens are single-use
+        });
     });
   });
 

@@ -1,23 +1,35 @@
 # Подключение форм к Telegram – что осталось сделать
 
-Код готов в `_server/contact-worker/` и покрыт тестами (`_qa/unit/contact.test.mjs`). Сейчас он **не развёрнут**, а формы на сайте отключены (`cfg_form_endpoint = ""` в `_build/build.py`).
+Код готов в `_server/contact-worker/` и покрыт тестами (`_qa/unit/contact.test.mjs` и `_qa/e2e/pages.spec.js`).
+
+Сейчас он **не развёрнут**, формы на сайте отключены. Они включатся, только когда в `_build/build.py` заданы оба значения: `cfg_form_endpoint` и `cfg_turnstile_sitekey`.
 
 ## Как это работает
 
 ```
-браузер (форма) ──POST JSON──▶ https://teaphuket.com/api/contact (Cloudflare Worker)
-                                   ├─ проверка Origin, размера, rate limit
-                                   ├─ антиспам: honeypot "website", время заполнения ≥ 3 с, (опц.) Turnstile
-                                   ├─ серверная валидация и нормализация полей
-                                   └─ Telegram Bot API sendMessage ──▶ ваш личный чат
-                                ◀── {ok:true} только если Telegram принял сообщение
+браузер: форма + невидимая проверка Cloudflare Turnstile
+   │ POST JSON (≤ 16 KB)
+   ▼
+https://teaphuket.com/api/contact (Cloudflare Worker)
+   ├─ все секреты и привязки на месте? иначе 503, ничего не отправляется (fail-closed)
+   ├─ Origin, метод, Content-Type
+   ├─ rate limit Cloudflare: 5/мин на IP, 30/мин на весь сайт; 20 в сутки на IP (KV)
+   ├─ размер тела ≤ 16 KB, JSON
+   ├─ строгая валидация: только известные поля, типы, длины, формат email/WhatsApp/Telegram, ≤ 3 ссылок
+   ├─ honeypot "website", время заполнения (слабый сигнал)
+   ├─ Turnstile: токен проверяется на сервере секретным ключом (сайт, форма, срок 5 минут, одноразовость)
+   ├─ дубль того же сообщения за 10 минут не отправляется повторно
+   └─ Telegram Bot API sendMessage (plain text, таймаут 8 с) ──▶ ваш личный чат
+◀── {ok:true} только если Telegram принял сообщение
 ```
 
 - Сайт показывает «Сообщение доставлено» **только** после ответа `{ok:true}`.
-- Если бот не настроен, обработчик отвечает 503, и пользователь видит ошибку с предложением написать в мессенджер. Если Telegram недоступен – 502, результат тот же.
-- Worker работает на том же домене, поэтому CORS не нужен. Сторонние webhook-сервисы не используются.
+- При любом сбое или ограничении посетитель видит честную ошибку и предложение написать в мессенджер. Введённые данные остаются в форме.
+- Ответы API не повторяют введённые данные: возвращаются только коды ошибок.
+- В логи пишутся только коды событий, без имён, email, контактов, текста, IP и токенов.
+- IP и сообщения хранятся в KV только как солёные SHA-256-хэши.
 
-Формат уведомления: plain text, без разметки, поэтому пользовательский ввод не может её сломать. Время – Asia/Bangkok.
+Формат уведомления (plain text, время Asia/Bangkok):
 
 ```
 B2B / Wholesale enquiry            ← только для заявок с /wholesale/
@@ -34,65 +46,68 @@ Email: …
 Дата и время: 15.10.2026, 18:42 (Asia/Bangkok)
 ```
 
-## Что потребуется
+## Что потребуется (всё бесплатно)
 
-1. **Бот.**
-   - В Telegram откройте @BotFather → `/newbot` и получите токен. Токен не присылайте в чат и не сохраняйте в файлы репозитория.
-   - Напишите своему боту любое сообщение.
-   - Узнайте свой `chat_id`: например, через `https://api.telegram.org/bot<TOKEN>/getUpdates` в своём браузере или с помощью @userinfobot.
-2. **Cloudflare** (домен уже там): права на Workers для зоны teaphuket.com.
-3. **Переменные окружения** – секреты Worker, задаются только через Cloudflare:
+1. **Telegram-бот.**
+   - В @BotFather выполните `/newbot` и получите токен.
+   - Напишите боту любое сообщение и узнайте свой `chat_id`.
+   - Токен не присылайте в чат и не сохраняйте в файлы.
+2. **Cloudflare Turnstile.**
+   - Dashboard → Turnstile → Add widget.
+   - Domain: `teaphuket.com`. Mode: **Managed**.
+   - Вы получите два ключа:
+     - **Site key** – публичный, вписывается в `cfg_turnstile_sitekey` в `_build/build.py`, коммитить можно.
+     - **Secret key** – только в секреты Worker (шаг 4), никуда больше.
+3. **Workers KV:** выполните `npx wrangler kv namespace create FORM_KV` и вставьте выданный `id` в `wrangler.toml`.
+4. **Секреты Worker.** Задаются только командами `wrangler secret put`, хранятся у Cloudflare в зашифрованном виде:
 
-   | Имя | Обязательно | Что это |
-   |---|---|---|
-   | `TELEGRAM_BOT_TOKEN` | да | токен бота от @BotFather |
-   | `TELEGRAM_CHAT_ID` | да | ваш личный chat_id |
-   | `TURNSTILE_SECRET` | нет | секрет Cloudflare Turnstile, если включаем капчу |
-   | `EXTRA_ORIGINS` | нет | доп. Origin через запятую, например для теста |
+   | Имя | Что это |
+   |---|---|
+   | `TELEGRAM_BOT_TOKEN` | токен бота |
+   | `TELEGRAM_CHAT_ID` | ваш chat_id |
+   | `TURNSTILE_SECRET` | Secret key из Turnstile |
+   | `HASH_SALT` | случайная строка, например результат `openssl rand -hex 32` |
 
-4. **Развёртывание.** Выполняется на вашем компьютере, с вашим логином Cloudflare:
+   Привязки `RL_IP`, `RL_GLOBAL` (rate limiting) и `FORM_KV` описаны в `wrangler.toml.example`.
+   - Без любого из секретов или привязок Worker отвечает 503 и ничего не отправляет.
+   - Необязательные переменные: `EXTRA_ORIGINS` и `EXTRA_HOSTNAMES` – только для отдельного тестового домена.
+
+5. **Развёртывание.** Выполняется на вашем компьютере, с вашим входом в Cloudflare:
    ```bash
    cd _server/contact-worker
    cp wrangler.toml.example wrangler.toml
    npx wrangler login
+   npx wrangler kv namespace create FORM_KV
    npx wrangler secret put TELEGRAM_BOT_TOKEN
    npx wrangler secret put TELEGRAM_CHAT_ID
+   npx wrangler secret put TURNSTILE_SECRET
+   npx wrangler secret put HASH_SALT
    npx wrangler deploy
    ```
-   Маршрут `teaphuket.com/api/contact` задаётся в `wrangler.toml`. В нём же отключены логи observability и настроен rate limit: 5 обращений в минуту с одного IP.
-5. **Включить формы на сайте:** в `_build/build.py` указать `"cfg_form_endpoint": "/api/contact"`, затем `python3 _build/build.py`, тесты, коммит и Push.
+6. **Включить формы:**
+   - в `_build/build.py` указать `"cfg_form_endpoint": "/api/contact"` и `"cfg_turnstile_sitekey": "<site key>"`;
+   - выполнить `python3 _build/build.py`;
+   - прогнать тесты, сделать коммит, после отдельного разрешения – Push.
 
-## Защита токенов и данных
+Дополнительный слой (по желанию): Cloudflare → Security → WAF → Rate limiting rules, правило на путь `/api/contact`. В бесплатном плане доступно одно правило.
 
-- Токен хранится только в секретах Cloudflare Worker. Во фронтенде и в репозитории его нет. Unit-тест `no secrets / tokens committed` проверяет tracked-файлы.
-- `.dev.vars` для локального теста добавлен в `.gitignore`.
-- Обработчик не пишет в логи имена, email, контакты и тексты – только код ошибки и тип обращения.
-- В GA4/GTM уходит только факт отправки (`contact_form_submit` / `wholesale_form_submit`), без персональных данных.
+## Как проверить без спама
 
-## Антиспам
+1. **Локально, без сети:** `cd _qa && npm run unit && npx playwright test e2e/pages.spec.js`. Telegram и Turnstile там заменены заглушками.
+2. **После deploy, без секретов** (до шага 4): `curl` из раздела ниже должен вернуть `503 {"ok":false}`. Это проверяет fail-closed.
+3. **С секретами:** один `curl` без Turnstile-токена должен вернуть `400 {"error":"captcha"}`. Сообщение в Telegram прийти не должно.
+4. **Один** реальный тест – отправить форму с `/contact/` в браузере. Проверьте пометку B2B на `/ru/wholesale/` и время по Бангкоку.
 
-- Скрытое поле-ловушка `website`.
-- Отказ, если форма отправлена быстрее чем за 3 секунды.
-- Rate limit Cloudflare: 5 запросов в минуту на IP.
-- Проверка Origin: принимаются только запросы с `https://teaphuket.com`.
-- Лимит тела запроса – 16 KB, лимиты длины полей.
-- Опционально – Cloudflare Turnstile. Если спам появится, нужно задать `TURNSTILE_SECRET` и добавить на форму виджет Turnstile, который передаёт `turnstile_token`.
-
-## Как проверить реальную отправку
-
-1. После `wrangler deploy` выполните в терминале:
-   ```bash
-   curl -i https://teaphuket.com/api/contact -H 'Origin: https://teaphuket.com' -H 'Content-Type: application/json' -d '{"inquiry_type":"contact","name":"Test","email":"test@example.com","contact_method":"whatsapp","contact_value":"","message":"Test message","page_language":"en","page_path":"/contact/","website":"","elapsed_ms":5000}'
-   ```
-   Ожидаемый результат – `200 {"ok":true}` и сообщение в Telegram.
-2. Проверка без секретов: тот же запрос должен вернуть `503 {"ok":false}`, а не успех.
-3. Включите формы локально (`cfg_form_endpoint`), отправьте форму с `/contact/` и `/ru/wholesale/`. Проверьте пометку B2B, Telegram username без `@` и время по Бангкоку.
-4. Запустите `cd _qa && npm run unit && npx playwright test e2e/pages.spec.js`.
+```bash
+curl -i https://teaphuket.com/api/contact -H 'Origin: https://teaphuket.com' -H 'Content-Type: application/json' -d '{"inquiry_type":"contact","name":"Test","email":"test@example.com","contact_method":"whatsapp","contact_value":"","message":"Test message","page_language":"en","page_path":"/contact/","website":"","elapsed_ms":5000}'
+```
 
 ## Чек-лист перед включением на production
 
-- [ ] Бот создан, `chat_id` получен, секреты заданы в Cloudflare
-- [ ] Worker развёрнут, `curl` возвращает `{"ok":true}`, сообщение пришло
-- [ ] Опубликована страница политики конфиденциальности, ссылка добавлена под формы (`form.note` в `build.py`)
-- [ ] `cfg_form_endpoint = "/api/contact"`, сайт пересобран, тесты зелёные
+- [ ] Бот создан, chat_id получен
+- [ ] Turnstile-виджет создан для teaphuket.com
+- [ ] KV создан, 4 секрета заданы, Worker развёрнут, проверки 2–3 пройдены
+- [ ] В Meta Events Manager выключен Automatic Advanced Matching (P-1 из аудита)
+- [ ] Опубликована политика конфиденциальности, ссылка добавлена под формы (`form.note` в `build.py`)
+- [ ] `cfg_form_endpoint` и `cfg_turnstile_sitekey` заданы, сайт пересобран, тесты зелёные
 - [ ] Отдельное разрешение на публикацию – после этого Push

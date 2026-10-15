@@ -32,11 +32,17 @@ export function formatMessage(d) {
 
 export async function sendTelegram(env, text, fetchImpl = fetch) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return { ok: false, error: 'not_configured' };
-  const r = await fetchImpl(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text, disable_web_page_preview: true }),
-  });
-  const j = await r.json().catch(() => ({}));
-  return r.ok && j.ok ? { ok: true } : { ok: false, error: 'telegram_' + r.status };
+  try {
+    const r = await fetchImpl(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text, disable_web_page_preview: true }),
+      signal: AbortSignal.timeout(8000),
+    });
+    const j = await r.json().catch(() => ({}));
+    // only the status code leaves this function: Telegram's error text could echo the request
+    return r.ok && j.ok === true ? { ok: true } : { ok: false, error: 'telegram_' + r.status };
+  } catch {
+    return { ok: false, error: 'telegram_network' };   // the URL with the token is never logged or returned
+  }
 }

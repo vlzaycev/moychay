@@ -33,6 +33,9 @@ CONFIG = {
     # Contact & wholesale forms: URL of the server handler (_server/contact-worker), e.g. "/api/contact".
     # Empty = forms are shown disabled with a note to use WhatsApp/Telegram (nothing is sent anywhere).
     "cfg_form_endpoint": "",
+    # Cloudflare Turnstile site key (public, safe to commit). The secret key lives only in the Worker.
+    # The forms go live only when both cfg_form_endpoint and this key are set.
+    "cfg_turnstile_sitekey": "",
 }
 
 MAPS = "https://maps.app.goo.gl/uuZkb3YwtNMGQhy18"
@@ -247,7 +250,10 @@ EN = dict(
                       tg="Telegram username: 5–32 Latin letters, digits or _.", short="Please write a little more.",
                       fix="Please check the highlighted fields.", sending="Sending…",
                       ok="Thank you! Your message has been delivered – we'll reply by email soon.",
-                      fail="Sorry, the message could not be sent. Please try again or message us on WhatsApp.")),
+                      fail="Sorry, the message could not be sent. Please try again or message us on WhatsApp.",
+                      too_long="This is too long – please shorten it.", links="Please include no more than 3 links.",
+                      invalid="Please check this field.", captcha="Please wait for the security check to finish and try again.",
+                      rate="Too many messages in a short time. Please try again later or message us on WhatsApp.")),
 )
 
 # ── RU ───────────────────────────────────────────────────────────
@@ -368,7 +374,10 @@ RU = dict(
                       tg="Telegram username: 5–32 латинские буквы, цифры или _.", short="Напишите чуть подробнее.",
                       fix="Проверьте отмеченные поля.", sending="Отправляем…",
                       ok="Спасибо! Сообщение доставлено – скоро ответим на email.",
-                      fail="Не получилось отправить сообщение. Попробуйте ещё раз или напишите нам в Telegram.")),
+                      fail="Не получилось отправить сообщение. Попробуйте ещё раз или напишите нам в Telegram.",
+                      too_long="Слишком длинно – сократите, пожалуйста.", links="Пожалуйста, не больше 3 ссылок.",
+                      invalid="Проверьте это поле.", captcha="Дождитесь окончания проверки безопасности и попробуйте ещё раз.",
+                      rate="Слишком много сообщений за короткое время. Попробуйте позже или напишите нам в Telegram.")),
 )
 
 

@@ -59,15 +59,22 @@ const FORMS = [
   { path: '/ru/wholesale/', kind: 'wholesale', how: 'telegram', submit: 'Отправить сообщение' },
 ];
 
-// Serve the page as if the server endpoint were configured (build.py → cfg_form_endpoint)
-async function enableForm(page, path) {
+// Serve the page as if the server endpoint and Turnstile were configured (build.py → cfg_form_endpoint,
+// cfg_turnstile_sitekey). Turnstile is replaced by a local stub: no request leaves the machine.
+async function enableForm(page, path, { token = 'tok-test' } = {}) {
   await page.route(u => new URL(u).pathname === path, async route => {
     const res = await route.fetch();
     let html = await res.text();
-    html = html.replace('data-endpoint=""', 'data-endpoint="/api/contact"').replace(/<fieldset disabled>/, '<fieldset>')
+    html = html.replace('data-endpoint="" data-sitekey=""', 'data-endpoint="/api/contact" data-sitekey="1x00000000000000000000AA"')
+               .replace(/<fieldset disabled>/, '<fieldset>')
                .replace(/<div class="form-off"[\s\S]*?<\/div>\n    <\/div>\n/, '');
     await route.fulfill({ response: res, body: html });
   });
+  await page.route(/challenges\.cloudflare\.com\/turnstile/, route => route.fulfill({ contentType: 'text/javascript', body: `
+    window.__ts = { renders: [], resets: 0 };
+    window.turnstile = { render(el, o) { __ts.renders.push(o); return 'w' + __ts.renders.length; },
+      getResponse() { return ${JSON.stringify(token)}; }, reset() { __ts.resets++; } };
+    window.onTurnstileLoad && window.onTurnstileLoad();` }));
 }
 
 for (const f of FORMS) {
@@ -82,6 +89,7 @@ for (const f of FORMS) {
     await expect(form.locator('.form-off a').first()).toHaveAttribute('href', /wa\.me|t\.me/);
     await expect(form.locator('button[type=submit]')).toHaveText(f.submit);
     expect(posts).toEqual([]);
+    expect(await page.evaluate(() => [...document.scripts].some(s => /turnstile/.test(s.src)))).toBe(false);  // no third-party load
   });
 
   test(`${f.path} form: validation, then success only after the server confirms`, async ({ page }) => {
@@ -118,6 +126,8 @@ for (const f of FORMS) {
     await form.locator('button[type=submit]').click();
     await expect(form.locator('.form-msg')).toHaveClass(/err/);
     await expect(fld('name')).toHaveValue('Test Guest');
+    expect(body.turnstile_token).toBe('tok-test');
+    expect(await page.evaluate(() => __ts.renders[0])).toMatchObject({ action: f.kind, appearance: 'interaction-only' });
     expect(body).toMatchObject({ inquiry_type: f.kind, contact_method: f.how, page_path: f.path,
       page_language: f.path.startsWith('/ru/') ? 'ru' : 'en', email: 'guest@example.com', website: '' });
     if (f.kind === 'wholesale') expect(body.company).toBe('Test Cafe');
@@ -132,6 +142,45 @@ for (const f of FORMS) {
     expect(dl).toHaveLength(1);
     expect(dl[0].event).toBe(f.kind === 'wholesale' ? 'wholesale_form_submit' : 'contact_form_submit');
     expect(JSON.stringify(dl[0])).not.toMatch(/Test Guest|guest@example|moychay_test|234 5678|Hello/);
+  });
+}
+
+test('form: no Turnstile token yet → nothing sent; server limits → honest error, never success', async ({ page }) => {
+  await enableForm(page, '/contact/', { token: '' });
+  let posts = 0;
+  await page.route('**/api/contact', r => { posts++; r.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }); });
+  await page.goto('/contact/');
+  const form = page.locator('#contact-form');
+  await form.locator('[name=name]').fill('Test Guest');
+  await form.locator('[name=email]').fill('guest@example.com');
+  await form.locator('[name=message]').fill('Hello, this is a test message');
+  await form.locator('button[type=submit]').click();
+  await expect(form.locator('.form-msg')).toHaveClass(/err/);
+  await expect(form.locator('.form-msg')).toContainText('security check');
+  expect(posts).toBe(0);
+});
+
+for (const [status, body, text] of [
+  [429, '{"ok":false,"error":"rate_limited"}', 'Too many messages'],
+  [400, '{"ok":false,"error":"captcha"}', 'security check'],
+  [503, '{"ok":false,"error":"unavailable"}', 'could not be sent'],
+  [500, 'not json', 'could not be sent'],
+  [422, '{"ok":false,"errors":{"message":"links"}}', 'check the highlighted'],
+]) {
+  test(`form: server answers ${status} ${body.slice(0, 30)} → error shown, data kept, widget reset`, async ({ page }) => {
+    await enableForm(page, '/contact/');
+    await page.route('**/api/contact', r => r.fulfill({ status, contentType: 'application/json', body }));
+    await page.goto('/contact/');
+    const form = page.locator('#contact-form');
+    await form.locator('[name=name]').fill('Test Guest');
+    await form.locator('[name=email]').fill('guest@example.com');
+    await form.locator('[name=message]').fill('Hello, this is a test message');
+    await form.locator('button[type=submit]').click();
+    await expect(form.locator('.form-msg')).toHaveClass(/err/);
+    await expect(form.locator('.form-msg')).toContainText(text);
+    await expect(form.locator('[name=name]')).toHaveValue('Test Guest');
+    expect(await page.evaluate(() => __ts.resets)).toBe(1);
+    expect(await page.evaluate(() => (window.gtmDataLayer || []).some(e => /form_submit/.test(e.event)))).toBe(false);
   });
 }
 

@@ -94,10 +94,13 @@ def paras(items):
 
 
 # ── Forms ────────────────────────────────────────────────────────
-def form(L, kind, endpoint):
+def form(L, kind, endpoint, sitekey=""):
     F = L["form"]
     how = "whatsapp" if L["lang"] == "en" else "telegram"
-    off = not endpoint
+    # live only when both the server handler and Turnstile are configured; otherwise disabled, nothing is sent
+    off = not (endpoint and sitekey)
+    if off:
+        endpoint = sitekey = ""
 
     def fld(name, label, typ="text", req=True, attrs="", hint=""):
         fid = f"{kind}-{name}"
@@ -131,11 +134,12 @@ def form(L, kind, endpoint):
       </div>
     </div>
 '''
-    return f'''<form class="form" id="{kind}-form" data-form="{kind}" data-endpoint="{escape(endpoint)}" novalidate>
+    return f'''<form class="form" id="{kind}-form" data-form="{kind}" data-endpoint="{escape(endpoint)}" data-sitekey="{escape(sitekey)}" novalidate>
 {notice}    <fieldset{" disabled" if off else ""}>
 {chr(10).join(rows)}
       <div class="hp" aria-hidden="true"><label for="{kind}-website">{F["hp"]}</label><input id="{kind}-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
       <input type="hidden" name="contact_method" value="{how}">
+      <div class="ts" id="{kind}-ts"></div>
       <p class="form-note">{F["note"]}</p>
       <button class="btn" type="submit">{F["submit"]}</button>
     </fieldset>
@@ -306,7 +310,7 @@ def contact(L, P, cfg):
       <h2 class="rv">{P["form_h2"]}</h2>
       <p class="muted">{P["form_lead"]}</p>
     </div>
-  {form(L, "contact", cfg["cfg_form_endpoint"])}
+  {form(L, "contact", cfg["cfg_form_endpoint"], cfg["cfg_turnstile_sitekey"])}
   </div>
 </section>'''
     return "\n\n".join([hero(L, P, actions, "interior/7_shop", P["alt_hero"]), visit, frm])
@@ -327,7 +331,7 @@ def wholesale(L, P, cfg):
       <h2 class="rv">{P["form_h2"]}</h2>
       <p class="muted">{P["form_lead"]}</p>
     </div>
-  {form(L, "wholesale", cfg["cfg_form_endpoint"])}
+  {form(L, "wholesale", cfg["cfg_form_endpoint"], cfg["cfg_turnstile_sitekey"])}
   </div>
 </section>'''
     return "\n\n".join([hero(L, P, actions, "interior/2_shop", P["alt_hero"]), who, rng, how, frm])
