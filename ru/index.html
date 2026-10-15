@@ -229,7 +229,7 @@ figure{margin:0}
 .hdr .wrap{display:flex;align-items:center;justify-content:space-between;height:68px;gap:24px}
 .hdr-logo img{height:44px;width:auto}
 .nav{display:none;gap:28px;font-size:15px}
-.nav a{opacity:.82;transition:opacity .2s}.nav a:hover{opacity:1}
+.nav a{opacity:.86;font-weight:600;transition:opacity .2s}.nav a:hover{opacity:1}
 .lang{position:relative;display:grid;grid-template-columns:1fr 1fr;padding:3px;border:1px solid rgba(243,236,225,.28);border-radius:999px;
   background:rgba(33,28,25,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-size:13px;font-weight:600;letter-spacing:.04em}
 .lang a{position:relative;z-index:1;display:grid;place-items:center;width:46px;height:34px;color:var(--on-dark);opacity:.72;transition:color .35s var(--ease),opacity .35s}
@@ -262,8 +262,7 @@ figure{margin:0}
 .atm{padding:clamp(72px,10vw,128px) 0 0}
 .atm-text{display:grid;gap:4px 64px}
 .atm-text .copy p{max-width:56ch}
-.facts{list-style:none;margin:20px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px 0;font-size:15px;color:var(--muted-l)}
-.facts li:not(:last-child)::after{content:"·";margin:0 10px;color:var(--clay)}
+.facts{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:4px;font-size:15px;color:var(--muted-l)}
 @media (min-width:900px){.atm-text{grid-template-columns:5fr 7fr;align-items:start}.atm-text h2{max-width:11ch}}
 .gallery{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:var(--max);margin:40px auto 0;padding:0 var(--gut)}
 .gallery .g1{grid-column:1/-1;aspect-ratio:4/5;margin:0 calc(var(--gut) * -1)}
@@ -352,8 +351,11 @@ figure{margin:0}
 .evc-text{margin:0 0 6px;font-size:15.5px;color:var(--muted-l)}
 .evc{align-content:start}
 .evc-in{display:flex;flex-direction:column;min-width:0}
-.evc-foot{display:flex;flex-wrap:wrap;align-items:center;gap:0 18px;font-size:15px;margin-top:auto}
-.evc-price{font-weight:600}
+.evc-text:empty{display:none}
+/* footer row: price left, Details right, pinned to the bottom of the card */
+.evc-foot{display:flex;justify-content:space-between;align-items:center;gap:0 16px;min-height:40px;font-size:15px;margin-top:auto}
+.evc-foot .tlink{margin-left:auto;white-space:nowrap}
+.evc-price{font-weight:600;color:var(--ink)}
 .evc .tlink{font-size:15px;min-height:40px}
 .evc-skel{min-height:132px;background:linear-gradient(90deg,transparent,rgba(58,44,34,.06),transparent);background-size:200% 100%;animation:sk 1.4s infinite}
 @keyframes sk{to{background-position:-200% 0}}
@@ -366,6 +368,15 @@ figure{margin:0}
   .ev-head{grid-template-columns:1fr auto;align-items:end}
   .ev-list{grid-template-columns:repeat(3,1fr);gap:40px 28px;border-top:0}
   .evc{grid-template-columns:1fr;grid-template-rows:auto 1fr;gap:14px;padding:0;border:0}
+  /* one shared set of rows per line of cards: photo / date / title / text / price row */
+  @supports (grid-template-rows:subgrid){
+    .ev-list{row-gap:0}
+    .evc{grid-row:span 5;grid-template-rows:subgrid;row-gap:0;margin-bottom:44px}
+    .evc-in{display:contents}
+    .evc-ph{margin-bottom:16px}
+    .evc-text:empty{display:block}
+    .evc-foot{align-self:end;margin-top:10px}
+  }
   .evc-ph{aspect-ratio:3/2}
   .evc-skel{min-height:320px}
 }
@@ -742,7 +753,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
 (function () {
-  var I18N = {"lang": "ru", "evEmpty": "Анонсы появляются каждую неделю – в Telegram-клубе и Instagram.", "evMore": "Подробнее", "evAll": "Показать все мероприятия", "root": "../"};
+  var I18N = {"lang": "ru", "evEmpty": "Анонсы появляются каждую неделю – в Telegram-клубе и Instagram.", "evMore": "Подробнее", "evFree": "Бесплатно", "evAll": "Показать все мероприятия", "root": "../"};
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -846,7 +857,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   function nicePrice(p) {
     var m = p.match(/^([\d\s.,]+)\s*(thb|฿|бат\S*)?$/i);
-    return m ? Math.round(parseFloat(m[1].replace(/[\s,]/g, ''))) + '฿' : p;  // house style: 380฿, 2000฿
+    if (!m) return p;                                   // "Donation", "Донат", "Free" etc. as written
+    var n = Math.round(parseFloat(m[1].replace(/[\s,]/g, '')));
+    return n ? n + '฿' : I18N.evFree;                   // house style: 380฿, 2000฿; 0 → Free
   }
   // Photo per event: "image" column wins; otherwise matched by keywords, no repeats.
   var RULES = [
@@ -906,7 +919,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var when = new Intl.DateTimeFormat(L, { weekday: 'short', day: 'numeric', month: 'long' }).format(d);
       body.appendChild(el('p', 'evc-when', [when.charAt(0).toUpperCase() + when.slice(1), r.time].filter(Boolean).join(' · ')));
       body.appendChild(el('h3', '', r.title));
-      if (r.text) body.appendChild(el('p', 'evc-text', r.text));
+      body.appendChild(el('p', 'evc-text', r.text));  // always present: keeps rows aligned across cards
       var foot = el('div', 'evc-foot');
       foot.appendChild(el('span', 'evc-price', r.price ? nicePrice(r.price) : ''));
       if (/^https?:\/\//.test(r.link)) {

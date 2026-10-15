@@ -206,7 +206,7 @@ EN = dict(
     ftr_about="Tea house and tea ceremonies in Bangtao, Phuket. Part of Moychay, an international tea community.",
     ftr_nav_label="Footer", ftr_nav_1="Tea ceremonies", ftr_nav_2="Our teas", ftr_nav_3="Events", ftr_nav_4="Online shop",
     credit_by="Website & marketing by", credit_label="Website & marketing by vlad.marketing (opens in a new tab)",
-    js=dict(lang="en", evEmpty="New dates are announced every week on Instagram.", evMore="Details", evAll="Show all events"),
+    js=dict(lang="en", evEmpty="New dates are announced every week on Instagram.", evMore="Details", evFree="Free", evAll="Show all events"),
 )
 
 # ── RU ───────────────────────────────────────────────────────────
@@ -322,7 +322,7 @@ RU = dict(
     ftr_about="Чайная и чайные церемонии в Бангтао, Пхукет. Часть международного чайного сообщества Moychay.",
     ftr_nav_label="Футер", ftr_nav_1="Чайные церемонии", ftr_nav_2="Наш чай", ftr_nav_3="Мероприятия", ftr_nav_4="Интернет-магазин",
     credit_by="Сайт и маркетинг –", credit_label="Сайт и маркетинг – vlad.marketing (откроется в новой вкладке)",
-    js=dict(lang="ru", evEmpty="Анонсы появляются каждую неделю – в Telegram-клубе и Instagram.", evMore="Подробнее", evAll="Показать все мероприятия"),
+    js=dict(lang="ru", evEmpty="Анонсы появляются каждую неделю – в Telegram-клубе и Instagram.", evMore="Подробнее", evFree="Бесплатно", evAll="Показать все мероприятия"),
 )
 
 

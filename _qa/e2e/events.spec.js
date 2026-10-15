@@ -64,19 +64,24 @@ for (const p of PAGES) {
       const long = 'A much longer description that wraps onto several lines so this card is taller than its neighbours in the row.';
       await mockEvents(page, HEADER +
         `16.10.2099,18:00,Tea detective,Tea Detective,${long},${long},Donation,Донат,https://example.com/a,\n` +
-        '17.10.2099,18:00,Aged tea tasting,Дегустация «Выдержанный чай» с длинным названием,Short.,Коротко.,380,380,https://example.com/b,\n' +
-        '23.10.2099,19:00,DJ tea,DJ TEA,Short.,Коротко.,Donation,Донат,https://example.com/c,\n');
+        '17.10.2099,18:00,A very long aged tea tasting title that wraps onto two or three lines,Дегустация «Выдержанный чай» с очень длинным названием на несколько строк,Short.,Коротко.,380,380,https://example.com/b,\n' +
+        '23.10.2099,19:00,DJ tea,DJ TEA,,,0,0,https://example.com/c,\n');
       await page.goto(p.path + '#events');
       const cards = page.locator('#evRow .evc:not(.evc-skel)');
       await expect(cards).toHaveCount(3);
       await expect(cards.first().locator('img')).toHaveAttribute('src', /events\/tea-detective-700\.webp/);
-      await expect(cards.nth(2).locator('.evc-price')).toHaveText(p.lang === 'en' ? 'Donation' : 'Донат');
+      await expect(cards.nth(2).locator('.evc-price')).toHaveText(p.lang === 'en' ? 'Free' : 'Бесплатно');
       if (page.viewportSize().width < 900) return; // one card per row on smaller screens
-      const pos = await cards.evaluateAll(cs => cs.map(c => ({
-        when: Math.round(c.querySelector('.evc-when').getBoundingClientRect().top),
-        foot: Math.round(c.querySelector('.evc-foot').getBoundingClientRect().bottom) })));
-      expect(new Set(pos.map(x => x.when)).size).toBe(1);
-      expect(new Set(pos.map(x => x.foot)).size).toBe(1);
+      const pos = await cards.evaluateAll(cs => cs.map(c => {
+        const r = s => c.querySelector(s).getBoundingClientRect();
+        return { ph: Math.round(r('.evc-ph').height), when: Math.round(r('.evc-when').top), h3: Math.round(r('h3').top),
+          text: Math.round(r('.evc-text').top), foot: Math.round(r('.evc-foot').bottom),
+          price: Math.round(r('.evc-price').top + r('.evc-price').height / 2),
+          priceLeft: Math.round(r('.evc-price').left - c.getBoundingClientRect().left),
+          linkRight: Math.round(c.getBoundingClientRect().right - r('.tlink').right) };
+      }));
+      for (const k of ['ph', 'when', 'h3', 'text', 'foot', 'price']) expect(new Set(pos.map(x => x[k])).size, k).toBe(1);
+      for (const x of pos) { expect(Math.abs(x.priceLeft)).toBeLessThanOrEqual(1); expect(Math.abs(x.linkRight)).toBeLessThanOrEqual(1); }  // price left, Details right
     });
 
     test('network error → friendly message instead of endless skeleton', async ({ page }) => {
