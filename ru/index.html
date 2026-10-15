@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){if(!i)return;w[l]=w[l]||[];w[l].push({'gtm.start':
+<script>(function(w,d,s,l,i){if(!i||navigator.webdriver)return;w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
@@ -109,7 +109,9 @@ window.SITE = {
 };
 (function (S) {
   // Google tag (GA4 + Google Ads)
-  var gid = S.GA4_ID || S.ADS_ID;
+  // Automated browsers (our tests, CI, headless bots) are not visitors: no analytics for them
+  var bot = navigator.webdriver;
+  var gid = bot ? '' : (S.GA4_ID || S.ADS_ID);
   if (gid) {
     var g = document.createElement('script'); g.async = true;
     g.src = 'https://www.googletagmanager.com/gtag/js?id=' + gid;
@@ -121,14 +123,14 @@ window.SITE = {
     if (S.ADS_ID) gtag('config', S.ADS_ID);
   }
   // Yandex Metrika
-  if (S.YM_ID) {
+  if (S.YM_ID && !bot) {
     (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
     m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
     (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
     ym(Number(S.YM_ID), "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true });
   }
   // Meta Pixel
-  if (S.PIXEL_ID) {
+  if (S.PIXEL_ID && !bot) {
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
     n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
     n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;

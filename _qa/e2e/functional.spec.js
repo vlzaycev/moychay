@@ -180,6 +180,16 @@ for (const p of PAGES) {
       expect(box.height).toBeLessThan(main.height);
     });
 
+    test('automated browsers (tests, CI) never hit GA4/GTM, so they do not count as visitors', async ({ page }) => {
+      const hits = [];
+      page.on('request', r => { if (/googletagmanager\.com|google-analytics\.com|analytics\.google\.com/.test(r.url())) hits.push(r.url()); });
+      await page.goto(p.path, { waitUntil: 'networkidle' });
+      await page.locator('#home a[data-track="directions"]').evaluate(a => a.addEventListener('click', e => e.preventDefault()));
+      await page.locator('#home a[data-track="directions"]').click();
+      expect(hits).toEqual([]);
+      expect(await page.evaluate(() => /GTM-[A-Z0-9]+/.test(document.head.innerHTML))).toBe(true); // tag is still on the page for real visitors
+    });
+
     test('header becomes solid after scrolling', async ({ page }) => {
       await page.evaluate(() => window.scrollTo(0, 400));
       await expect(page.locator('#hdr')).toHaveClass(/solid/);
