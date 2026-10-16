@@ -159,3 +159,17 @@ test('blog: a published article without a real date is refused by the build', ()
   assert.throws(() => execFileSync('python3', ['-c', 'import sys; sys.path.insert(0, "_build"); import blog; blog.load()'], { cwd: tmp, stdio: 'pipe' }),
     /published_at/);
 });
+
+test('Moychay brand: official pattern asset, tokens, logo safe space, motto casing', () => {
+  const svg = read('img/brand/moychay-pattern.svg');
+  assert.match(svg, /viewBox="0 0 96\.378 68\.031"/);       // the brandbook tiling cell, not a redraw
+  assert.match(svg, /fill="#C7A06A"/);
+  const html = read('index.html');
+  for (const tok of ['--mc-green:#289B38', '--mc-green-dark:#375A3C', '--mc-green-light:#90C685', '--mc-black:#02090D', '--mc-gold:#C7A06A'])
+    assert.ok(html.includes(tok), tok);
+  assert.match(html, /--pattern:url\(img\/brand\/moychay-pattern\.svg\)/);
+  assert.match(read('ru/index.html'), /--pattern:url\(\.\.\/img\/brand\/moychay-pattern\.svg\)/);
+  assert.match(html, /\.hdr-logo img\{height:38px/);
+  assert.match(html, /class="motto">in tea we trust</);
+  assert.doesNotMatch(read('_config.yml') + execFileSync('git', ['ls-files'], { cwd: ROOT }).toString(), /\.pdf/i, 'no brandbook PDF in the repo');
+});
