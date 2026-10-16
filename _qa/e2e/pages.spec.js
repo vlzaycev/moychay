@@ -4,9 +4,9 @@ const { mockEvents, watchErrors } = require('./helpers');
 
 const H1 = {
   en: { ceremonies: 'Tea ceremonies in Phuket', tea: 'Chinese tea in Phuket', matcha: 'Matcha in Phuket',
-        events: 'Tea events in Phuket', contact: 'Visit Moychay Phuket', wholesale: 'Wholesale tea for businesses in Phuket' },
+        events: 'Tea events in Phuket', contact: 'Visit Moychay Phuket', wholesale: 'Wholesale tea & tea solutions for businesses in Phuket' },
   ru: { ceremonies: 'Чайные церемонии на Пхукете', tea: 'Китайский чай на Пхукете', matcha: 'Матча на Пхукете',
-        events: 'Чайные мероприятия на Пхукете', contact: 'Контакты Moychay Phuket', wholesale: 'Оптовые поставки чая на Пхукете' },
+        events: 'Чайные мероприятия на Пхукете', contact: 'Контакты Moychay Phuket', wholesale: 'Чай и чайные решения для бизнеса на Пхукете' },
 };
 
 for (const lang of ['en', 'ru']) {
@@ -110,7 +110,7 @@ for (const f of FORMS) {
     expect(body).toBeNull();
 
     await fld('name').fill('Test Guest');
-    if (f.kind === 'wholesale') await fld('company').fill('Test Cafe');
+    if (f.kind === 'wholesale') { await fld('company').fill('Test Cafe'); await fld('business_type').selectOption('hotel'); }
     await fld('email').fill('bad-email');
     await fld('contact_value').fill(f.how === 'whatsapp' ? '12' : 'ab');
     await fld('message').fill('Hello, this is a test message');
@@ -130,7 +130,7 @@ for (const f of FORMS) {
     expect(await page.evaluate(() => __ts.renders[0])).toMatchObject({ action: f.kind, appearance: 'interaction-only' });
     expect(body).toMatchObject({ inquiry_type: f.kind, contact_method: f.how, page_path: f.path,
       page_language: f.path.startsWith('/ru/') ? 'ru' : 'en', email: 'guest@example.com', website: '' });
-    if (f.kind === 'wholesale') expect(body.company).toBe('Test Cafe');
+    if (f.kind === 'wholesale') { expect(body.company).toBe('Test Cafe'); expect(body.business_type).toBe('hotel'); }
 
     // server confirms → success, form reset, analytics event without personal data
     reply = { status: 200, body: '{"ok":true}' };
@@ -193,3 +193,50 @@ test('form keyboard access: fields reachable by Tab, honeypot skipped', async ({
   for (let i = 0; i < 5; i++) { order.push(await page.evaluate(() => document.activeElement.name || document.activeElement.tagName)); await page.keyboard.press('Tab'); }
   expect(order).toEqual(['name', 'email', 'contact_value', 'message', 'BUTTON']);
 });
+
+/* ── Growth iteration: B2B page, ceremonies, blog drafts ─────────── */
+for (const lang of ['en', 'ru']) {
+  const lp = lang === 'en' ? '/' : '/ru/';
+  test(`${lp}wholesale/: B2B sections, no prices or discounts, partners hidden while empty`, async ({ page }) => {
+    await page.goto(lp + 'wholesale/');
+    for (const id of ['who', 'formats', 'products', 'how', 'terms', 'faq', 'request']) await expect(page.locator('#' + id)).toHaveCount(1);
+    await expect(page.locator('#who .seg li')).toHaveCount(5);
+    await expect(page.locator('#formats .offer li')).toHaveCount(5);
+    await expect(page.locator('#how .steps li')).toHaveCount(4);
+    await expect(page.locator('#partners')).toHaveCount(0);
+    const text = await page.locator('main').innerText();
+    expect(text).not.toMatch(/\d+\s?%|\d[\d\s,]*\s?฿|minimum order|минимальн/i);
+    await expect(page.locator('a[data-track="wholesale_contact_click"]')).toHaveAttribute('href', '#request');
+    await expect(page.locator('#wholesale-business_type option')).toHaveCount(7);
+  });
+
+  test(`${lp}ceremonies/: comparison table and link to business ceremonies`, async ({ page }) => {
+    await page.goto(lp + 'ceremonies/');
+    await expect(page.locator('#compare tbody tr')).toHaveCount(3);
+    await expect(page.locator('#private a')).toHaveAttribute('href', lp + 'wholesale/#experiences');
+  });
+
+  test(`${lp}: matcha drinks are no longer listed as a ceremony`, async ({ page }) => {
+    await mockEvents(page);
+    await page.goto(lp);
+    await expect(page.locator('#prices .menu-i')).toHaveCount(3);
+    await expect(page.locator('#prices .menu-extra a')).toHaveAttribute('href', lp + 'matcha/');
+  });
+
+  test(`${lp}blog/ drafts: local preview works, is noindex, and nothing is published`, async ({ page, request }) => {
+    expect((await request.get(lp + 'blog/')).status()).toBe(404);
+    const r = await page.goto('/_preview' + lp + 'blog/');
+    expect(r.status()).toBe(200);
+    await expect(page.locator('meta[name=robots]')).toHaveAttribute('content', 'noindex');
+    const links = page.locator('.posts h2 a');
+    expect(await links.count()).toBeGreaterThanOrEqual(3);
+    await links.first().click();
+    await expect(page.locator('h1')).toHaveCount(1);
+    await expect(page.locator('.draft')).toBeVisible();
+    await expect(page.locator('.prose h2').first()).toBeVisible();
+    const ld = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent())['@graph'];
+    expect(ld[0]['@type']).toBe('BlogPosting');
+    expect(ld[0].datePublished).toBeUndefined();          // no invented dates
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+  });
+}

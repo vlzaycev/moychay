@@ -12,6 +12,10 @@ import json
 import os
 import re
 
+import shutil
+
+import blog as B
+import pages as PG
 from pages import BUILDERS, PAGES, SLUGS
 from urllib.parse import quote
 
@@ -188,10 +192,8 @@ EN = dict(
         dict(name="Group ceremonies", price="Price on request",
              meta="Up to 30 guests · At the tea house or your venue",
              text="Birthdays, team events and gatherings."),
-        dict(name="Matcha drinks &amp; kombucha", price="from 250฿",
-             meta="To stay or to go",
-             text='Non-alcoholic matcha lattes and tonics, kombucha on tap. <a href="{{lp}}matcha/">More about matcha</a>'),
     ]),
+    ways_extra='Also on the menu: non-alcoholic matcha lattes and tonics and kombucha on tap, from 250฿, to stay or to go. <a href="{{lp}}matcha/">More about matcha</a>',
     ways_note="Not sure where to start? Ask the tea master – from a light green tea to an aged pu-erh.",
     cta_book="Book a ceremony on WhatsApp",
     tea_h2="Our teas",
@@ -237,7 +239,9 @@ EN = dict(
     ftr_wholesale="Wholesale &amp; partnerships", ftr_shop="Online shop",
     more_cer="All ceremony formats", more_tea="More about our teas", more_contact="Contact page and form",
     crumbs_label="Breadcrumbs", home_name="Home",
-    form=dict(name="Name", company="Company / Business name", email="Email", contact="WhatsApp number",
+    form=dict(name="Name", company="Company / Business name", btype="Business type", btype_none="Choose…",
+              btypes=[("restaurant", "Restaurant or café"), ("hotel", "Hotel or resort"), ("spa", "Spa or wellness"),
+                      ("fitness", "Fitness or yoga studio"), ("real_estate", "Real estate"), ("other", "Other")], email="Email", contact="WhatsApp number",
               contact_hint="International format, e.g. +66 81 234 5678", message="Message",
               message_wh="Tell us about your venue and what tea you need", optional="(optional)",
               hp="Leave this field empty", submit="Send message",
@@ -310,10 +314,8 @@ RU = dict(
         dict(name="Групповые церемонии", price="Цена по запросу",
              meta="До 30 гостей · У нас или на вашей площадке",
              text="Дни рождения, командные встречи и праздники."),
-        dict(name="Коктейли на матче и комбуча", price="от 250฿",
-             meta="Здесь или с собой",
-             text='Безалкогольные матча-латте и тоники, комбуча на разлив. <a href="{{lp}}matcha/">Подробнее о матче</a>'),
     ]),
+    ways_extra='Ещё в меню: безалкогольные матча-латте и тоники, комбуча на разлив – от 250฿, здесь или с собой. <a href="{{lp}}matcha/">Подробнее о матче</a>',
     ways_note="Не знаете, с чего начать? Спросите чайного мастера – подберёт что-то от лёгкого зелёного до выдержанного пуэра.",
     cta_book="Записаться в Telegram",
     tea_h2="Наш чай",
@@ -361,7 +363,9 @@ RU = dict(
     ftr_wholesale="Оптовые поставки", ftr_shop="Интернет-магазин",
     more_cer="Все форматы церемоний", more_tea="Подробнее о нашем чае", more_contact="Страница контактов и форма",
     crumbs_label="Навигационная цепочка", home_name="Главная",
-    form=dict(name="Имя", company="Название компании", email="Email", contact="Telegram username",
+    form=dict(name="Имя", company="Название компании", btype="Тип бизнеса", btype_none="Выберите…",
+              btypes=[("restaurant", "Ресторан или кафе"), ("hotel", "Отель или курорт"), ("spa", "SPA или wellness"),
+                      ("fitness", "Фитнес или йога-студия"), ("real_estate", "Недвижимость"), ("other", "Другое")], email="Email", contact="Telegram username",
               contact_hint="Например, moychay_phuket – символ @ не обязателен", message="Сообщение",
               message_wh="Расскажите о заведении и о том, какой чай вам нужен", optional="(необязательно)",
               hp="Оставьте это поле пустым", submit="Отправить сообщение",
@@ -446,6 +450,12 @@ def inner_page(data, slug):
         {"@type": "ListItem", "position": 1, "name": "Moychay Phuket", "item": url(lang)},
         {"@type": "ListItem", "position": 2, "name": P["crumb"], "item": url(lang, slug)}]}
     graph = [crumbs] + ([business(d)] if slug == "contact" else [])
+    if slug == "wholesale":   # what we offer, without invented prices or offers
+        graph.append({"@type": "Service", "name": re.sub("<[^>]+>", "", P["h1"]).replace("&amp;", "&"),
+                      "description": P["desc"], "url": url(lang, slug), "areaServed": {"@type": "AdministrativeArea", "name": "Phuket"},
+                      "audience": {"@type": "BusinessAudience", "audienceType": ", ".join(n.replace("&amp;", "&") for n, _ in P["segments"])},
+                      "serviceType": [o[1].replace("&amp;", "&") for o in P["offers"]],
+                      "provider": {"@type": "Organization", "@id": f"{SITE_URL}/#teahouse", "name": "Moychay Phuket", "url": f"{SITE_URL}/"}})
     d["jsonld"] = jsonld(graph)
     d["main"] = BUILDERS[slug](d, P, CONFIG)
     # preload the hero photo (LCP) with the same srcset/sizes as the <img>
@@ -453,6 +463,18 @@ def inner_page(data, slug):
     if m:
         d["head_extra"] = f'<link rel="preload" as="image" href="{m[1]}" imagesrcset="{m[2]}" imagesizes="{m[3]}" fetchpriority="high">'
     return d
+
+
+def hreflang(en, ru):
+    """Alternate links only for language versions that really exist."""
+    out = []
+    if en:
+        out.append(f'<link rel="alternate" hreflang="en" href="{en}">')
+    if ru:
+        out.append(f'<link rel="alternate" hreflang="ru" href="{ru}">')
+    if en or ru:
+        out.append(f'<link rel="alternate" hreflang="x-default" href="{en or ru}">')
+    return "\n".join(out)
 
 
 def build(data, out):
@@ -471,6 +493,9 @@ def render(data, out="404.html"):
     px = CONFIG["cfg_pixel"]
     values["pixel_noscript"] = (f'<noscript><img height="1" width="1" style="display:none" alt="" '
                                 f'src="https://www.facebook.com/tr?id={px}&amp;ev=PageView&amp;noscript=1"></noscript>' if px else "")
+    if "hreflang" not in values:
+        values["hreflang"] = hreflang(values.get("url_en"), values.get("url_ru"))
+    values.setdefault("ftr_blog_link", footer_blog(data))
     html = html.replace("{{main}}", values.pop("main", ""))
     for _ in range(2):   # second pass: placeholders inside inserted values ({{lp}}, {{root}}…)
         for k, v in values.items():
@@ -490,11 +515,206 @@ def sitemap():
                       for h, l in (("en", "en"), ("ru", "ru"), ("x-default", "en")))
         for lang in ("en", "ru"):
             urls += f"  <url>\n    <loc>{url(lang, slug)}</loc>\n    <lastmod>{today}</lastmod>\n{alt}  </url>\n"
+    for p in PUBLISHED:                       # published articles only; drafts never reach the sitemap
+        other = B.translation(PUBLISHED, p)
+        alts = [(p["language"], B.url(p["language"], p["slug"]))] + ([(other["language"], B.url(other["language"], p["slug"]))] if other else [])
+        alt = "".join(f'    <xhtml:link rel="alternate" hreflang="{l}" href="{u}"/>\n' for l, u in alts)
+        urls += f'  <url>\n    <loc>{B.url(p["language"], p["slug"])}</loc>\n    <lastmod>{p.get("updated_at") or p["published_at"]}</lastmod>\n{alt}  </url>\n'
+    for lang in ("en", "ru"):
+        if any(p["language"] == lang for p in PUBLISHED):
+            urls += f"  <url>\n    <loc>{B.url(lang)}</loc>\n    <lastmod>{today}</lastmod>\n  </url>\n"
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
            + urls + "</urlset>\n")
     open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8").write(xml)
     print("built sitemap.xml")
+
+
+# ── Tea Knowledge (blog) ─────────────────────────────────────────
+BLOG_T = dict(
+    en=dict(title="Tea Knowledge – Chinese Tea Guides | Moychay Phuket", crumb="Blog",
+            h1="Tea Knowledge by Moychay Phuket",
+            desc="Guides to Chinese tea from Moychay Phuket in Bangtao: tea ceremonies, pu-erh, brewing at home and choosing tea for cafés and restaurants.",
+            lead="Unhurried guides to Chinese tea from our tea house on Boat Avenue: what to try, how to brew it and where tea fits into your day.",
+            read="min read", published="Published", updated="Updated", by="By",
+            next_h2="Where to go next", more_h2="More from Tea Knowledge", all="All articles", draft_label="Draft",
+            draft="Draft – not published. This preview is visible only on your computer.",
+            verify_h="To check with the tea master", photos_h="Photos needed",
+            cats={"ceremony": "Tea ceremony", "guide": "Tea guide", "business": "For business"},
+            related=dict(ceremonies="Tea ceremonies at Moychay Phuket", tea="Chinese tea at our tea house", matcha="Matcha at Moychay Phuket",
+                         events="Upcoming tea events", contact="Address and directions", wholesale="Tea for your business",
+                         home="Visit Moychay Phuket", shop="Online shop with delivery across Thailand")),
+    ru=dict(title="Блог о чае – Moychay Phuket", crumb="Блог",
+            h1="Блог о чае – Moychay Phuket",
+            desc="Материалы о китайском чае от чайной Moychay Phuket в Бангтао: чайные церемонии, пуэр, заваривание дома и выбор чая для кафе и ресторанов.",
+            lead="Неспешные материалы о китайском чае от нашей чайной на Boat Avenue: что попробовать, как заварить и как чай вписывается в жизнь.",
+            read="мин чтения", published="Опубликовано", updated="Обновлено", by="Автор:",
+            next_h2="Что дальше", more_h2="Ещё в блоге", all="Все статьи", draft_label="Черновик",
+            draft="Черновик – не опубликован. Этот предпросмотр виден только на вашем компьютере.",
+            verify_h="Проверить с чайным мастером", photos_h="Нужные фотографии",
+            cats={"ceremony": "Чайная церемония", "guide": "О чае", "business": "Для бизнеса"},
+            related=dict(ceremonies="Чайные церемонии в Moychay Phuket", tea="Китайский чай в нашей чайной", matcha="Матча в Moychay Phuket",
+                         events="Ближайшие чайные мероприятия", contact="Адрес и маршрут", wholesale="Чай для вашего бизнеса",
+                         home="Приходите в Moychay Phuket", shop="Интернет-магазин с доставкой по Таиланду")),
+)
+POSTS = B.load()
+PUBLISHED = [p for p in POSTS if p["published"]]
+PG.PUBLISHED = {(p["language"], p["slug"]): p["title"] for p in PUBLISHED}
+
+
+def blog_meta(p, T):
+    bits = [T["cats"].get(p["category"], p["category"]), f'{max(1, round(p["words"] / 200))} {T["read"]}']
+    if p.get("published_at"):
+        bits.append(f'{T["published"]} {B.fmt_date(p["published_at"], p["language"])}')
+    if p.get("updated_at") and p.get("updated_at") != p.get("published_at"):
+        bits.append(f'{T["updated"]} {B.fmt_date(p["updated_at"], p["language"])}')
+    return " · ".join(bits)
+
+
+def blog_hero(lang, crumbs, h1, lead, meta, photo, alt):
+    c = "".join(f'<li><a href="{u}">{n}</a></li>' for n, u in crumbs[:-1]) + f'<li aria-current="page">{crumbs[-1][0]}</li>'
+    ph = PG.img(photo, alt, "(min-width:900px) 50vw, 100vw", "phero-ph", eager=True) if photo else ""
+    m = f'<p class="art-meta">{meta}</p>' if meta else ""
+    return f"""<section class="phero{'' if photo else ' phero-text'}" id="home">
+  <div class="wrap">
+    <div>
+      <nav aria-label="{(EN if lang == 'en' else RU)['crumbs_label']}"><ol class="crumbs">{c}</ol></nav>
+      <h1{' class="long"' if len(h1) > 40 else ''}>{h1}</h1>
+      <p class="lead">{lead}</p>
+      {m}
+    </div>
+    {ph}
+  </div>
+</section>"""
+
+
+def blog_data(lang, out_depth, preview):
+    data = EN if lang == "en" else RU
+    d = {**data, "root": "../" * out_depth, "lp": B.lp(lang), "nb": B.lp(lang), "home_href": B.lp(lang)}
+    d["head_extra"] = '<meta name="robots" content="noindex">' if preview else ""
+    return d
+
+
+def article_page(p, preview=False):
+    lang, slug, T = p["language"], p["slug"], BLOG_T[p["language"]]
+    pool = POSTS if preview else PUBLISHED
+    other = B.translation(pool, p)
+    depth = (3 if lang == "en" else 4) if preview else (3 if lang == "ru" else 2)
+    d = blog_data(lang, depth, preview)
+    blog_home = (f"/_preview{B.lp(lang)}blog/" if preview else f"{B.lp(lang)}blog/")
+    crumbs = [("Moychay Phuket", B.lp(lang)), (T["crumb"], blog_home), (p["title"], "")]
+    banner = ""
+    if preview and not p["published"]:
+        notes = "".join(f"<li>{html_escape(x)}</li>" for x in p.get("verify", []) or [])
+        photos = "".join(f"<li>{html_escape(x)}</li>" for x in p.get("photos", []) or [])
+        banner = (f'<aside class="draft"><p><strong>{T["draft"]}</strong></p>'
+                  + (f'<p>{T["verify_h"]}:</p><ul>{notes}</ul>' if notes else "")
+                  + (f'<p>{T["photos_h"]}:</p><ul>{photos}</ul>' if photos else "") + "</aside>")
+    body = B.markdown(p["body"], {"slug": slug, "lang": lang})
+    rel = []
+    for k in p.get("related_pages", []) or []:
+        if k == "shop":
+            rel.append(f'<li><a class="tlink" href="{B.SHOP}" target="_blank" rel="noopener" data-track="online_shop_click" data-place="blog_next">{T["related"]["shop"]}{PG.ARROW}</a></li>')
+        elif k in B.PAGES:
+            rel.append(f'<li><a class="tlink" href="{B.lp(lang)}{B.PAGES[k]}" data-track="blog_cta_click" data-place="{slug}">{T["related"][k]}{PG.ARROW}</a></li>')
+    more = [q for q in pool if q["language"] == lang and q["slug"] != slug][:3]
+    more_html = "".join(f'<li><a href="{blog_home}{q["slug"]}/">{q["title"]}</a><span>{T["cats"].get(q["category"], q["category"])}</span></li>' for q in more)
+    nxt = f"""<section class="sec sand" id="next">
+  <div class="wrap split">
+    <h2 class="rv">{T["next_h2"]}</h2>
+    <div>
+      <ul class="next-links">{"".join(rel)}</ul>
+      {f'<h3 class="more-h">{T["more_h2"]}</h3><ul class="art-list">{more_html}</ul>' if more_html else ''}
+      <p class="more"><a class="tlink" href="{blog_home}">{T["all"]}{PG.ARROW}</a></p>
+    </div>
+  </div>
+</section>"""
+    main = "\n\n".join([
+        blog_hero(lang, crumbs, p["title"], p["description"], blog_meta(p, T), p.get("hero_image"), p.get("image_alt", "")),
+        f'<article class="sec art" id="article"><div class="wrap">{banner}<div class="prose">\n{body}\n</div></div></article>',
+        nxt])
+    d.update(main=main, meta_title=p.get("seo_title") or f'{p["title"]} | Moychay Phuket',
+             meta_desc=p.get("seo_description") or p["description"],
+             canonical=B.url(lang, slug), href_en=(f"/blog/{slug}/" if (lang == "en" or other) else "/blog/"),
+             href_ru=(f"/ru/blog/{slug}/" if (lang == "ru" or other) else "/ru/blog/"))
+    d["hreflang"] = "" if preview else hreflang(B.url("en", slug) if (lang == "en" or other) else None,
+                                                 B.url("ru", slug) if (lang == "ru" or other) else None)
+    posting = {"@type": "BlogPosting", "headline": p["title"], "description": p["description"], "inLanguage": lang,
+               "url": B.url(lang, slug), "mainEntityOfPage": B.url(lang, slug),
+               "author": ({"@type": "Organization", "name": "Moychay Phuket", "url": url(lang)}
+                          if p.get("author", "Moychay Phuket") == "Moychay Phuket" else {"@type": "Person", "name": p["author"]}),
+               "publisher": {"@type": "Organization", "name": "Moychay Phuket", "url": f"{SITE_URL}/",
+                             "logo": {"@type": "ImageObject", "url": f"{SITE_URL}/img/logo.png"}},
+               "articleSection": T["cats"].get(p["category"], p["category"]), "wordCount": p["words"]}
+    if p.get("published_at"):
+        posting["datePublished"] = p["published_at"]
+        posting["dateModified"] = p.get("updated_at") or p["published_at"]
+    if p.get("hero_image"):
+        posting["image"] = f'{SITE_URL}/img/{p["hero_image"]}-1400.webp'
+    if p.get("reviewer"):
+        posting["reviewedBy"] = {"@type": "Person", "name": p["reviewer"]}
+    crumbs_ld = {"@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Moychay Phuket", "item": url(lang)},
+        {"@type": "ListItem", "position": 2, "name": T["crumb"], "item": B.url(lang)},
+        {"@type": "ListItem", "position": 3, "name": p["title"], "item": B.url(lang, slug)}]}
+    d["jsonld"] = jsonld([posting, crumbs_ld])
+    return d
+
+
+def blog_index(lang, preview=False):
+    T = BLOG_T[lang]
+    pool = [p for p in (POSTS if preview else PUBLISHED) if p["language"] == lang]
+    depth = (2 if lang == "en" else 3) if preview else (2 if lang == "ru" else 1)
+    d = blog_data(lang, depth, preview)
+    base = f"/_preview{B.lp(lang)}blog/" if preview else f"{B.lp(lang)}blog/"
+    rows = "".join(
+        f'<li><p class="art-cat">{T["cats"].get(p["category"], p["category"])}'
+        + (f' · <span class="draft-tag">{T["draft_label"]}</span>' if not p["published"] else "")
+        + f'</p><h2><a href="{base}{p["slug"]}/">{p["title"]}</a></h2><p>{p["description"]}</p></li>' for p in pool)
+    main = "\n\n".join([
+        blog_hero(lang, [("Moychay Phuket", B.lp(lang)), (T["crumb"], "")], T["h1"], T["lead"], "", "interior/1_shop",
+                  (EN if lang == "en" else RU)["alt_1shop"]),
+        f'<section class="sec" id="articles"><div class="wrap"><ul class="posts">{rows}</ul></div></section>'])
+    has_other = any(p["language"] != lang for p in (POSTS if preview else PUBLISHED))
+    d.update(main=main, meta_title=T["title"], meta_desc=T["desc"], canonical=B.url(lang),
+             href_en="/blog/" if (lang == "en" or has_other) else "/", href_ru="/ru/blog/" if (lang == "ru" or has_other) else "/ru/")
+    d["hreflang"] = "" if preview else hreflang(B.url("en") if (lang == "en" or has_other) else None,
+                                                 B.url("ru") if (lang == "ru" or has_other) else None)
+    d["jsonld"] = jsonld([{"@type": "Blog", "name": T["h1"], "url": B.url(lang), "inLanguage": lang,
+                           "publisher": {"@type": "Organization", "name": "Moychay Phuket", "url": f"{SITE_URL}/"},
+                           "blogPost": [{"@type": "BlogPosting", "headline": p["title"], "url": B.url(lang, p["slug"])}
+                                        for p in pool if p["published"]]},
+                          {"@type": "BreadcrumbList", "itemListElement": [
+                              {"@type": "ListItem", "position": 1, "name": "Moychay Phuket", "item": url(lang)},
+                              {"@type": "ListItem", "position": 2, "name": T["crumb"], "item": B.url(lang)}]}])
+    return d
+
+
+def html_escape(s):
+    import html as _h
+    return _h.escape(str(s))
+
+
+def build_blog():
+    for d in ("blog", "ru/blog", "_preview"):            # generated output only: rebuilt from _content every time
+        shutil.rmtree(os.path.join(ROOT, d), ignore_errors=True)
+    for lang in ("en", "ru"):
+        if any(p["language"] == lang for p in PUBLISHED):
+            build(blog_index(lang), f"{B.lp(lang).lstrip('/')}blog/index.html")
+        if any(p["language"] == lang for p in POSTS):
+            build(blog_index(lang, preview=True), f"_preview/{B.lp(lang).lstrip('/')}blog/index.html")
+    for p in POSTS:
+        if p["published"]:
+            build(article_page(p), f"{B.lp(p['language']).lstrip('/')}blog/{p['slug']}/index.html")
+        build(article_page(p, preview=True), f"_preview/{B.lp(p['language']).lstrip('/')}blog/{p['slug']}/index.html")
+
+
+def footer_blog(data):
+    lang = data["lang"]
+    if not any(p["language"] == lang for p in PUBLISHED):
+        return ""
+    return f'\n        <a href="{B.lp(lang)}blog/">{BLOG_T[lang]["crumb"]}</a>'
+
 
 
 NF = dict(
@@ -560,5 +780,6 @@ build(home_page(RU), "ru/index.html")
 for slug in SLUGS:
     build(inner_page(EN, slug), f"{slug}/index.html")
     build(inner_page(RU, slug), f"ru/{slug}/index.html")
+build_blog()
 page_404()
 sitemap()

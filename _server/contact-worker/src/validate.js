@@ -8,7 +8,10 @@ export const MAX_LINKS = 3;                 // more links than this in one messa
 export const MIN_FILL_MS = 3000;            // soft signal only: sent by the client, Turnstile is the real check
 
 const FIELDS = new Set(['inquiry_type', 'name', 'company', 'email', 'contact_method', 'contact_value', 'message',
-  'page_language', 'page_path', 'submitted_at', 'elapsed_ms', 'website', 'turnstile_token']);
+  'page_language', 'page_path', 'submitted_at', 'elapsed_ms', 'website', 'turnstile_token', 'business_type']);
+// optional on the wholesale form; the site sends the key, the Telegram message shows the label
+export const BUSINESS_TYPES = { restaurant: 'Ресторан / кафе', hotel: 'Отель / курорт', spa: 'SPA / wellness',
+  fitness: 'Фитнес / йога', real_estate: 'Недвижимость', other: 'Другое' };
 
 const EMAIL = /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*\.[A-Za-z]{2,63}$/;
 // control characters (line breaks are allowed only in the message), bidi overrides and zero-width characters:
@@ -64,6 +67,7 @@ export function validate(body, now = Date.now()) {
     inquiry_type: kind,
     name: text('name'),
     company: kind === 'wholesale' ? text('company') : '',
+    business_type: String(body.business_type || ''),
     email: text('email').toLowerCase(),
     contact_method: body.contact_method,
     contact_value: text('contact_value'),
@@ -76,6 +80,7 @@ export function validate(body, now = Date.now()) {
   const m = d.page_path.match(/^\/(ru\/)?(contact|wholesale)\/$/);
   if (!m || m[2] !== kind || (m[1] ? 'ru' : 'en') !== d.page_language) return { ok: false, errors: { form: 'invalid' } };
 
+  if (d.business_type && (kind !== 'wholesale' || !Object.hasOwn(BUSINESS_TYPES, d.business_type))) errors.business_type = 'invalid';
   if (!errors.name && !d.name) errors.name = 'required';
   if (!errors.name && HAS_URL.test(d.name)) errors.name = 'invalid';
   if (kind === 'wholesale' && !errors.company && !d.company) errors.company = 'required';

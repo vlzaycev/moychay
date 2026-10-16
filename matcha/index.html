@@ -309,6 +309,8 @@ figure{margin:0}
 .crumbs li+li::before{content:"/";margin-right:8px;opacity:.6}
 .crumbs a{display:inline-block;padding:10px 0;margin:-10px 0;transition:color .2s}.crumbs a:hover{color:var(--clay-soft)}
 .phero h1{font-size:clamp(40px,6.2vw,80px);line-height:1;letter-spacing:-.03em;margin-bottom:22px;max-width:13ch}
+.phero h1.long{font-size:clamp(34px,4.6vw,60px);line-height:1.04;max-width:18ch}
+.about.plain{background:var(--paper)}
 .phero .lead{color:rgba(243,236,225,.84);max-width:44ch;margin-bottom:32px}
 .phero-ph{aspect-ratio:4/3;margin:0 calc(var(--gut) * -1)}
 @media (max-width:599px){.phero .btn{width:100%}.phero .tlink{min-height:48px}}
@@ -334,7 +336,7 @@ figure{margin:0}
 .info>div{display:grid;gap:2px 32px;padding:18px 0;border-bottom:1px solid var(--line-l)}
 .info dt{font-weight:600}
 .info dd{margin:0;color:var(--muted-l)}
-.info dd a{color:var(--clay-text);border-bottom:1px solid currentColor}
+.info dd a,a.inl{color:var(--clay-text);border-bottom:1px solid currentColor}
 @media (min-width:600px){.info>div{grid-template-columns:minmax(150px,2fr) 5fr}}
 .list2{list-style:none;margin:0;padding:0;display:grid;gap:0 48px;border-top:1px solid var(--line-l)}
 .list2 li{padding:16px 0;border-bottom:1px solid var(--line-l);font-size:18px}
@@ -350,6 +352,65 @@ figure{margin:0}
 .map{aspect-ratio:4/3;background:var(--sand);margin:0 calc(var(--gut) * -1)}
 .map iframe{display:block;width:100%;height:100%;border:0;filter:grayscale(.25) sepia(.12)}
 @media (min-width:700px){.map{margin:0;aspect-ratio:16/10}}
+/* B2B: business types, offer list, partners */
+.seg{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-l)}
+.seg li{padding:20px 0;border-bottom:1px solid var(--line-l)}
+.seg h3{font-size:21px;margin-bottom:4px}
+.seg p{margin:0;color:var(--muted-l);max-width:56ch}
+.offer{list-style:none;margin:0;padding:0;counter-reset:o;border-top:1px solid var(--line-l)}
+.offer li{counter-increment:o;display:grid;grid-template-columns:36px 1fr;gap:6px 14px;padding:24px 0;border-bottom:1px solid var(--line-l);scroll-margin-top:96px}
+.offer li::before{content:counter(o,upper-latin);grid-row:span 3;font-family:var(--head);font-size:22px;line-height:1.2;color:var(--clay-text)}
+.offer h3{font-size:21px}
+.offer p{margin:0;max-width:58ch}
+.offer .offer-inc{font-size:15px;color:var(--muted-l)}
+.partners{list-style:none;margin:0;padding:0;display:grid;gap:28px 40px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.partners img{height:48px;width:auto;max-width:160px;object-fit:contain;margin-bottom:12px}
+.partners p{margin:0;font-size:15px}
+/* Tea Knowledge (blog) */
+.phero-text .wrap{grid-template-columns:1fr!important}
+.phero-text h1{max-width:20ch}
+.art-meta{margin:-12px 0 0;font-size:15px;color:var(--muted-d)}
+.art{padding-top:clamp(48px,6vw,80px)}
+.prose{max-width:68ch;margin:0 auto;font-size:18px;line-height:1.7}
+.prose h2{font-size:clamp(26px,3vw,34px);line-height:1.15;margin:48px 0 16px}
+.prose h3{font-size:21px;margin:32px 0 10px}
+.prose p,.prose ul,.prose ol{margin:0 0 1.1em}
+.prose ul,.prose ol{padding-left:1.3em}
+.prose li{margin-bottom:.4em}
+.prose a{color:var(--clay-text);border-bottom:1px solid currentColor}
+.prose a:hover{color:var(--clay)}
+.prose .note{margin:28px 0;padding:16px 20px;border-left:3px solid var(--clay);background:var(--sand)}
+.prose .note p{margin:0}
+.tbl{overflow-x:auto;margin:24px 0 28px;-webkit-overflow-scrolling:touch}
+.tbl table{width:100%;min-width:520px;border-collapse:collapse;font-size:16px;line-height:1.5}
+.tbl th,.tbl td{text-align:left;vertical-align:top;padding:12px 14px 12px 0;border-bottom:1px solid var(--line-l)}
+.tbl thead th{font-weight:600;border-bottom-color:var(--ink)}
+.tbl tbody th{font-weight:600}
+@media (max-width:599px){
+  .tbl table{min-width:0}
+  .tbl thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .tbl tr{display:block;padding:12px 0;border-bottom:1px solid var(--line-l)}
+  .tbl th,.tbl td{display:block;padding:2px 0;border:0}
+  .tbl tbody th{font-size:17px;margin-bottom:4px}
+  .tbl td{display:grid;grid-template-columns:minmax(96px,38%) 1fr;gap:12px}
+  .tbl td::before{content:attr(data-label);color:var(--muted-l);font-size:14px}
+}
+.draft{max-width:68ch;margin:0 auto 32px;padding:16px 20px;border:1px dashed var(--clay);background:#FFF7E8;font-size:15px}
+.draft p{margin:0 0 6px}.draft ul{margin:0 0 10px;padding-left:1.2em}
+.posts{list-style:none;margin:0 auto;padding:0;max-width:860px;border-top:1px solid var(--line-l)}
+.posts li{padding:28px 0;border-bottom:1px solid var(--line-l)}
+.posts h2{font-size:clamp(24px,2.6vw,32px);line-height:1.2;margin:4px 0 10px}
+.posts h2 a:hover{color:var(--clay-text)}
+.posts p{margin:0;color:var(--muted-l);max-width:62ch}
+.art-cat{font-size:14px;font-weight:600;color:var(--clay-text)!important}
+.draft-tag{color:#9B2C17}
+.next-links{list-style:none;margin:0;padding:0}
+.more-h{font-size:18px;margin:28px 0 8px}
+.art-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-l)}
+.art-list li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;padding:12px 0;border-bottom:1px solid var(--line-l)}
+.art-list a:hover{color:var(--clay-text)}
+.art-list span{font-size:14px;color:var(--muted-l)}
+
 /* Forms */
 .form{display:grid;gap:22px;max-width:640px}
 .form fieldset{display:grid;gap:22px;min-width:0;margin:0;padding:0;border:0}
@@ -357,8 +418,9 @@ figure{margin:0}
 .fld{display:grid;gap:4px}
 .fld label{font-size:15px;font-weight:600}
 .fld .opt{font-weight:400;color:var(--muted-l)}
-.fld input,.fld textarea{width:100%;min-height:48px;padding:10px 0;font:inherit;font-size:17px;color:var(--ink);background:transparent;
+.fld input,.fld textarea,.fld select{width:100%;min-height:48px;padding:10px 0;font:inherit;font-size:17px;color:var(--ink);background:transparent;
   border:0;border-bottom:1px solid rgba(58,44,34,.45);border-radius:0;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
+.fld select{padding-right:28px;cursor:pointer;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23221D19' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 4px center}
 .fld textarea{min-height:140px;resize:vertical;line-height:1.5}
 .fld input:focus,.fld textarea:focus{outline:none;border-bottom-color:var(--clay);box-shadow:0 1px 0 var(--clay)}
 .fld [aria-invalid="true"]{border-bottom-color:#9B2C17;box-shadow:0 1px 0 #9B2C17}
@@ -427,7 +489,8 @@ figure{margin:0}
 @keyframes sk{to{background-position:-200% 0}}
 .ev-empty{padding:24px 0;margin:0;color:var(--muted-l);border-bottom:1px solid var(--line-l)}
 .tlink[hidden]{display:none}
-.menu-d a{color:var(--clay-text);border-bottom:1px solid currentColor}
+.menu-d a,.menu-extra a{color:var(--clay-text);border-bottom:1px solid currentColor}
+.menu-extra{margin:18px 0 0;font-size:16px;color:var(--muted-l);max-width:60ch}
 .find .act{display:flex;flex-wrap:wrap;align-items:center;gap:8px 28px}
 @media (min-width:600px){.evc{grid-template-columns:140px 1fr;gap:22px}}
 @media (min-width:900px){
@@ -619,6 +682,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="copy">
       <p>Matcha is green tea ground into a fine powder. Instead of steeping leaves and pouring off the infusion, you drink the whole tea leaf.</p>
       <p>If you'd like to try leaf green tea as well, ask the tea master – it is one of the categories on our shelves.</p>
+      <p class="muted more">Matcha and tea bases for drinks are also available for cafés, hotels and studios. <a class="inl" href="/wholesale/#supply">Tea for your business</a></p>
     </div>
   </div>
 </section>
@@ -779,7 +843,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                         appearance: 'interaction-only', 'refresh-expired': 'auto' });
     });
     var T = I18N.form, btn = $('button[type=submit]', f), btnText = btn.textContent, msg = $('.form-msg', f);
-    var started = Date.now(), fields = $$('input[name]:not([type=hidden]):not([name=website]), textarea[name]', f);
+    var started = Date.now(), fields = $$('input[name]:not([type=hidden]):not([name=website]), textarea[name], select[name]', f);
     function show(text, bad) { msg.textContent = text; msg.classList.toggle('err', !!bad); msg.hidden = !text; }
     function setErr(inp, text) {
       var e = document.getElementById(inp.id + '-err');

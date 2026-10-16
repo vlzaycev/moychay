@@ -1,3 +1,5 @@
+import { BUSINESS_TYPES } from './validate.js';
+
 // Telegram Bot API delivery. The token lives only in the Worker's secrets (TELEGRAM_BOT_TOKEN),
 // never in the site code or this repository.
 
@@ -20,6 +22,7 @@ export function formatMessage(d) {
     '',
     `Имя: ${d.name}`,
     d.inquiry_type === 'wholesale' ? `Компания: ${d.company}` : null,
+    d.business_type ? `Тип бизнеса: ${BUSINESS_TYPES[d.business_type]}` : null,
     `Email: ${d.email}`,
     `Контакт: ${contact}`,
     `Сообщение:\n${d.message}`,

@@ -17,6 +17,7 @@ const graph = (html) => JSON.parse(html.match(/<script type="application\/ld\+js
 test('build is reproducible: _build/build.py output == committed HTML', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tp-build-'));
   fs.cpSync(path.join(ROOT, '_build'), path.join(tmp, '_build'), { recursive: true });
+  if (fs.existsSync(path.join(ROOT, '_content'))) fs.cpSync(path.join(ROOT, '_content'), path.join(tmp, '_content'), { recursive: true });
   execFileSync('python3', [path.join(tmp, '_build', 'build.py')], { stdio: 'pipe' });
   for (const f of [...Object.values(PAGES), '404.html', 'sitemap.xml']) {
     assert.equal(fs.readFileSync(path.join(tmp, f), 'utf8'), read(f), `${f} differs from build output — someone edited HTML by hand or forgot to rebuild`);
@@ -127,4 +128,34 @@ test('404 page and web manifest are valid', () => {
   }
   const man = JSON.parse(read('site.webmanifest'));
   for (const i of man.icons) assert.ok(fs.existsSync(path.join(ROOT, i.src)), i.src);
+});
+
+test('blog: drafts never published – no /blog/ output, not in sitemap or footer, preview is noindex and git-ignored', () => {
+  const md = fs.readdirSync(path.join(ROOT, '_content', 'blog')).filter(f => f.endsWith('.md'));
+  const published = md.filter(f => /\nstatus:\s*published/.test(read('_content/blog/' + f)));
+  const sm = read('sitemap.xml');
+  for (const f of md) {
+    const slug = f.split('.')[0], lang = f.split('.')[1];
+    const pub = published.includes(f);
+    const out = (lang === 'ru' ? 'ru/' : '') + 'blog/' + slug + '/index.html';
+    assert.equal(fs.existsSync(path.join(ROOT, out)), pub, out);
+    assert.equal(sm.includes('/blog/' + slug + '/'), pub, 'sitemap ' + slug);
+    const prev = read('_preview/' + out);
+    assert.match(prev, /<meta name="robots" content="noindex">/, 'preview noindex ' + out);
+  }
+  if (!published.length) {
+    assert.ok(!fs.existsSync(path.join(ROOT, 'blog')), 'no empty blog index');
+    assert.doesNotMatch(read('index.html'), /href="\/blog\/"/, 'no footer link to an empty blog');
+  }
+  assert.match(read('.gitignore'), /^_preview\/$/m);
+});
+
+test('blog: a published article without a real date is refused by the build', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tp-blog-'));
+  fs.mkdirSync(path.join(tmp, '_content', 'blog'), { recursive: true });
+  fs.cpSync(path.join(ROOT, '_build'), path.join(tmp, '_build'), { recursive: true });
+  fs.writeFileSync(path.join(tmp, '_content', 'blog', 'x-test.en.md'),
+    '---\ntitle: T\nslug: x-test\ndescription: D\nlanguage: en\ncategory: guide\nstatus: published\n---\nText\n');
+  assert.throws(() => execFileSync('python3', ['-c', 'import sys; sys.path.insert(0, "_build"); import blog; blog.load()'], { cwd: tmp, stdio: 'pipe' }),
+    /published_at/);
 });

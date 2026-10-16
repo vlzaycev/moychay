@@ -21,9 +21,27 @@ TEA_MASTER = None
 #     ru=dict(name="", role="Чайный мастер Moychay Phuket", alt="", bio=["", ""], experience="", approach=""),
 # )
 
+# ── B2B partners on /wholesale/: only real partners who agreed to be shown. Empty = no section at all. ──
+# Logo file goes to img/partners/. Example:
+# dict(name="Hotel Name", logo="hotel-name.svg", en=dict(format="Tea for guest rooms", case=""), ru=dict(format="Чай для номеров", case=""))
+PARTNERS = []
+
 # ── Matcha menu: exact drinks for /matcha/. Empty = only the confirmed summary is shown. ──
 # Example item: dict(en=("Matcha latte", "…"), ru=("Матча-латте", "…"), price="250฿")
 MATCHA_MENU = []
+
+
+# Published blog articles {(lang, slug): title}; filled by build.py. Links to an article appear only once it is published.
+PUBLISHED = {}
+
+
+def read_more(L, slugs):
+    """Natural link to a related published article (first one found), or nothing."""
+    for s in slugs:
+        title = PUBLISHED.get((L["lang"], s))
+        if title:
+            return '<p class="more">' + tlink(L["lp"] + "blog/" + s + "/", title) + "</p>"
+    return ""
 
 
 def img(path, alt, sizes, cls="", eager=False, w=1400, h=1050):
@@ -41,7 +59,7 @@ def hero(L, P, actions, photo, alt):
   <div class="wrap">
     <div>
       <nav aria-label="{L["crumbs_label"]}">{crumbs}</nav>
-      <h1>{P["h1"]}</h1>
+      <h1{' class="long"' if len(P["h1"]) > 40 else ""}>{P["h1"]}</h1>
       <p class="lead">{P["lead"]}</p>
       <div class="actions">
 {actions}
@@ -67,6 +85,12 @@ def tlink(href, label, ext=False, track=""):
     if track:
         attrs += f' data-track="{track[0]}" data-place="{track[1]}"'
     return f'<a class="tlink" href="{href}"{attrs}>{label}{ARROW}</a>'
+
+
+def table_rows(head, rows):
+    """Table body; each cell carries its column name, so narrow screens can show rows as labelled blocks."""
+    return "".join("<tr>" + "".join((f'<th scope="row">{c}</th>' if j == 0 else f'<td data-label="{head[j]}">{c}</td>')
+                                    for j, c in enumerate(r)) + "</tr>" for r in rows)
 
 
 def info(rows):
@@ -116,6 +140,11 @@ def form(L, kind, endpoint, sitekey=""):
     rows = [fld("name", F["name"], attrs='autocomplete="name" maxlength="100"')]
     if kind == "wholesale":
         rows.append(fld("company", F["company"], attrs='autocomplete="organization" maxlength="150"'))
+        fid = "wholesale-business_type"     # optional; values must match BUSINESS_TYPES in the Worker (validate.js)
+        opts = "".join(f'<option value="{v}">{lbl}</option>' for v, lbl in F["btypes"])
+        rows.append(f'      <div class="fld"><label for="{fid}">{F["btype"]} <span class="opt">{F["optional"]}</span></label>'
+                    f'<select id="{fid}" name="business_type" aria-describedby="{fid}-err"><option value="">{F["btype_none"]}</option>{opts}</select>'
+                    f'<span class="fld-err" id="{fid}-err"></span></div>')
     rows.append(fld("email", F["email"], "email", attrs='autocomplete="email" inputmode="email" maxlength="200" spellcheck="false"'))
     if how == "whatsapp":
         rows.append(fld("contact_value", F["contact"], "tel", False,
@@ -192,11 +221,17 @@ def ceremonies(L, P, cfg):
     </div>
   </div>
 </section>'''
-    how = split(P["how_h2"], "      " + steps(P["how"]), sid="how")
+    how = split(P["how_h2"], "      " + steps(P["how"]) + read_more(L, ["what-happens-at-a-chinese-tea-ceremony"]), sid="how")
     pr = split(P["info_h2"], "      " + info(P["info"]) + "\n      <div class=\"actions more\">\n"
                + btn_msg(L, "ceremonies_info", L["msg_book_url"], P["cta"]) + "\n        "
                + tlink(L["lp"] + "events/", P["to_events"]) + "\n      </div>", "sec sand", "visit")
-    return "\n\n".join(x for x in [hero(L, P, actions, "people/4_people", P["alt_hero"]), formats, master, how, pr] if x)
+    head = "".join(f'<th scope="col">{h}</th>' for h in P["cmp_head"])
+    rows = table_rows(P["cmp_head"], P["cmp"])
+    compare = split(P["cmp_h2"], f'      <div class="tbl"><table><thead><tr>{head}</tr></thead><tbody>{rows}</tbody></table></div>', sid="compare")
+    private = split(P["priv_h2"], paras(P["priv"]) + '\n      <p class="more">'
+                    + tlink(L["lp"] + "wholesale/#experiences", P["priv_cta"]) + "</p>", "sec sand", "private")
+    return "\n\n".join(x for x in [hero(L, P, actions, "people/4_people", P["alt_hero"]), formats, compare, master, how,
+                                    private, pr] if x)
 
 
 def tea(L, P, cfg):
@@ -219,7 +254,10 @@ def tea(L, P, cfg):
     {tlink(L["lp"] + "ceremonies/", P["to_cer"])}
   </div>
 </section>'''
-    ware = split(P["ware_h2"], paras(P["ware"]), sid="teaware")
+    head = "".join(f'<th scope="col">{h}</th>' for h in P["diff_head"])
+    rows = table_rows(P["diff_head"], P["diff"])
+    diff = split(P["diff_h2"], f'      <p>{P["diff_lead"]}</p>\n      <div class="tbl"><table><thead><tr>{head}</tr></thead><tbody>{rows}</tbody></table></div>', sid="differences")
+    ware = split(P["ware_h2"], paras(P["ware"]) + read_more(L, ["sheng-vs-shou-pu-erh", "how-to-brew-chinese-tea-at-home"]), sid="teaware")
     shop = f'''<section class="shop" id="shop" aria-labelledby="shop-h">
   <div class="wrap">
     {img("interior/4_shop", L["alt_4shop"], "(min-width:900px) 56vw, 100vw", "shop-ph", w=834, h=1280)}
@@ -232,7 +270,7 @@ def tea(L, P, cfg):
     </div>
   </div>
 </section>'''
-    return "\n\n".join([hero(L, P, actions, "interior/2_shop", P["alt_hero"]), origin, cats, ware, shop])
+    return "\n\n".join([hero(L, P, actions, "interior/2_shop", P["alt_hero"]), origin, cats, diff, ware, shop])
 
 
 def matcha(L, P, cfg):
@@ -245,7 +283,8 @@ def matcha(L, P, cfg):
           <p class="menu-d">{m[L["lang"]][1]}</p></li>''' for m in MATCHA_MENU)
         menu = f'\n      <ul class="menu">\n{lis}\n      </ul>'
     drinks = split(P["drinks_h2"], "      " + info(rows) + menu, sid="drinks")
-    what = split(P["what_h2"], paras(P["what"]), "sec", "about-matcha")
+    what = split(P["what_h2"], paras(P["what"]) + read_more(L, ["matcha-vs-green-tea"])
+                 + f'\n      <p class="muted more">{P["biz"]} <a class="inl" href="{L["lp"]}wholesale/#supply">{P["biz_link"]}</a></p>', "sec", "about-matcha")
     stay = f'''<section class="about" id="stay">
   <div class="wrap">
     {img("interior/1_shop", P["alt_stay"], "(min-width:900px) 60vw, 100vw", "about-ph")}
@@ -283,7 +322,9 @@ def events(L, P, cfg):
     join = split(P["join_h2"], "      " + info(P["join"]) + "\n      <div class=\"actions more\">\n"
                  + btn_msg(L, "events_join", L["msg_url"], P["cta"]) + "\n        "
                  + tlink(L["lp"] + "ceremonies/", P["to_cer"]) + "\n      </div>", "sec sand", "join")
-    return "\n\n".join([hero(L, P, actions, "people/2_people", P["alt_hero"]), lst, join])
+    private = split(P["priv_h2"], paras(P["priv"]) + '\n      <p class="more">'
+                    + tlink(L["lp"] + "wholesale/#experiences", P["priv_cta"]) + "</p>", "sec", "private")
+    return "\n\n".join([hero(L, P, actions, "people/2_people", P["alt_hero"]), lst, join, private])
 
 
 def contact(L, P, cfg):
@@ -317,14 +358,67 @@ def contact(L, P, cfg):
 
 
 def wholesale(L, P, cfg):
-    actions = "\n".join(['        <a class="btn" href="#request">' + P["cta"] + "</a>",
+    actions = "\n".join(['        <a class="btn" href="#request" data-track="wholesale_contact_click" data-place="wholesale_hero">' + P["cta"] + "</a>",
                          btn_msg(L, "wholesale_hero", L["msg_url"], L["cta_message"], "tlink")])
-    who = split(P["who_h2"], "      <ul class=\"list2\">" + "".join(f"<li>{x}</li>" for x in P["who"]) + "</ul>\n"
-                + f'      <p class="muted more">{P["who_note"]}</p>', sid="who")
-    rng = split(P["range_h2"], paras(P["range"]) + "\n      <ul class=\"list2 more\">"
-                + "".join(f"<li>{x}</li>" for x in P["range_list"]) + "</ul>\n      <p class=\"more\">"
-                + tlink(L["lp"] + "tea/", P["to_tea"]) + "</p>", "sec sand", "range")
-    how = split(P["how_h2"], "      " + steps(P["how"]), sid="how")
+    # who: business types as an editorial index, not cards
+    segs = "".join(f'<li><h3>{n}</h3><p>{x}</p></li>' for n, x in P["segments"])
+    who = f'''<section class="sec" id="who">
+  <div class="wrap split">
+    <div>
+      <h2 class="rv">{P["who_h2"]}</h2>
+      <p class="muted">{P["who_note"]}</p>
+    </div>
+    <ul class="seg">{segs}</ul>
+  </div>
+</section>'''
+    offers = "".join(f'<li id="{oid}"><h3>{n}</h3><p>{x}</p><p class="offer-inc">{inc}</p></li>' for oid, n, x, inc in P["offers"])
+    formats = f'''<section class="sec sand" id="formats">
+  <div class="wrap split">
+    <div>
+      <h2 class="rv">{P["offers_h2"]}</h2>
+      <p class="muted">{P["offers_note"]}</p>
+    </div>
+    <ol class="offer">{offers}</ol>
+  </div>
+</section>'''
+    products = f'''<section class="about plain" id="products">
+  <div class="wrap">
+    {img("interior/3_shop", P["alt_products"], "(min-width:900px) 60vw, 100vw", "about-ph")}
+    <div class="copy rv">
+      <h2>{P["products_h2"]}</h2>
+      <ul class="list2">{"".join(f"<li>{x}</li>" for x in P["products"])}</ul>
+      <p class="muted more">{P["products_note"]}</p>
+      <p class="more">{tlink(L["lp"] + "tea/", P["to_tea"])}</p>
+    </div>
+  </div>
+</section>'''
+    how = split(P["how_h2"], "      " + steps(P["how"]) + read_more(L, ["how-to-choose-tea-for-a-cafe-or-restaurant"]), sid="how")
+    terms = split(P["terms_h2"], paras(P["terms"]), "sec sand", "terms")
+    partners = ""
+    if PARTNERS:
+        items = "".join(
+            f'<li><img src="{{{{root}}}}img/partners/{p["logo"]}" alt="{escape(p["name"])}" loading="lazy" decoding="async">'
+            f'<p><strong>{escape(p["name"])}</strong> · {p[L["lang"]]["format"]}</p>'
+            + (f'<p class="muted">{p[L["lang"]]["case"]}</p>' if p[L["lang"]].get("case") else "") + "</li>"
+            for p in PARTNERS)
+        partners = f'''<section class="sec" id="partners">
+  <div class="wrap split">
+    <h2 class="rv">{P["partners_h2"]}</h2>
+    <ul class="partners">{items}</ul>
+  </div>
+</section>'''
+    faq_items = "\n".join(f'''      <li>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="wfaq-{n}">{q}<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <div class="acc-p" id="wfaq-{n}"><div><p>{a}</p></div></div>
+      </li>''' for n, (q, a) in enumerate(P["faq"], 1))
+    faq = f'''<section class="faq" id="faq">
+  <div class="wrap">
+    <h2 class="rv">{P["faq_h2"]}</h2>
+    <ul class="faq-list">
+{faq_items}
+    </ul>
+  </div>
+</section>'''
     frm = f'''<section class="sec sand" id="request">
   <div class="wrap split">
     <div>
@@ -334,7 +428,8 @@ def wholesale(L, P, cfg):
   {form(L, "wholesale", cfg["cfg_form_endpoint"], cfg["cfg_turnstile_sitekey"])}
   </div>
 </section>'''
-    return "\n\n".join([hero(L, P, actions, "interior/2_shop", P["alt_hero"]), who, rng, how, frm])
+    return "\n\n".join(x for x in [hero(L, P, actions, "people/6_people", P["alt_hero"]), who, formats, products,
+                                    how, terms, partners, faq, frm] if x)
 
 
 BUILDERS = dict(ceremonies=ceremonies, tea=tea, matcha=matcha, events=events, contact=contact, wholesale=wholesale)
@@ -386,6 +481,15 @@ PAGES = dict(
                 ("Languages", "Thai, English and Russian"),
             ],
             to_events="Tea events this week",
+            cmp_h2="Which format to choose",
+            cmp_head=["Format", "Time", "Booking", "Price", "Good for"],
+            cmp=[["Walk-in tasting (Pin Cha)", "About 10 minutes, then you stay with your tea", "Not needed", "300฿ + tea by weight", "A first acquaintance with Chinese tea, a short visit"],
+                 ["Gong fu cha ceremony", "60 minutes + up to 60 minutes to relax", "Required", "600฿ per person", "An unhurried hour with the tea master"],
+                 ["Group ceremony", "Agreed with you", "Required", "On request", "Birthdays, team events and gatherings of up to 30 guests"]],
+            priv_h2="Ceremonies for hotels, teams and private events",
+            priv=["We also hold tea ceremonies and tastings outside the tea house – for hotel guests, private groups, client meetings and residents' events, in English or Russian.",
+                  "The duration, number of guests, host, teaware, space and travel are agreed for each event."],
+            priv_cta="Tea experiences for businesses",
         ),
         ru=dict(
             title="Чайные церемонии на Пхукете | Moychay Phuket",
@@ -430,6 +534,15 @@ PAGES = dict(
                 ("Языки", "Тайский, английский и русский"),
             ],
             to_events="Чайные мероприятия на неделе",
+            cmp_h2="Какой формат выбрать",
+            cmp_head=["Формат", "Время", "Запись", "Цена", "Подходит для"],
+            cmp=[["Дегустация без записи (Пин Ча)", "Около 10 минут, потом остаётесь с чаем", "Не нужна", "300฿ + чай по весу", "Первого знакомства с китайским чаем, короткого визита"],
+                 ["Церемония гунфу ча", "60 минут + до 60 минут отдыха", "Нужна", "600฿ с человека", "Неспешного часа с чайным мастером"],
+                 ["Групповая церемония", "Согласуем с вами", "Нужна", "По запросу", "Дней рождения, командных встреч и праздников до 30 гостей"]],
+            priv_h2="Церемонии для отелей, команд и частных событий",
+            priv=["Мы проводим чайные церемонии и дегустации и вне чайной – для гостей отелей, частных групп, клиентских встреч и мероприятий резидентов, на русском или английском.",
+                  "Длительность, число гостей, ведущего, посуду, пространство и выезд согласуем под каждое событие."],
+            priv_cta="Чайные мероприятия для бизнеса",
         ),
     ),
     tea=dict(
@@ -449,6 +562,16 @@ PAGES = dict(
             cats_lead="Every category below can be tasted at the tea house – at a walk-in tasting or during a ceremony.",
             alt_cats="Shelves of clay teapots and porcelain cups",
             to_cer="Tea ceremonies and tastings",
+            diff_h2="How the main categories differ",
+            diff_lead="The difference starts with how the leaf is processed after picking. A short guide – the tea master will tell you more at the table.",
+            diff_head=["Category", "How it is made", "Character"],
+            diff=[["White tea", "Withered and dried with minimal processing", "Light and delicate"],
+                  ["Green tea", "Heated soon after picking to stop oxidation", "Fresh, grassy, bright"],
+                  ["Oolong", "Partly oxidised; dark oolongs are also roasted", "From floral and sweet to roasted and rich"],
+                  ["Red tea", "Fully oxidised", "Warming and smooth"],
+                  ["Sheng pu-erh", "Pressed and aged slowly", "Lively when young, deep with age"],
+                  ["Shu pu-erh and dark tea", "Fermented in a moist pile for weeks", "Earthy and smooth"],
+                  ["Herbal tea", "Herbs, flowers and fruit – no tea leaf", "Caffeine-free"]],
             ware_h2="Teaware and antiques",
             ware=[
                 "Clay teapots, porcelain cups and antique teaware on our shelves are a real collection for sale, not decor.",
@@ -473,6 +596,16 @@ PAGES = dict(
             cats_lead="Любую категорию можно попробовать в чайной – на дегустации или во время церемонии.",
             alt_cats="Полки с глиняными чайниками и фарфоровыми чашками",
             to_cer="Чайные церемонии и дегустации",
+            diff_h2="Чем отличаются основные категории",
+            diff_lead="Разница начинается с того, как обрабатывают лист после сбора. Коротко – а подробнее расскажет чайный мастер за столом.",
+            diff_head=["Категория", "Как делают", "Характер"],
+            diff=[["Белый чай", "Завяливают и сушат при минимальной обработке", "Лёгкий и деликатный"],
+                  ["Зелёный чай", "Вскоре после сбора прогревают, чтобы остановить окисление", "Свежий, травянистый, яркий"],
+                  ["Улун", "Частично окисляют; тёмные улуны ещё и обжаривают", "От цветочного и сладкого до обжаренного и насыщенного"],
+                  ["Красный чай", "Полностью окисляют", "Согревающий и мягкий"],
+                  ["Шэн пуэр", "Прессуют и медленно выдерживают", "Живой в молодости, глубокий с годами"],
+                  ["Шу пуэр и тёмные чаи", "Неделями ферментируют во влажной куче", "Землистый и мягкий"],
+                  ["Травяной чай", "Травы, цветы и фрукты – без чайного листа", "Без кофеина"]],
             ware_h2="Посуда и антиквариат",
             ware=[
                 "Глиняные чайники, фарфоровые чашки и антикварная посуда на наших полках – настоящая коллекция, её можно купить.",
@@ -509,6 +642,8 @@ PAGES = dict(
                 "Matcha is green tea ground into a fine powder. Instead of steeping leaves and pouring off the infusion, you drink the whole tea leaf.",
                 "If you'd like to try leaf green tea as well, ask the tea master – it is one of the categories on our shelves.",
             ],
+            biz="Matcha and tea bases for drinks are also available for cafés, hotels and studios.",
+            biz_link="Tea for your business",
         ),
         ru=dict(
             title="Матча на Пхукете – Чай и напитки с матчей | Moychay",
@@ -536,6 +671,8 @@ PAGES = dict(
                 "Матча – это зелёный чай, перемолотый в тонкий порошок. Вы пьёте не настой, а весь чайный лист целиком.",
                 "Если захочется попробовать и листовой зелёный чай, спросите чайного мастера – он есть на наших полках.",
             ],
+            biz="Матчу и чайные основы для напитков поставляем и кафе, отелям и студиям.",
+            biz_link="Чай для бизнеса",
         ),
     ),
     events=dict(
@@ -556,6 +693,9 @@ PAGES = dict(
                 ("Announcements", "New dates are announced every week on Instagram"),
             ],
             to_cer="Private and group tea ceremonies",
+            priv_h2="Private and corporate tea events",
+            priv=["The schedule above is for public events. For a private tasting, a team event, an event for hotel guests or a ceremony at your venue, we prepare a separate programme."],
+            priv_cta="Tea experiences for businesses",
         ),
         ru=dict(
             title="Чайные мероприятия и дегустации на Пхукете | Moychay",
@@ -574,6 +714,9 @@ PAGES = dict(
                 ("Анонсы", "Новые даты каждую неделю – в Telegram-клубе и Instagram"),
             ],
             to_cer="Частные и групповые церемонии",
+            priv_h2="Частные и корпоративные чайные события",
+            priv=["Выше – расписание открытых мероприятий. Для частной дегустации, командной встречи, события для гостей отеля или церемонии на вашей площадке готовим отдельную программу."],
+            priv_cta="Чайные мероприятия для бизнеса",
         ),
     ),
     contact=dict(
@@ -604,54 +747,120 @@ PAGES = dict(
     ),
     wholesale=dict(
         en=dict(
-            title="Wholesale Tea Supplier in Phuket | Moychay Phuket",
-            desc="Chinese tea for cafés, restaurants, hotels and spas in Phuket. Moychay Phuket discusses regular tea supplies for businesses – send us a request.",
-            crumb="Wholesale", h1="Wholesale tea for businesses in Phuket",
-            lead="Moychay Phuket supplies Chinese tea to businesses in Phuket. Tell us about your venue, and we'll discuss the teas and the supply that suit you.",
-            cta="Send a request",
-            alt_hero="Pu-erh tea cakes on the shelves of Moychay Phuket",
-            who_h2="Who it's for",
-            who=["Cafés", "Coffee shops", "Restaurants", "Hotels", "Spa and wellness centres", "Other venues"],
-            who_note="Any business that serves tea to its guests and needs regular supplies in Phuket.",
-            range_h2="Teas to discuss",
-            range=[
-                "We'll talk about specific teas, volumes and delivery once we know your needs. You can taste the teas at our tea house on Boat Avenue before deciding.",
+            title="Wholesale Tea &amp; Tea Solutions in Phuket | Moychay",
+            desc="Tea supplier for restaurants, cafés, hotels and spas in Phuket: Chinese tea, matcha, tea menus, staff training, corporate gifts and private tea ceremonies.",
+            crumb="Wholesale", h1="Wholesale tea &amp; tea solutions for businesses in Phuket",
+            lead="We supply tea and help businesses create thoughtful tea experiences – from café and restaurant menus to guest service, staff training and private events.",
+            cta="Discuss a partnership",
+            alt_hero="Guests at a tea gathering at Moychay Phuket",
+            who_h2="Who we work with",
+            who_note="Directions we can discuss with your team. Every proposal is built around your venue and your guests.",
+            segments=[
+                ("Restaurants &amp; cafés", "Tea for the menu, teas chosen for your kitchen, tea and food pairings, tea-based drinks and staff preparation."),
+                ("Hotels &amp; resorts", "Welcome tea, tea at breakfast and in guest rooms, gifts for guests, tea corners and tea events for guests."),
+                ("Spa &amp; wellness", "Tea service after treatments, a selection of drinks, tastings and tea events."),
+                ("Fitness &amp; yoga studios", "Drinks, a tea shelf and themed gatherings for your community."),
+                ("Real estate &amp; luxury hospitality", "Tea for client meetings, gift sets, branded teaware and tea events for residents."),
             ],
-            range_list=["White tea", "Green tea", "Light and dark oolongs", "Red tea", "Sheng and shu pu-erh", "Herbal tea"],
-            to_tea="More about our teas",
-            how_h2="How it works",
+            offers_h2="What we can create together",
+            offers_note="The products and the cost of additional services are set out in an individual proposal for your business.",
+            offers=[
+                ("supply", "Tea supply &amp; menu development", "A tea range chosen for your kitchen, your budget and the way you brew.",
+                 "Tea supply · choice of teas · pairings with dishes · tea bases for drinks, including matcha and iced tea · recipe cards for your team"),
+                ("training", "Staff training", "Your team learns to brew and serve tea the same way every time, in a language agreed with you.",
+                 "Brewing and serving · standard steps · working with teaware · storage and brewing recommendations"),
+                ("corners", "Tea corners &amp; retail shelves", "From a shelf of packaged tea that guests buy themselves to a corner where tea is prepared, or a separate tea room.",
+                 "Tea shelf · tea corner with preparation · choice of teaware · design of the space"),
+                ("gifts", "Corporate gifts &amp; branded teaware", "Gift sets and teaware for guests, clients and partners.",
+                 "Gift sets · tea and teaware · packaging in your design · teaware with your brand, made to an agreed sample"),
+                ("experiences", "Private tea experiences", "Tea ceremonies in English and Russian for hotel guests, private groups, client meetings and residents' events.",
+                 "Ceremonies at your venue · group tastings · private events · themed evenings for clubs and studios"),
+            ],
+            products_h2="Products for your business",
+            products=["Chinese tea and herbal blends", "Matcha", "Tea bases for drinks", "Non-alcoholic kombucha brewed on our tea",
+                      "Wild honey from Chiang Mai", "Teaware and gift sets"],
+            products_note="Range, packaging and prices are agreed for each order. For kombucha, the supply format and the product specification are agreed separately.",
+            alt_products="Shelves of clay teapots and porcelain cups at Moychay Phuket",
+            to_tea="Teas on our shelves",
+            how_h2="How we work together",
             how=[
-                ("You send a request", "Tell us about your business and what kind of tea you're looking for."),
-                ("We discuss your needs", "We talk through the range, the volumes and how you plan to serve the tea."),
-                ("We agree on the terms", "Together we settle the supply terms that work for your venue."),
+                ("Consultation", "We talk about your venue, your guests and what tea should do for them."),
+                ("Tea selection &amp; tasting", "We choose the range and the way of serving, and taste the teas together."),
+                ("Proposal", "We agree on products, services and commercial terms in an individual proposal."),
+                ("Launch &amp; ongoing supply", "We train the team, check the service together and agree on a reorder schedule."),
             ],
-            form_h2="Request wholesale tea",
-            form_lead="Tell us about your venue and what you need. We'll reply by email.",
+            terms_h2="Wholesale terms",
+            terms=["Wholesale terms depend on your order and the products selected. Contact us for a tailored quotation.",
+                   "A chain can start with one location and add the others once the format works."],
+            partners_h2="Our partners",
+            faq_h2="Questions from businesses",
+            faq=[
+                ("Can we taste the teas before ordering?", "Yes – tasting is part of choosing the range. We'll agree on the format together, and you're always welcome at our tea house on Boat Avenue."),
+                ("Do you train our staff?", "Yes. We prepare the training and recipe cards in a language agreed with your team."),
+                ("Can a chain start with one location?", "Yes. You can start with one venue and expand once the format works."),
+                ("How are prices calculated?", "They depend on the products, the volumes and the services included. Final terms are fixed in an individual commercial proposal."),
+                ("Can you hold a tea ceremony at our venue?", "Yes. We agree on the duration, the number of guests, the host, teaware, space and travel. Ceremonies are held in English or Russian."),
+            ],
+            form_h2="Discuss a partnership",
+            form_lead="Tell us about your business and what you need. We'll reply by email with the next steps.",
         ),
         ru=dict(
-            title="Оптовые поставки чая на Пхукете | Moychay",
-            desc="Китайский чай для кафе, ресторанов, отелей и SPA на Пхукете. Moychay Phuket обсуждает регулярные поставки чая для бизнеса – оставьте заявку.",
-            crumb="Оптовые поставки", h1="Оптовые поставки чая на Пхукете",
-            lead="Moychay Phuket поставляет китайский чай заведениям на Пхукете. Расскажите о своём бизнесе – обсудим сорта и формат поставок.",
-            cta="Оставить заявку",
-            alt_hero="Блины пуэра на полках Moychay Phuket",
-            who_h2="Для кого",
-            who=["Кафе", "Кофейни", "Рестораны", "Отели", "SPA и wellness-центры", "Другие заведения"],
-            who_note="Любой бизнес, где гостям подают чай и нужны регулярные поставки по Пхукету.",
-            range_h2="Какой чай можно обсудить",
-            range=[
-                "Конкретные сорта, объёмы и доставку обсудим, когда поймём ваши задачи. Попробовать чай можно в нашей чайной на Boat Avenue.",
+            title="Чай оптом и решения для бизнеса на Пхукете | Moychay",
+            desc="Поставщик чая для ресторанов, кафе, отелей и SPA на Пхукете: китайский чай, матча, чайное меню, обучение персонала, подарки и выездные церемонии.",
+            crumb="Оптовые поставки", h1="Чай и чайные решения для бизнеса на Пхукете",
+            lead="Поставляем качественный чай и помогаем организовать чайный сервис – от меню кафе и ресторанов до обучения персонала, подарков и мероприятий.",
+            cta="Обсудить сотрудничество",
+            alt_hero="Гости на чайной встрече в Moychay Phuket",
+            who_h2="Для каких заведений",
+            who_note="Направления, которые можно обсудить с вашей командой. Каждое предложение строим под заведение и ваших гостей.",
+            segments=[
+                ("Рестораны и кафе", "Чай для меню, подбор сортов под кухню, сочетания чая с блюдами, чайные напитки и подготовка персонала."),
+                ("Отели и курорты", "Welcome tea, чай на завтраках и в номерах, подарки гостям, чайные уголки и чайные события для гостей."),
+                ("SPA и wellness", "Чайная подача после процедур, подбор напитков, дегустации и чайные события."),
+                ("Фитнес и йога-студии", "Напитки, чайная полка и тематические встречи для сообщества."),
+                ("Недвижимость и luxury hospitality", "Чай для встреч с клиентами, подарочные наборы, посуда с брендом и чайные мероприятия для резидентов."),
             ],
-            range_list=["Белый чай", "Зелёный чай", "Светлые и тёмные улуны", "Красный чай", "Шэн и шу пуэр", "Травяной чай"],
-            to_tea="Подробнее о нашем чае",
-            how_h2="Как мы работаем",
+            offers_h2="Форматы сотрудничества",
+            offers_note="Состав поставки и стоимость дополнительных услуг фиксируем в индивидуальном предложении.",
+            offers=[
+                ("supply", "Поставки чая и чайное меню", "Ассортимент под вашу кухню, бюджет и способ приготовления.",
+                 "Поставки чая · подбор сортов · сочетания с блюдами · чайные основы для напитков, в том числе матча и холодный чай · техкарты для команды"),
+                ("training", "Обучение персонала", "Команда учится готовить и подавать чай одинаково хорошо – на согласованном с вами языке.",
+                 "Приготовление и подача · стандарты · работа с чайной посудой · рекомендации по хранению и завариванию"),
+                ("corners", "Чайная полка и чайный уголок", "От полки с упакованным чаем, где гость выбирает сам, до уголка с приготовлением или отдельной чайной комнаты.",
+                 "Чайная полка · уголок с приготовлением · подбор посуды · оформление пространства"),
+                ("gifts", "Корпоративные подарки и посуда с брендом", "Подарочные наборы и посуда для гостей, клиентов и партнёров.",
+                 "Подарочные наборы · чай и посуда · упаковка в вашем оформлении · посуда с вашим брендом по согласованному образцу"),
+                ("experiences", "Частные чайные мероприятия", "Чайные церемонии на русском и английском для гостей отелей, частных групп, клиентских встреч и мероприятий резидентов.",
+                 "Выездные церемонии · групповые дегустации · частные мероприятия · тематические вечера для клубов и студий"),
+            ],
+            products_h2="Продукты для бизнеса",
+            products=["Китайский чай и травяные сборы", "Матча", "Чайные основы для напитков", "Безалкогольная комбуча на нашем чае",
+                      "Дикий мёд из Чиангмая", "Посуда и подарочные наборы"],
+            products_note="Ассортимент, фасовку и цены согласуем под каждый заказ. Для комбучи формат поставки и спецификацию продукта согласуем отдельно.",
+            alt_products="Полки с глиняными чайниками и фарфоровыми чашками в Moychay Phuket",
+            to_tea="Чай на наших полках",
+            how_h2="Как проходит сотрудничество",
             how=[
-                ("Вы оставляете заявку", "Расскажите о заведении и о том, какой чай ищете."),
-                ("Обсуждаем задачи", "Говорим об ассортименте, объёмах и о том, как вы будете подавать чай."),
-                ("Согласовываем условия", "Вместе договариваемся об условиях поставок, удобных вашему заведению."),
+                ("Обсуждаем задачи", "Говорим о заведении, гостях и о том, какую роль в сервисе должен играть чай."),
+                ("Подбираем ассортимент и проводим дегустацию", "Выбираем сорта и способ подачи, пробуем чай вместе."),
+                ("Согласовываем предложение", "Фиксируем товары, услуги и коммерческие условия в индивидуальном предложении."),
+                ("Организуем запуск и поставки", "Обучаем команду, вместе проверяем подачу и договариваемся о графике пополнения."),
             ],
-            form_h2="Заявка на оптовые поставки",
-            form_lead="Расскажите о заведении и о том, что вам нужно. Ответим на email.",
+            terms_h2="Оптовые условия",
+            terms=["Оптовые условия зависят от объёма и состава заказа. Подготовим индивидуальное предложение для вашего бизнеса.",
+                   "Сетевой проект можно начать с одного заведения и подключить остальные, когда формат себя покажет."],
+            partners_h2="Наши партнёры",
+            faq_h2="Вопросы от бизнеса",
+            faq=[
+                ("Можно ли попробовать чай до заказа?", "Да – дегустация входит в подбор ассортимента. Формат обсудим вместе, а в нашей чайной на Boat Avenue вам всегда рады."),
+                ("Вы обучаете персонал?", "Да. Готовим обучение и техкарты на согласованном с вашей командой языке."),
+                ("Может ли сеть начать с одного заведения?", "Да. Можно начать с одной площадки и расширяться, когда формат заработает."),
+                ("Как формируется цена?", "Она зависит от товаров, объёмов и включённых услуг. Окончательные условия фиксируются в индивидуальном коммерческом предложении."),
+                ("Можете провести чайную церемонию у нас?", "Да. Согласуем длительность, число гостей, ведущего, посуду, пространство и выезд. Церемонии проводим на русском или английском."),
+            ],
+            form_h2="Обсудить сотрудничество",
+            form_lead="Расскажите о бизнесе и о том, что вам нужно. Ответим на email и предложим следующие шаги.",
         ),
     ),
 )

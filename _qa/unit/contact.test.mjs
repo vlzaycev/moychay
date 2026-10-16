@@ -228,3 +228,13 @@ test('KV keys are hashed: no IPs, emails or messages stored in clear text', asyn
   const keys = [...env.FORM_KV.m.keys()].join(' ');
   for (const s of ['203.0.113.7', 'anna@example.com', 'Hello']) assert.ok(!keys.includes(s), keys);
 });
+
+test('wholesale business type: optional, whitelist only, shown in Telegram', () => {
+  const w = { ...base, inquiry_type: 'wholesale', company: 'Cafe', page_path: '/wholesale/' };
+  assert.equal(validate(w).ok, true);
+  assert.equal(validate({ ...w, business_type: 'hotel' }).ok, true);
+  assert.equal(validate({ ...w, business_type: '<script>' }).errors.business_type, 'invalid');
+  assert.equal(validate({ ...w, business_type: '__proto__' }).errors.business_type, 'invalid');
+  assert.equal(validate({ ...base, business_type: 'hotel' }).errors.business_type, 'invalid', 'not on the contact form');
+  assert.match(formatMessage(validate({ ...w, business_type: 'spa' }).data), /Тип бизнеса: SPA \/ wellness/);
+});
