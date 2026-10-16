@@ -459,6 +459,8 @@ figure{margin:0}
 .map{aspect-ratio:4/3;background:var(--sand);margin:0 calc(var(--gut) * -1)}
 .map iframe{display:block;width:100%;height:100%;border:0;filter:grayscale(.25) sepia(.12)}
 @media (min-width:700px){.map{margin:0;aspect-ratio:16/10}}
+/* contact page: the map is as tall as the address column next to it */
+@media (min-width:900px){#find-us .split{align-items:stretch}#find-us .map{aspect-ratio:auto;height:100%;min-height:420px}}
 /* B2B: business types, offer list, partners */
 .seg{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-l)}
 .seg li{padding:20px 0;border-bottom:1px solid var(--line-l)}
