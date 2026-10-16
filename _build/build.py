@@ -185,7 +185,7 @@ EN = dict(
     hours="Open daily 11:00-22:00",
     cta_directions="Get directions",
     cta_message="Message us on WhatsApp",
-    why_h2="A quiet place in Bangtao",
+    why_h2="Your quiet place in Phuket",
     why_body=paras([
         "You don't need to know anything about tea to come in. Guests book a ceremony, work over a matcha latte, or just want a quiet corner away from the beach.",
         "Concrete walls, calligraphy, a rattan peacock chair and shelves of teapots – most of them for sale. The tea master will help you choose.",
@@ -311,7 +311,7 @@ RU = dict(
     hours="Ежедневно 11:00-22:00",
     cta_directions="Проложить маршрут",
     cta_message="Написать в Telegram",
-    why_h2="Тихое место в Бангтао",
+    why_h2="Ваше тихое место на Пхукете",
     why_body=paras([
         "Разбираться в чае не обязательно. К нам приходят на церемонию, поработать за матча-латте или просто посидеть в тишине подальше от пляжа.",
         "Бетонные стены, каллиграфия, ротанговое кресло-павлин и полки с чайниками – большинство из них можно купить. Чайный мастер поможет выбрать.",
