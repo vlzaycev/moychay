@@ -894,7 +894,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 </footer>
 
-<!-- Sticky bar: visible after the hero, hidden from Contacts on and while another main button is on screen -->
+<!-- Sticky bar: visible after the hero until the footer, hidden while a directions button is on screen -->
 <div class="bar" id="bar">
   <div class="in">
     <span class="addr"><span>Open daily 11:00-22:00</span><span class="motto">in tea we trust</span></span>
@@ -931,9 +931,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   });
 
   /* Header + sticky bar */
-  var hdr = $('#hdr'), bar = $('#bar'), barLinks = $$('a', bar), hero = $('#home'), find = $('#find-us') || $('.ftr');
+  var hdr = $('#hdr'), bar = $('#bar'), barLinks = $$('a', bar), hero = $('#home'), find = $('.ftr');
   var ticking = false, btnsInView = [];
-  // Hide the bar while another primary button is on screen (one main CTA at a time)
+  // Visible after the first screen down to the footer, on every page; hidden only while a
+  // "Get directions" button is already on screen, so the same action is never shown twice
   if ('IntersectionObserver' in window) {
     var bo = new IntersectionObserver(function (es) {
       es.forEach(function (en) {
@@ -943,7 +944,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       });
       onScroll();
     });
-    $$('main .btn').forEach(function (b) { bo.observe(b); });
+    $$('main .btn[data-track="directions"]').forEach(function (b) { bo.observe(b); });
   }
   function onScroll() {
     ticking = false;

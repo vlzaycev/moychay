@@ -292,3 +292,20 @@ for (const path of ['/', '/ru/', '/ceremonies/', '/ru/ceremonies/', '/tea/', '/m
     expect(res.bad).toEqual([]);
   });
 }
+
+/* The sticky bar (hours | in tea we trust | directions) appears while scrolling on every page */
+for (const path of ['/', '/ru/', '/ceremonies/', '/tea/', '/matcha/', '/events/', '/contact/', '/wholesale/', '/ru/contact/', '/ru/matcha/']) {
+  test(`${path}: sticky bar shows up while scrolling`, async ({ page }) => {
+    await mockEvents(page);
+    await page.goto(path);
+    const seen = await page.evaluate(async () => {
+      const H = document.documentElement.scrollHeight;
+      for (let y = 0; y < H; y += 120) {
+        scrollTo(0, y); await new Promise(r => setTimeout(r, 80));
+        if (document.getElementById('bar').classList.contains('on')) return true;
+      }
+      return false;
+    });
+    expect(seen).toBe(true);
+  });
+}

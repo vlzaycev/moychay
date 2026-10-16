@@ -111,14 +111,16 @@ for (const p of PAGES) {
       await expect(page.locator('.lang')).toHaveAttribute('data-cur', other);
     });
 
-    test('sticky bar: hidden on hero, shown mid-page, hidden at Find us', async ({ page }) => {
+    test('sticky bar: hidden on hero, shown mid-page, hidden next to a directions button and at the footer', async ({ page }) => {
       const bar = page.locator('#bar');
       await expect(bar).not.toHaveClass(/\bon\b/);
       await page.locator('#teas .tea-list').scrollIntoViewIfNeeded();
       await page.evaluate(() => window.scrollBy(0, 200));
       await expect(bar).toHaveClass(/\bon\b/);
-      await page.locator('#find-us').evaluate(e => window.scrollTo(0, e.offsetTop));
-      await expect(bar).not.toHaveClass(/\bon\b/);
+      await page.locator('#find-us .btn[data-track="directions"]').evaluate(e => e.scrollIntoView({ block: 'center' }));
+      await expect(bar).not.toHaveClass(/\bon\b/);        // the same action is already on screen
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      await expect(bar).not.toHaveClass(/\bon\b/);        // footer
     });
 
     test('gallery: one lead photo + 3 more, real proportions, nothing moves by itself', async ({ page }) => {
