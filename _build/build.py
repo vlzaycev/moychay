@@ -49,8 +49,7 @@ TG_CLUB = "https://t.me/moychayphuket"     # channel «За чашкой чая�
 PHONE = "+66817959110"                     # calls and official enquiries
 PHONE_TXT = "+66 81 795 9110"
 EMAIL = "info@phuket.moychay.asia"
-TEL_LINK = f'<a href="tel:{PHONE}" data-track="phone_call" data-place="{{place}}">{PHONE_TXT}</a>'
-MAIL_LINK = f'<a href="mailto:{EMAIL}" data-track="email_click" data-place="{{place}}">{EMAIL}</a>'
+
 
 
 FONTS = json.load(open(os.path.join(HERE, "fonts.json"), encoding="utf-8"))
@@ -65,6 +64,23 @@ def fonts(families, preload, root):
                 f"src:url({root}fonts/{f['file']}) format('woff2');unicode-range:{f['range']}}}")
     links = "\n".join(f'<link rel="preload" as="font" type="font/woff2" href="{root}fonts/{n}" crossorigin>' for n in preload)
     return "\n".join(faces), links
+
+
+def clink(href, label, icon, track, place, ext=True, stroke=False):
+    """One contact link with its icon (no separators between links)."""
+    attrs = ' target="_blank" rel="noopener"' if ext else ""
+    return (f'<li><a href="{href}"{attrs} data-track="{track}" data-place="{place}">'
+            f'<svg class="{"ico" if stroke else "bi"}" aria-hidden="true"><use href="#{icon}"/></svg>{label}</a></li>')
+
+
+def clinks(*items):
+    return '<ul class="clinks">' + "".join(items) + "</ul>"
+
+
+def spans(s):
+    """'A · B' in the data → one readable phrase: 'A, b' (no middle dots on the page)."""
+    parts = s.split(" · ")
+    return ", ".join([parts[0]] + [p[:1].lower() + p[1:] for p in parts[1:]])
 
 
 def wa(text):
@@ -85,7 +101,7 @@ def menu(items):
         out.append(f"""        <li class="menu-i">
           <h3>{m["name"]}</h3>
           <p class="menu-p">{m["price"]}</p>
-          <p class="menu-m">{m["meta"]}</p>
+          <p class="menu-m">{spans(m["meta"])}</p>
           <p class="menu-d">{m["text"]}</p>
         </li>""")
     return "\n".join(out)
@@ -140,7 +156,8 @@ TEA_RU = [
 
 
 COMMON = dict(maps=MAPS, phone=PHONE, phone_txt=PHONE_TXT, email=EMAIL,
-              find_call=TEL_LINK.format(place="find") + "<br>" + MAIL_LINK.format(place="find"), head_font="Geologica", font_families=["Geologica", "Inter"])
+              find_call=clinks(clink(f"tel:{PHONE}", PHONE_TXT, "i-phone", "phone_call", "find", ext=False, stroke=True),
+                               clink(f"mailto:{EMAIL}", EMAIL, "i-mail", "email_click", "find", ext=False, stroke=True)), head_font="Geologica", font_families=["Geologica", "Inter"])
 
 # ── EN ───────────────────────────────────────────────────────────
 EN = dict(
@@ -150,7 +167,7 @@ EN = dict(
     canonical="https://teaphuket.com/", og_locale="en_US", map_lang="en",
     cur_en='aria-current="page"', cur_ru="",
     meta_title="Moychay Phuket – Tea House &amp; Tea Ceremonies in Bangtao",
-    meta_desc="Moychay Phuket – tea house on Boat Avenue, Bangtao. Chinese tea ceremonies, tastings, 200+ teas, matcha drinks and weekly tea events. Open daily 11:00–22:00.",
+    meta_desc="Moychay Phuket – tea house on Boat Avenue, Bangtao. Chinese tea ceremonies, tastings, 200+ teas, matcha drinks and weekly tea events. Open daily 11:00-22:00.",
     nav_label="Sections", nav_1="Tea ceremonies", nav_2="Our teas", nav_3="Events", nav_4="Contacts", nav_shop="Online shop",
     msg_url=wa("Hi! I found you on teaphuket.com"),
     msg_book_url=wa("Hi! I'd like to book a tea ceremony"),
@@ -161,7 +178,7 @@ EN = dict(
     hero_sub="Tea house &amp; tea ceremonies in Bangtao, Phuket",
     addr_short="2nd floor, Boat Avenue, Bangtao",
     addr_full="2nd floor, Boat Avenue, Bangtao, Phuket",
-    hours="Open daily 11:00–22:00",
+    hours="Open daily 11:00-22:00",
     cta_directions="Get directions",
     cta_message="Message us on WhatsApp",
     why_h2="A quiet place in Bangtao",
@@ -221,7 +238,8 @@ EN = dict(
     find_h2="Contacts",
     map_title="Moychay Phuket on Google Maps",
     find_addr_l="Address", find_hours_l="Hours", find_park_l="Parking", find_msg_l="Write to us", find_call_l="Call or email",
-    find_msgs=f'<a href="{wa("Hi! I found you on teaphuket.com")}" target="_blank" rel="noopener" data-track="whatsapp" data-place="find">WhatsApp</a> · <a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="find">Instagram</a>',
+    find_msgs=clinks(clink(wa("Hi! I found you on teaphuket.com"), "WhatsApp", "i-wa", "whatsapp", "find"),
+                     clink("https://www.instagram.com/moychay.phuket", "Instagram", "i-ig", "instagram", "find")),
     ev_more="All events", 
     find_park="On site at Boat Avenue",
     faq_h2="Common questions",
@@ -239,7 +257,7 @@ EN = dict(
         ("Instagram", "https://www.instagram.com/moychay.phuket", "instagram", "i-ig"),
         ("Facebook", "https://www.facebook.com/moychay.phuket/", "facebook", "i-fb"),
     ]),
-    ftr_about="Tea house and tea ceremonies in Bangtao, Phuket. Part of Moychay, an international tea community.",
+    ftr_about="Tea house and tea ceremonies in Bangtao, Phuket. Part of Moychay, an international tea culture company.",
     ftr_h_explore="Explore", ftr_h_partners="Partnerships", ftr_h_visit="Visit us",
     ftr_ceremonies="Tea ceremonies", ftr_tea="Chinese tea", ftr_matcha="Matcha", ftr_events="Events", ftr_contact="Contact",
     ftr_wholesale="Wholesale &amp; partnerships", ftr_shop="Online shop",
@@ -274,7 +292,7 @@ RU = dict(
     canonical="https://teaphuket.com/ru/", og_locale="ru_RU", map_lang="ru",
     cur_en="", cur_ru='aria-current="page"',
     meta_title="Moychay Phuket – Чайная и чайные церемонии на Пхукете",
-    meta_desc="Moychay Phuket (Мойчай) – чайная на Boat Avenue в Бангтао, Пхукет. Китайские чайные церемонии, дегустации, 200+ сортов чая, матча и мероприятия. Ежедневно 11:00–22:00.",
+    meta_desc="Moychay Phuket (Мойчай) – чайная на Boat Avenue в Бангтао, Пхукет. Китайские чайные церемонии, дегустации, 200+ сортов чая, матча и мероприятия. Ежедневно 11:00-22:00.",
     nav_label="Разделы", nav_1="Церемонии", nav_2="Наш чай", nav_3="Мероприятия", nav_4="Контакты", nav_shop="Магазин",
     msg_url=TG, msg_book_url=TG, msg_order_url=TG,
     msg_event="telegram", msg_icon="i-tg",
@@ -283,7 +301,7 @@ RU = dict(
     hero_sub="Чайная и чайные церемонии на Пхукете",
     addr_short="2 этаж, Boat Avenue, Бангтао",
     addr_full="2 этаж, Boat Avenue, Бангтао, Пхукет",
-    hours="Ежедневно 11:00–22:00",
+    hours="Ежедневно 11:00-22:00",
     cta_directions="Проложить маршрут",
     cta_message="Написать в Telegram",
     why_h2="Тихое место в Бангтао",
@@ -343,7 +361,8 @@ RU = dict(
     find_h2="Контакты",
     map_title="Moychay Phuket на Google Картах",
     find_addr_l="Адрес", find_hours_l="Часы работы", find_park_l="Парковка", find_msg_l="Написать", find_call_l="Телефон и email",
-    find_msgs=f'<a href="{TG}" target="_blank" rel="noopener" data-track="telegram" data-place="find">Telegram</a> · <a href="{WA}" target="_blank" rel="noopener" data-track="whatsapp" data-place="find">WhatsApp</a> · <a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="find">Instagram</a>',
+    find_msgs=clinks(clink(TG, "Telegram", "i-tg", "telegram", "find"), clink(WA, "WhatsApp", "i-wa", "whatsapp", "find"),
+                     clink("https://www.instagram.com/moychay.phuket", "Instagram", "i-ig", "instagram", "find")),
     ev_more="Все мероприятия", 
     find_park="На месте, на Boat Avenue",
     faq_h2="Частые вопросы",
@@ -363,7 +382,7 @@ RU = dict(
         ("Instagram", "https://www.instagram.com/moychay.phuket", "instagram", "i-ig"),
         ("Facebook", "https://www.facebook.com/moychay.phuket/", "facebook", "i-fb"),
     ]),
-    ftr_about="Чайная и чайные церемонии в Бангтао, Пхукет. Часть международного чайного сообщества Moychay.",
+    ftr_about="Чайная и чайные церемонии в Бангтао, Пхукет. Часть Moychay, международной компании чайной культуры.",
     ftr_h_explore="Разделы", ftr_h_partners="Сотрудничество", ftr_h_visit="Как нас найти",
     ftr_ceremonies="Чайные церемонии", ftr_tea="Китайский чай", ftr_matcha="Матча", ftr_events="Мероприятия", ftr_contact="Контакты",
     ftr_wholesale="Оптовые поставки", ftr_shop="Интернет-магазин",
@@ -575,7 +594,7 @@ def blog_meta(p, T):
         bits.append(f'{T["published"]} {B.fmt_date(p["published_at"], p["language"])}')
     if p.get("updated_at") and p.get("updated_at") != p.get("published_at"):
         bits.append(f'{T["updated"]} {B.fmt_date(p["updated_at"], p["language"])}')
-    return " · ".join(bits)
+    return ", ".join([bits[0]] + [b[:1].lower() + b[1:] for b in bits[1:]])
 
 
 def blog_hero(lang, crumbs, h1, lead, meta, photo, alt):
@@ -676,7 +695,7 @@ def blog_index(lang, preview=False):
     base = f"/_preview{B.lp(lang)}blog/" if preview else f"{B.lp(lang)}blog/"
     rows = "".join(
         f'<li><p class="art-cat">{T["cats"].get(p["category"], p["category"])}'
-        + (f' · <span class="draft-tag">{T["draft_label"]}</span>' if not p["published"] else "")
+        + (f' <span class="draft-tag">{T["draft_label"]}</span>' if not p["published"] else "")
         + f'</p><h2><a href="{base}{p["slug"]}/">{p["title"]}</a></h2><p>{p["description"]}</p></li>' for p in pool)
     main = "\n\n".join([
         blog_hero(lang, [("Moychay Phuket", B.lp(lang)), (T["crumb"], "")], T["h1"], T["lead"], "", "interior/1_shop",

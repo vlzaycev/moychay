@@ -196,7 +196,7 @@ def ceremonies(L, P, cfg):
         fm.append(f'''        <li class="menu-i">
           <h3>{f["name"]}</h3>
           <p class="menu-p">{f["price"]}</p>
-          <p class="menu-m">{f["meta"]}</p>
+          <p class="menu-m">{", ".join([m for m in f["meta"].split(" · ")][:1] + [m[:1].lower() + m[1:] for m in f["meta"].split(" · ")[1:]])}</p>
           <p class="menu-d">{f["text"]}</p>
           <p class="menu-c">{f["terms"]}</p>{book}
         </li>''')
@@ -226,7 +226,7 @@ def ceremonies(L, P, cfg):
     {img(TEA_MASTER["photo"], M["alt"], "(min-width:900px) 40vw, 100vw", "master-ph", w=1120, h=1400)}
     <div class="copy">
       <h2 class="rv">{P["m_h2"]}</h2>
-      <p class="master-role"><strong>{M["name"]}</strong> · {M["role"]}</p>
+      <p class="master-role"><strong>{M["name"]}</strong><span>{M["role"]}</span></p>
 {body}
     </div>
   </div>
@@ -409,7 +409,7 @@ def wholesale(L, P, cfg):
     if PARTNERS:
         items = "".join(
             f'<li><img src="{{{{root}}}}img/partners/{p["logo"]}" alt="{escape(p["name"])}" loading="lazy" decoding="async">'
-            f'<p><strong>{escape(p["name"])}</strong> · {p[L["lang"]]["format"]}</p>'
+            f'<p><strong>{escape(p["name"])}</strong><br>{p[L["lang"]]["format"]}</p>'
             + (f'<p class="muted">{p[L["lang"]]["case"]}</p>' if p[L["lang"]].get("case") else "") + "</li>"
             for p in PARTNERS)
         partners = f'''<section class="sec" id="partners">
@@ -435,7 +435,7 @@ def wholesale(L, P, cfg):
     <div>
       <h2 class="rv">{P["form_h2"]}</h2>
       <p class="muted">{P["form_lead"]}</p>
-      <p class="muted more">{P["direct"]}<br>{L["find_call"].replace('data-place="find"', 'data-place="wholesale"')}</p>
+      <div class="muted more"><p>{P["direct"]}</p>{L["find_call"].replace('data-place="find"', 'data-place="wholesale"')}</div>
     </div>
   {form(L, "wholesale", cfg["cfg_form_endpoint"], cfg["cfg_turnstile_sitekey"])}
   </div>
@@ -446,6 +446,17 @@ def wholesale(L, P, cfg):
 
 BUILDERS = dict(ceremonies=ceremonies, tea=tea, matcha=matcha, events=events, contact=contact, wholesale=wholesale)
 
+
+def _social(items):
+    li = "".join(f'<li><a href="{u}" target="_blank" rel="noopener" data-track="{tr}" data-place="contact">'
+                 f'<svg class="bi" aria-hidden="true"><use href="#{i}"/></svg>{n}</a></li>' for n, u, tr, i in items)
+    return f'<ul class="clinks">{li}</ul>'
+
+
+IG = ("Instagram", "https://www.instagram.com/moychay.phuket", "instagram", "i-ig")
+FB = ("Facebook", "https://www.facebook.com/moychay.phuket/", "facebook", "i-fb")
+SOCIAL_EN = _social([IG, FB])
+SOCIAL_RU = _social([IG, FB, ("Чайный клуб в Telegram", "https://t.me/moychayphuket", "telegram_club", "i-tg")])
 
 # ── Texts ────────────────────────────────────────────────────────
 PAGES = dict(
@@ -486,7 +497,7 @@ PAGES = dict(
             info_h2="Before you come",
             info=[
                 ("Where", "Moychay Phuket, 2nd floor, Boat Avenue, Bangtao, Phuket. Parking on site."),
-                ("Hours", "Open daily 11:00–22:00"),
+                ("Hours", "Open daily 11:00-22:00"),
                 ("Booking", "Needed for the gong fu cha ceremony and group ceremonies – message us on WhatsApp. Walk-in tastings need no booking."),
                 ("Experience", "Not needed. Most guests try a tea ceremony for the first time."),
                 ("Duration and price", "Walk-in tasting – about 10 minutes, 300฿ + tea by weight. Gong fu cha – 60 minutes + up to 60 minutes to relax, 600฿ per person. Groups – price on request."),
@@ -539,7 +550,7 @@ PAGES = dict(
             info_h2="Перед визитом",
             info=[
                 ("Где", "Moychay Phuket, 2 этаж, Boat Avenue, Бангтао, Пхукет. Парковка на месте."),
-                ("Часы работы", "Ежедневно 11:00–22:00"),
+                ("Часы работы", "Ежедневно 11:00-22:00"),
                 ("Запись", "Нужна на церемонию гунфу ча и групповые церемонии – напишите нам в Telegram. На дегустацию записываться не нужно."),
                 ("Опыт", "Не нужен. Большинство гостей пробуют чайную церемонию впервые."),
                 ("Длительность и цена", "Дегустация – около 10 минут, 300฿ + чай по весу. Гунфу ча – 60 минут + до 60 минут отдыха, 600฿ с человека. Группы – цена по запросу."),
@@ -632,7 +643,7 @@ PAGES = dict(
     matcha=dict(
         en=dict(
             title="Matcha in Phuket – Matcha Tea &amp; Drinks | Moychay Phuket",
-            desc="Matcha lattes and matcha tonics at Moychay Phuket on Boat Avenue, Bangtao. Non-alcoholic matcha drinks from 250฿, to stay or to go. Open daily 11:00–22:00.",
+            desc="Matcha lattes and matcha tonics at Moychay Phuket on Boat Avenue, Bangtao. Non-alcoholic matcha drinks from 250฿, to stay or to go. Open daily 11:00-22:00.",
             crumb="Matcha", h1="Matcha in Phuket",
             lead="Non-alcoholic matcha lattes and matcha tonics at our tea house on Boat Avenue in Bangtao – to stay or to go.",
             cta="Visit our tea house", cta2="Address and hours",
@@ -643,7 +654,7 @@ PAGES = dict(
                 ("Price", "From 250฿"),
                 ("To stay or to go", "Both – take a seat in the tea house or take your drink with you"),
                 ("Also on the menu", "Kombucha on tap and more than 200 Chinese teas"),
-                ("Hours", "Open daily 11:00–22:00"),
+                ("Hours", "Open daily 11:00-22:00"),
             ],
             stay_h2="A quiet place for your matcha",
             stay=[
@@ -661,7 +672,7 @@ PAGES = dict(
         ),
         ru=dict(
             title="Матча на Пхукете – Чай и напитки с матчей | Moychay",
-            desc="Матча-латте и тоники с матчей в Moychay Phuket на Boat Avenue, Бангтао. Безалкогольные напитки с матчей от 250฿, здесь или с собой. Ежедневно 11:00–22:00.",
+            desc="Матча-латте и тоники с матчей в Moychay Phuket на Boat Avenue, Бангтао. Безалкогольные напитки с матчей от 250฿, здесь или с собой. Ежедневно 11:00-22:00.",
             crumb="Матча", h1="Матча на Пхукете",
             lead="Безалкогольные матча-латте и тоники с матчей в нашей чайной на Boat Avenue в Бангтао – здесь или с собой.",
             cta="Приходите к нам", cta2="Адрес и часы работы",
@@ -672,7 +683,7 @@ PAGES = dict(
                 ("Цена", "От 250฿"),
                 ("Здесь или с собой", "Можно остаться в чайной или взять напиток с собой"),
                 ("Ещё в меню", "Комбуча на разлив и больше 200 сортов китайского чая"),
-                ("Часы работы", "Ежедневно 11:00–22:00"),
+                ("Часы работы", "Ежедневно 11:00-22:00"),
             ],
             stay_h2="Тихое место для матчи",
             stay=[
@@ -736,25 +747,25 @@ PAGES = dict(
     contact=dict(
         en=dict(
             title="Contact &amp; Visit Moychay Phuket | Tea House in Bangtao",
-            desc="Moychay Phuket tea house: 2nd floor, Boat Avenue, Bangtao, Phuket. Open daily 11:00–22:00. Get directions, message us on WhatsApp or write to us.",
+            desc="Moychay Phuket tea house: 2nd floor, Boat Avenue, Bangtao, Phuket. Open daily 11:00-22:00. Get directions, message us on WhatsApp or write to us.",
             crumb="Contact", h1="Visit Moychay Phuket",
-            lead="2nd floor, Boat Avenue, Bangtao. Open daily 11:00–22:00 – for a walk-in tasting just come by.",
+            lead="2nd floor, Boat Avenue, Bangtao. Open daily 11:00-22:00 – for a walk-in tasting just come by.",
             alt_hero="Moychay Phuket entrance on Boat Avenue",
             visit_h2="Address and contacts",
             social_l="Follow us",
-            social='<a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="contact">Instagram</a> · <a href="https://www.facebook.com/moychay.phuket/" target="_blank" rel="noopener" data-track="facebook" data-place="contact">Facebook</a>',
+            social=SOCIAL_EN,
             form_h2="Get in touch",
             form_lead="For bookings the quickest way is WhatsApp. For anything else, write to us here and we'll reply by email.",
         ),
         ru=dict(
             title="Контакты Moychay Phuket – Чайная в Бангтао",
-            desc="Чайная Moychay Phuket: 2 этаж, Boat Avenue, Бангтао, Пхукет. Ежедневно 11:00–22:00. Маршрут, Telegram, WhatsApp и форма обратной связи.",
+            desc="Чайная Moychay Phuket: 2 этаж, Boat Avenue, Бангтао, Пхукет. Ежедневно 11:00-22:00. Маршрут, Telegram, WhatsApp и форма обратной связи.",
             crumb="Контакты", h1="Контакты Moychay Phuket",
-            lead="2 этаж, Boat Avenue, Бангтао. Ежедневно 11:00–22:00 – на дегустацию можно прийти без записи.",
+            lead="2 этаж, Boat Avenue, Бангтао. Ежедневно 11:00-22:00 – на дегустацию можно прийти без записи.",
             alt_hero="Вход в Moychay Phuket на Boat Avenue",
             visit_h2="Адрес и контакты",
             social_l="Соцсети",
-            social='<a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="contact">Instagram</a> · <a href="https://www.facebook.com/moychay.phuket/" target="_blank" rel="noopener" data-track="facebook" data-place="contact">Facebook</a> · <a href="https://t.me/moychayphuket" target="_blank" rel="noopener" data-track="telegram_club" data-place="contact">Чайный клуб в Telegram</a>',
+            social=SOCIAL_RU,
             form_h2="Напишите нам",
             form_lead="Записаться на церемонию быстрее всего в Telegram. По другим вопросам напишите здесь – ответим на email.",
         ),
@@ -780,15 +791,15 @@ PAGES = dict(
             offers_note="The products and the cost of additional services are set out in an individual proposal for your business.",
             offers=[
                 ("supply", "Tea supply &amp; menu development", "A tea range chosen for your kitchen, your budget and the way you brew.",
-                 "Tea supply · choice of teas · pairings with dishes · tea bases for drinks, including matcha and iced tea · recipe cards for your team"),
+                 "Tea supply, choice of teas, pairings with dishes, tea bases for drinks, including matcha and iced tea, recipe cards for your team"),
                 ("training", "Staff training", "Your team learns to brew and serve tea the same way every time, in a language agreed with you.",
-                 "Brewing and serving · standard steps · working with teaware · storage and brewing recommendations"),
+                 "Brewing and serving, standard steps, working with teaware, storage and brewing recommendations"),
                 ("corners", "Tea corners &amp; retail shelves", "From a shelf of packaged tea that guests buy themselves to a corner where tea is prepared, or a separate tea room.",
-                 "Tea shelf · tea corner with preparation · choice of teaware · design of the space"),
+                 "Tea shelf, tea corner with preparation, choice of teaware, design of the space"),
                 ("gifts", "Corporate gifts &amp; branded teaware", "Gift sets and teaware for guests, clients and partners.",
-                 "Gift sets · tea and teaware · packaging in your design · teaware with your brand, made to an agreed sample"),
+                 "Gift sets, tea and teaware, packaging in your design, teaware with your brand, made to an agreed sample"),
                 ("experiences", "Private tea experiences", "Tea ceremonies in English and Russian for hotel guests, private groups, client meetings and residents' events.",
-                 "Ceremonies at your venue · group tastings · private events · themed evenings for clubs and studios"),
+                 "Ceremonies at your venue, group tastings, private events, themed evenings for clubs and studios"),
             ],
             products_h2="Products for your business",
             products=["Chinese tea and herbal blends", "Matcha", "Tea bases for drinks", "Non-alcoholic kombucha brewed on our tea",
@@ -839,15 +850,15 @@ PAGES = dict(
             offers_note="Состав поставки и стоимость дополнительных услуг фиксируем в индивидуальном предложении.",
             offers=[
                 ("supply", "Поставки чая и чайное меню", "Ассортимент под вашу кухню, бюджет и способ приготовления.",
-                 "Поставки чая · подбор сортов · сочетания с блюдами · чайные основы для напитков, в том числе матча и холодный чай · техкарты для команды"),
+                 "Поставки чая, подбор сортов, сочетания с блюдами, чайные основы для напитков, в том числе матча и холодный чай, техкарты для команды"),
                 ("training", "Обучение персонала", "Команда учится готовить и подавать чай одинаково хорошо – на согласованном с вами языке.",
-                 "Приготовление и подача · стандарты · работа с чайной посудой · рекомендации по хранению и завариванию"),
+                 "Приготовление и подача, стандарты, работа с чайной посудой, рекомендации по хранению и завариванию"),
                 ("corners", "Чайная полка и чайный уголок", "От полки с упакованным чаем, где гость выбирает сам, до уголка с приготовлением или отдельной чайной комнаты.",
-                 "Чайная полка · уголок с приготовлением · подбор посуды · оформление пространства"),
+                 "Чайная полка, уголок с приготовлением, подбор посуды, оформление пространства"),
                 ("gifts", "Корпоративные подарки и посуда с брендом", "Подарочные наборы и посуда для гостей, клиентов и партнёров.",
-                 "Подарочные наборы · чай и посуда · упаковка в вашем оформлении · посуда с вашим брендом по согласованному образцу"),
+                 "Подарочные наборы, чай и посуда, упаковка в вашем оформлении, посуда с вашим брендом по согласованному образцу"),
                 ("experiences", "Частные чайные мероприятия", "Чайные церемонии на русском и английском для гостей отелей, частных групп, клиентских встреч и мероприятий резидентов.",
-                 "Выездные церемонии · групповые дегустации · частные мероприятия · тематические вечера для клубов и студий"),
+                 "Выездные церемонии, групповые дегустации, частные мероприятия, тематические вечера для клубов и студий"),
             ],
             products_h2="Продукты для бизнеса",
             products=["Китайский чай и травяные сборы", "Матча", "Чайные основы для напитков", "Безалкогольная комбуча на нашем чае",
