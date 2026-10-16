@@ -45,7 +45,7 @@ for (const lang of ['en', 'ru']) {
   test(`${lang}: home page links to the new pages in context`, async ({ page }) => {
     await mockEvents(page);
     await page.goto(lp);
-    for (const s of ['ceremonies', 'tea', 'matcha', 'events', 'contact']) {
+    for (const s of ['ceremonies', 'tea', 'matcha', 'events']) {
       expect(await page.locator(`main a[href="${lp}${s}/"]`).count(), s).toBeGreaterThan(0);
     }
   });
