@@ -210,8 +210,6 @@ window.SITE = {
   --bar-h:0px;
   --bleed:calc(var(--gut) + max(0px, (100vw - var(--max)) / 2));
   --pattern:url(../img/brand/moychay-pattern.svg);
-}},Inter,system-ui,sans-serif;
-  --bleed:calc(var(--gut) + max(0px, (100vw - var(--max)) / 2));
 }
 *{box-sizing:border-box}
 html{overscroll-behavior:none;overflow-x:clip;background:var(--dark);-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:72px}
@@ -406,9 +404,8 @@ figure{margin:0}
 .seg li{padding:20px 0;border-bottom:1px solid var(--line-l)}
 .seg h3{font-size:21px;margin-bottom:4px}
 .seg p{margin:0;color:var(--muted-l);max-width:56ch}
-.offer{list-style:none;margin:0;padding:0;counter-reset:o;border-top:1px solid var(--line-l)}
-.offer li{counter-increment:o;display:grid;grid-template-columns:36px 1fr;gap:6px 14px;padding:24px 0;border-bottom:1px solid var(--line-l);scroll-margin-top:96px}
-.offer li::before{content:counter(o,upper-latin);grid-row:span 3;font-family:var(--head);font-size:22px;line-height:1.2;color:var(--clay-text)}
+.offer{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-l)}
+.offer li{display:grid;gap:6px;padding:24px 0;border-bottom:1px solid var(--line-l);scroll-margin-top:96px}
 .offer h3{font-size:21px}
 .offer p{margin:0;max-width:58ch}
 .offer .offer-inc{font-size:15px;color:var(--muted-l)}
@@ -479,6 +476,13 @@ figure{margin:0}
 .nums b{font-family:var(--head);font-size:clamp(26px,3vw,36px);font-weight:var(--fw-head);line-height:1.1;color:var(--ink)}
 .nums span{font-size:var(--fs-caption);line-height:1.4;color:var(--muted-l)}
 @media (max-width:599px){.nums{grid-template-columns:1fr;gap:12px}.nums li{grid-template-columns:88px 1fr;align-items:baseline;gap:12px}}
+.stats{position:relative;background:var(--surface-deep);color:var(--on-dark);padding:calc(51px + clamp(48px,6vw,80px)) 0 clamp(56px,7vw,96px)}
+.stats::before{content:"";position:absolute;inset:0 0 auto;height:51px;background:var(--pattern) center top/72px 50.83px repeat-x;opacity:.35}
+.stats-list{list-style:none;margin:0;padding:0;display:grid;gap:28px}
+.stats-list li{display:grid;gap:10px;padding-top:22px;border-top:1px solid var(--line-gold)}
+.stats-list b{font-family:var(--head);font-weight:var(--fw-head);font-size:clamp(64px,9vw,112px);line-height:.9;letter-spacing:-.035em;color:var(--mc-gold)}
+.stats-list span{font-size:16px;line-height:1.45;color:var(--muted-d);max-width:28ch}
+@media (min-width:800px){.stats-list{grid-template-columns:repeat(3,1fr);gap:48px}}
 .network{display:grid;gap:32px}
 .pat-panel{position:relative;min-height:180px;background:var(--surface-deep);overflow:hidden;margin:0 calc(var(--gut) * -1)}
 .pat-panel::before{content:"";position:absolute;inset:0;background:var(--pattern) center/128px 90.36px repeat;opacity:.85}
@@ -628,14 +632,15 @@ figure{margin:0}
 .ftr{background:var(--surface-deep);color:var(--on-dark);padding:0 0 calc(24px + var(--bar-h));font-size:var(--fs-small)}
 /* Moychay pattern: a single band where the page ends – never behind text or photos */
 .ftr::before{content:"";display:block;height:51px;margin-bottom:52px;background:var(--pattern) center bottom/72px 50.83px repeat-x;opacity:.4}
-.ftr-top{display:grid;gap:36px;padding-bottom:40px}
+.ftr-top{display:grid;grid-template-columns:1fr 1fr;gap:32px 24px;padding-bottom:40px}
+.ftr-brand,.ftr-contact{grid-column:1/-1}
 .ftr-logo img{height:52px;width:auto}
 .ftr-brand p{margin:16px 0 20px;max-width:34ch;color:rgba(243,236,225,.78)}
 .soc{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .soc a{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--line-d);border-radius:50%;transition:background .2s,border-color .2s}
 .soc a:hover{background:var(--clay-btn);border-color:var(--clay-btn)}
 .ftr-col{display:flex;flex-direction:column;align-items:flex-start}
-.ftr-col a{display:inline-flex;align-items:center;gap:8px;min-height:44px;color:rgba(243,236,225,.9);transition:color .2s}
+.ftr-col a{display:inline-flex;align-items:center;gap:8px;min-height:36px;color:rgba(243,236,225,.9);transition:color .2s}
 .ftr-col a:hover{color:var(--clay-soft)}
 .ftr-col .ico{width:14px;height:14px}
 .ftr-contact p{margin:0 0 6px;color:rgba(243,236,225,.78)}
@@ -651,9 +656,9 @@ figure{margin:0}
 .credit:hover .credit-arr{transform:translate(2px,-2px);opacity:1}
 @media (max-width:599px){.ftr-bottom{flex-direction:column;align-items:flex-start;gap:4px}}
 .ftr-h{margin:0 0 6px;font-size:14px;color:rgba(243,236,225,.6)}
-.ftr-col .ftr-h+a{margin-top:-6px}
-@media (min-width:600px){.ftr-top{grid-template-columns:1fr 1fr;gap:40px 48px}.ftr-brand{grid-column:1/-1}}
-@media (min-width:1100px){.ftr-top{grid-template-columns:4fr 3fr 3fr 3fr}.ftr-brand{grid-column:auto}}
+.ftr-col .ftr-h+a{margin-top:-4px}
+@media (min-width:600px){.ftr-top{gap:40px 48px}.ftr-contact{grid-column:auto}}
+@media (min-width:1100px){.ftr-top{grid-template-columns:4fr 3fr 3fr 3fr}.ftr-brand,.ftr-contact{grid-column:auto}}
 
 /* Sticky directions bar (mobile-first; static, no animation) */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(33,28,25,.96);color:var(--on-dark);border-top:1px solid var(--line-d);
@@ -737,14 +742,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </section>
 
 <section class="sec" id="network">
-  <div class="wrap network">
+  <div class="wrap split">
+    <h2 class="rv">Part of the Moychay network</h2>
     <div class="copy">
-      <h2 class="rv">Part of the Moychay network</h2>
       <p>Moychay Phuket is part of Moychay, an international tea culture company founded in 2009 in Amsterdam. Moychay works directly with tea farmers, tea factories and artisan workshops, places a strong emphasis on quality control and sells only natural loose-leaf tea.</p>
       <p>For your business this means a range built on direct sourcing, and a local team on Boat Avenue that brews, serves and talks about tea every day.</p>
-      <ul class="nums" aria-label="Part of the Moychay network"><li><b>2009</b><span>Moychay founded</span></li><li><b>700+</b><span>suppliers and production partners</span></li><li><b>5</b><span>countries of tea sourcing</span></li></ul>
     </div>
-    <div class="pat-panel" aria-hidden="true"></div>
+  </div>
+</section>
+
+<section class="stats" aria-label="Part of the Moychay network">
+  <div class="wrap">
+    <ul class="stats-list"><li><b>2009</b><span>Moychay was founded in Amsterdam</span></li><li><b>700+</b><span>suppliers, tea farmers and production partners</span></li><li><b>6</b><span>cities with Moychay tea clubs: Amsterdam, Barcelona, Yerevan, Tbilisi, Phuket and Atlanta</span></li></ul>
   </div>
 </section>
 

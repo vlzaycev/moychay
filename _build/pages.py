@@ -441,17 +441,13 @@ def wholesale(L, P, cfg):
   </div>
 </section>'''
     nums = "".join(f"<li><b>{a}</b><span>{b}</span></li>" for a, b in P["net_nums"])
-    network = f'''<section class="sec" id="network">
-  <div class="wrap network">
-    <div class="copy">
-      <h2 class="rv">{P["net_h2"]}</h2>
-{paras(P["net"])}
-      <ul class="nums" aria-label="{P["net_h2"]}">{nums}</ul>
-    </div>
-    <div class="pat-panel" aria-hidden="true"></div>
+    network = split(P["net_h2"], paras(P["net"]), sid="network")
+    stats = f'''<section class="stats" aria-label="{P["net_h2"]}">
+  <div class="wrap">
+    <ul class="stats-list">{nums}</ul>
   </div>
 </section>'''
-    return "\n\n".join(x for x in [hero(L, P, actions, "people/6_people", P["alt_hero"]), network, who, formats, products,
+    return "\n\n".join(x for x in [hero(L, P, actions, "people/6_people", P["alt_hero"]), network, stats, who, formats, products,
                                     how, terms, partners, faq, frm] if x)
 
 
@@ -792,7 +788,7 @@ PAGES = dict(
             net_h2="Part of the Moychay network",
             net=["Moychay Phuket is part of Moychay, an international tea culture company founded in 2009 in Amsterdam. Moychay works directly with tea farmers, tea factories and artisan workshops, places a strong emphasis on quality control and sells only natural loose-leaf tea.",
                  "For your business this means a range built on direct sourcing, and a local team on Boat Avenue that brews, serves and talks about tea every day."],
-            net_nums=[("2009", "Moychay founded"), ("700+", "suppliers and production partners"), ("5", "countries of tea sourcing")],
+            net_nums=[("2009", "Moychay was founded in Amsterdam"), ("700+", "suppliers, tea farmers and production partners"), ("6", "cities with Moychay tea clubs: Amsterdam, Barcelona, Yerevan, Tbilisi, Phuket and Atlanta")],
             who_h2="Who we work with",
             who_note="Directions we can discuss with your team. Every proposal is built around your venue and your guests.",
             segments=[
@@ -855,7 +851,7 @@ PAGES = dict(
             net_h2="Часть сети Moychay",
             net=["Moychay Phuket – часть Moychay, международной компании чайной культуры, основанной в 2009 году в Амстердаме. Moychay работает напрямую с чайными фермерами, фабриками и мастерскими, уделяет большое внимание контролю качества и продаёт только натуральный листовой чай.",
                  "Для вашего бизнеса это ассортимент, основанный на прямых поставках, и местная команда на Boat Avenue, которая каждый день заваривает, подаёт и рассказывает о чае."],
-            net_nums=[("2009", "год основания Moychay"), ("700+", "поставщиков и производственных партнёров"), ("5", "стран, откуда приходит чай")],
+            net_nums=[("2009", "год основания Moychay в Амстердаме"), ("700+", "поставщиков, чайных фермеров и производственных партнёров"), ("6", "городов с чайными клубами Moychay: Амстердам, Барселона, Ереван, Тбилиси, Пхукет и Атланта")],
             who_h2="Для каких заведений",
             who_note="Направления, которые можно обсудить с вашей командой. Каждое предложение строим под заведение и ваших гостей.",
             segments=[

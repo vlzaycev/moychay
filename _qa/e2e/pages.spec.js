@@ -273,3 +273,22 @@ for (const lang of ['en', 'ru']) {
     await expect(m.locator('.info')).toHaveCount(0);                 // no invented experience / approach
   });
 }
+
+/* Nothing sticks out of the screen. overflow-x:clip hides overflow instead of scrolling it,
+   so the page-width check alone misses buttons cut off at the edge. */
+for (const path of ['/', '/ru/', '/ceremonies/', '/ru/ceremonies/', '/tea/', '/matcha/', '/events/', '/contact/', '/wholesale/', '/ru/wholesale/']) {
+  test(`${path}: no element wider than the screen; base CSS intact`, async ({ page }) => {
+    await page.route(/docs\.google\.com/, r => r.abort());
+    await page.goto(path);
+    const res = await page.evaluate(() => {
+      const W = document.documentElement.clientWidth;
+      const skip = '.phero-ph,.cer-ph,.teas-ph,.shop-ph,.about-ph,.gallery,.map,.master-ph,.tbl,.hero-bg';
+      const bad = [...document.querySelectorAll('main *, footer *, #bar *')]
+        .filter(e => { const r = e.getBoundingClientRect(); return r.width && r.right > W + 1 && !e.closest(skip); })
+        .map(e => e.tagName + '.' + e.className);
+      return { bad: [...new Set(bad)].slice(0, 5), sizing: getComputedStyle(document.querySelector('.btn')).boxSizing };
+    });
+    expect(res.sizing).toBe('border-box');
+    expect(res.bad).toEqual([]);
+  });
+}

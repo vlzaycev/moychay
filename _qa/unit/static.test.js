@@ -170,6 +170,8 @@ test('Moychay brand: official pattern asset, tokens, logo safe space, motto casi
   assert.match(html, /--pattern:url\(img\/brand\/moychay-pattern\.svg\)/);
   assert.match(read('ru/index.html'), /--pattern:url\(\.\.\/img\/brand\/moychay-pattern\.svg\)/);
   assert.match(html, /\.hdr-logo img\{height:38px/);
+  assert.match(html, /\n\}\n\*\{box-sizing:border-box\}/, ':root block closes cleanly before the base rules');
+  assert.doesNotMatch(html, /\}\},Inter/);
   assert.match(html, /class="motto">in tea we trust</);
   assert.doesNotMatch(read('_config.yml') + execFileSync('git', ['ls-files'], { cwd: ROOT }).toString(), /\.pdf/i, 'no brandbook PDF in the repo');
 });
