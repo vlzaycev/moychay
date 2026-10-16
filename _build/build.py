@@ -46,6 +46,11 @@ MAPS = "https://maps.app.goo.gl/uuZkb3YwtNMGQhy18"
 WA = "https://wa.me/66817959110"
 TG = "https://t.me/moychay_phuket"          # chat: write to the tea house (bookings, orders)
 TG_CLUB = "https://t.me/moychayphuket"     # channel «За чашкой чая»: tea club announcements
+PHONE = "+66817959110"                     # calls and official enquiries
+PHONE_TXT = "+66 81 795 9110"
+EMAIL = "info@phuket.moychay.asia"
+TEL_LINK = f'<a href="tel:{PHONE}" data-track="phone_call" data-place="{{place}}">{PHONE_TXT}</a>'
+MAIL_LINK = f'<a href="mailto:{EMAIL}" data-track="email_click" data-place="{{place}}">{EMAIL}</a>'
 
 
 FONTS = json.load(open(os.path.join(HERE, "fonts.json"), encoding="utf-8"))
@@ -134,7 +139,8 @@ TEA_RU = [
     ]
 
 
-COMMON = dict(maps=MAPS, head_font="Geologica", font_families=["Geologica", "Inter"])
+COMMON = dict(maps=MAPS, phone=PHONE, phone_txt=PHONE_TXT, email=EMAIL,
+              find_call=TEL_LINK.format(place="find") + "<br>" + MAIL_LINK.format(place="find"), head_font="Geologica", font_families=["Geologica", "Inter"])
 
 # ── EN ───────────────────────────────────────────────────────────
 EN = dict(
@@ -200,7 +206,7 @@ EN = dict(
     tea_intro="No need to know any of this before you come. Point at a jar, and the tea master will brew it for you.",
     tea_items=tea(TEA_EN), tea_list=TEA_EN,
     shop_h2="Your favorite tea, delivered",
-    shop_text="Explore our selection of tea and teaware. Free delivery across Thailand on orders over 2000฿. International shipping available.",
+    shop_text="Explore our selection of tea and teaware. Free delivery across Thailand on online orders over 2000฿, worldwide shipping with DHL – and a discount with the promo code MOYCHAY.",
     shop_cta="Visit online shop",
     deliv_cta="Order on WhatsApp",
     ev_h2="Upcoming events",
@@ -209,12 +215,12 @@ EN = dict(
     ev_extra="",
     about_h2="On Boat Avenue since 2024",
     about_body=paras([
-        "Moychay Phuket is part of Moychay, an international tea community with tea houses around the world – our teas come from suppliers they have worked with for years.",
+        "Moychay Phuket is part of Moychay – an international tea culture company founded in 2009 and based in Amsterdam, with tea clubs in Barcelona, Yerevan, Tbilisi, Phuket and Atlanta. Moychay works directly with more than 700 suppliers, tea farmers and artisan workshops in China, Japan, Vietnam, Thailand and Georgia, and sells only natural loose-leaf tea – no artificially flavoured teas.",
         "The room is small: locals and travellers share one table, and the tea master is here to explain, not to upsell.",
     ]),
     find_h2="Contacts",
     map_title="Moychay Phuket on Google Maps",
-    find_addr_l="Address", find_hours_l="Hours", find_park_l="Parking", find_msg_l="Write to us",
+    find_addr_l="Address", find_hours_l="Hours", find_park_l="Parking", find_msg_l="Write to us", find_call_l="Call or email",
     find_msgs=f'<a href="{wa("Hi! I found you on teaphuket.com")}" target="_blank" rel="noopener" data-track="whatsapp" data-place="find">WhatsApp</a> · <a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="find">Instagram</a>',
     ev_more="All events", 
     find_park="On site at Boat Avenue",
@@ -224,7 +230,7 @@ EN = dict(
         ("Do I need to know anything about tea?", "No. Most guests are trying a tea ceremony for the first time."),
         ("Can I really buy the antiques on the shelves?", "Yes – it's a real collection for sale, not decoration."),
         ("Is there parking?", "Yes, on site at Boat Avenue."),
-        ("Do you deliver outside Phuket?", "Yes – anywhere in Thailand, and we ship abroad too. Order in our online shop or message us."),
+        ("Do you deliver outside Phuket?", "Yes. Online orders over 2000฿ are delivered free anywhere in Thailand, and we ship worldwide with DHL. Order in our online shop – the promo code MOYCHAY gives a discount – or message us."),
         ("Do you have anything besides tea?", "Yes – non-alcoholic matcha drinks and kombucha, to stay or to go."),
     ]),
     footer_icons=footer([
@@ -322,7 +328,7 @@ RU = dict(
     tea_intro="Заранее разбираться не нужно. Покажите на банку – и чайный мастер заварит.",
     tea_items=tea(TEA_RU), tea_list=TEA_RU,
     shop_h2="Любимый чай – с доставкой",
-    shop_text="Выбирайте китайский чай, посуду и аксессуары в нашем интернет-магазине. Бесплатная доставка по Таиланду при заказе от 2000฿. Отправляем заказы по всему миру.",
+    shop_text="Выбирайте китайский чай, посуду и аксессуары в нашем интернет-магазине. Бесплатная доставка по Таиланду при онлайн-заказе от 2000฿, по всему миру отправляем через DHL, а по промокоду MOYCHAY – скидка.",
     shop_cta="Перейти в магазин",
     deliv_cta="Заказать в Telegram",
     ev_h2="Ближайшие мероприятия",
@@ -331,12 +337,12 @@ RU = dict(
     ev_extra=f'        <a class="tlink" href="{TG_CLUB}" target="_blank" rel="noopener" data-track="telegram_club" data-place="events"><svg class="bi" aria-hidden="true"><use href="#i-tg"/></svg>Чайный клуб в Telegram</a>',
     about_h2="На Boat Avenue с 2024 года",
     about_body=paras([
-        "Moychay Phuket – часть Moychay, международного чайного сообщества с чайными домами по всему миру. Чай приходит от поставщиков, с которыми работают годами.",
+        "Moychay Phuket – часть Moychay, международной компании чайной культуры. Она основана в 2009 году, штаб-квартира – в Амстердаме, чайные клубы – в Барселоне, Ереване, Тбилиси, на Пхукете и в Атланте. Moychay работает напрямую с более чем 700 поставщиками, чайными фермерами и мастерскими в Китае, Японии, Вьетнаме, Таиланде и Грузии и продаёт только натуральный листовой чай – без ароматизаторов.",
         "Сама чайная небольшая: местные, экспаты и путешественники садятся за один стол, а чайный мастер рядом, чтобы рассказать о чае, а не продать.",
     ]),
     find_h2="Контакты",
     map_title="Moychay Phuket на Google Картах",
-    find_addr_l="Адрес", find_hours_l="Часы работы", find_park_l="Парковка", find_msg_l="Написать",
+    find_addr_l="Адрес", find_hours_l="Часы работы", find_park_l="Парковка", find_msg_l="Написать", find_call_l="Телефон и email",
     find_msgs=f'<a href="{TG}" target="_blank" rel="noopener" data-track="telegram" data-place="find">Telegram</a> · <a href="{WA}" target="_blank" rel="noopener" data-track="whatsapp" data-place="find">WhatsApp</a> · <a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="find">Instagram</a>',
     ev_more="Все мероприятия", 
     find_park="На месте, на Boat Avenue",
@@ -346,7 +352,7 @@ RU = dict(
         ("Нужно ли разбираться в чае?", "Нет. Большинство гостей пробуют чайную церемонию впервые."),
         ("Можно ли купить антиквариат с полок?", "Да, это настоящая коллекция, её можно купить."),
         ("Есть ли парковка?", "Да, на месте, на Boat Avenue."),
-        ("Доставляете за пределы Пхукета?", "Да – по всему Таиланду и за рубеж. Заказать можно в интернет-магазине или написать нам."),
+        ("Доставляете за пределы Пхукета?", "Да. Онлайн-заказы от 2000฿ доставляем по Таиланду бесплатно, по всему миру отправляем через DHL. Заказать можно в интернет-магазине – по промокоду MOYCHAY скидка – или написать нам."),
         ("Есть что-то кроме чая?", "Да – безалкогольные напитки на матче и комбуча, можно остаться или взять с собой."),
     ]),
     footer_icons=footer([
@@ -399,7 +405,8 @@ def business(data):
         "name": "Moychay Phuket", "alternateName": ["Tea House Moychay Phuket", "Мойчай Пхукет"],
         "description": data["meta_desc"], "url": url(data["lang"]), "inLanguage": data["lang"],
         "image": [f"{SITE_URL}/img/og.jpg", f"{SITE_URL}/img/interior/1_shop-1400.webp"],
-        "logo": f"{SITE_URL}/img/logo.png", "telephone": "+66817959110",
+        "logo": f"{SITE_URL}/img/logo.png", "telephone": PHONE, "email": EMAIL,
+        "parentOrganization": {"@type": "Organization", "name": "Moychay", "url": "https://moychay.nl/", "foundingDate": "2009"},
         "servesCuisine": ["Tea", "Chinese tea", "Matcha"], "priceRange": "฿฿", "currenciesAccepted": "THB",
         "acceptsReservations": True,
         "address": {"@type": "PostalAddress", "streetAddress": "Boat Avenue, 2nd floor",

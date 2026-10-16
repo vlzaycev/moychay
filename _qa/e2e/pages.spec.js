@@ -240,3 +240,36 @@ for (const lang of ['en', 'ru']) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
   });
 }
+
+/* ── Contacts, shop terms, tea master ─────────────────────────────── */
+for (const lang of ['en', 'ru']) {
+  const lp = lang === 'en' ? '/' : '/ru/';
+  test(`${lp}: phone and email are clickable, shop terms are current`, async ({ page }) => {
+    await mockEvents(page);
+    await page.goto(lp);
+    for (const sel of ['#find-us', '.ftr']) {
+      await expect(page.locator(`${sel} a[href="tel:+66817959110"]`)).toHaveCount(1);
+      await expect(page.locator(`${sel} a[href="mailto:info@phuket.moychay.asia"]`)).toHaveCount(1);
+    }
+    await expect(page.locator('#delivery .lead')).toContainText('DHL');
+    await expect(page.locator('#delivery .lead')).toContainText('MOYCHAY');
+    await expect(page.locator('#delivery .lead')).toContainText('2000฿');
+    const ld = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent())['@graph'][0];
+    expect(ld).toMatchObject({ telephone: '+66817959110', email: 'info@phuket.moychay.asia', parentOrganization: { name: 'Moychay' } });
+    await page.locator('#find-us a[href^="tel:"]').evaluate(a => a.addEventListener('click', e => e.preventDefault()));
+    await page.locator('#find-us a[href^="tel:"]').click();
+    const dl = await page.evaluate(() => (window.gtmDataLayer || []).map(e => e.event + '@' + e.click_place));
+    expect(dl).toContain('phone_call@find');
+  });
+
+  test(`${lp}ceremonies/: tea master block with real photo`, async ({ page }) => {
+    await page.goto(lp + 'ceremonies/');
+    const m = page.locator('#tea-master');
+    await expect(m.locator('.master-role strong')).toHaveText(lang === 'en' ? 'Igor' : 'Игорь');
+    await expect(m).toContainText(lang === 'en' ? 'Astrakhan' : 'Астрахан');
+    const img = m.locator('img');
+    await img.scrollIntoViewIfNeeded();
+    await expect.poll(() => img.evaluate(i => i.complete && i.naturalWidth > 0)).toBe(true);
+    await expect(m.locator('.info')).toHaveCount(0);                 // no invented experience / approach
+  });
+}

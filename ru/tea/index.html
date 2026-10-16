@@ -138,7 +138,7 @@ window.SITE = {
       if (window.ym && S.YM_ID) ym(Number(S.YM_ID), 'reachGoal', name, params);
       if (window.fbq) {
         if (name === 'directions') fbq('track', 'FindLocation');
-        else if (name === 'whatsapp' || name === 'telegram') fbq('track', 'Contact');
+        else if (name === 'whatsapp' || name === 'telegram' || name === 'phone_call' || name === 'email_click') fbq('track', 'Contact');
         else if (/_form_submit$/.test(name)) fbq('track', 'Lead');
         else fbq('trackCustom', name, params);
       }
@@ -563,6 +563,7 @@ figure{margin:0}
 .ftr-col .ico{width:14px;height:14px}
 .ftr-contact p{margin:0 0 6px;color:rgba(243,236,225,.78)}
 .ftr-contact a{margin-top:4px}
+.ftr-contact p a{display:inline-block;min-height:0;margin:0;padding:6px 0}
 .ftr-bottom{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 32px;padding-top:20px;border-top:1px solid var(--line-d);font-size:14px;color:rgba(243,236,225,.66)}
 .ftr-bottom p{margin:0}
 .credit{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-height:44px;color:rgba(243,236,225,.66);transition:color .2s}
@@ -657,7 +658,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="wrap split">
     <h2 class="rv">Откуда наш чай</h2>
     <div class="copy">
-      <p>Moychay Phuket – часть Moychay, международного чайного сообщества с чайными домами по всему миру. Чай приходит от поставщиков, с которыми работают годами.</p>
+      <p>Moychay Phuket – часть Moychay, международной компании чайной культуры. Она основана в 2009 году, штаб-квартира – в Амстердаме, чайные клубы – в Барселоне, Ереване, Тбилиси, на Пхукете и в Атланте. Moychay работает напрямую с более чем 700 поставщиками, чайными фермерами и мастерскими в Китае, Японии, Вьетнаме, Таиланде и Грузии и продаёт только натуральный листовой чай – без ароматизаторов.</p>
+      <p>Основатель Moychay Сергей Мойчай больше 20 лет путешествует по чайным регионам Китая и работает напрямую с фермерами и чайными мастерами. Он автор книги «География китайского чая».</p>
       <p>Заранее разбираться не нужно. Покажите на банку – и чайный мастер заварит.</p>
     </div>
   </div>
@@ -713,7 +715,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <figure class="ph shop-ph"><img src="../../img/interior/4_shop-1000.webp" srcset="../../img/interior/4_shop-700.webp 700w, ../../img/interior/4_shop-1000.webp 1000w, ../../img/interior/4_shop-1400.webp 1400w" sizes="(min-width:900px) 56vw, 100vw" loading="lazy" decoding="async" width="834" height="1280" alt="Круглый чайный стол с посудой и книгами"></figure>
     <div class="shop-copy rv">
       <h2 id="shop-h">Купить чай онлайн</h2>
-      <p class="lead">Чай и посуда из нашего интернет-магазина с доставкой по всему Таиланду – бесплатно при заказе от 2000฿. Отправляем заказы и за рубеж.</p>
+      <p class="lead">Чай и посуда из нашего интернет-магазина с доставкой по всему Таиланду – бесплатно при онлайн-заказе от 2000฿. По всему миру отправляем через DHL, а по промокоду MOYCHAY – скидка.</p>
       <div class="shop-act">
         <a class="btn" href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="tea_page">Купить чай онлайн<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
       </div>
@@ -754,6 +756,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <p class="ftr-h">Как нас найти</p>
         <p>2 этаж, Boat Avenue, Бангтао, Пхукет</p>
         <p>Ежедневно 11:00–22:00</p>
+        <p><a href="tel:+66817959110" data-track="phone_call" data-place="footer">+66 81 795 9110</a><br><a href="mailto:info@phuket.moychay.asia" data-track="email_click" data-place="footer">info@phuket.moychay.asia</a></p>
         <a href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Проложить маршрут</a>
       </div>
     </div>

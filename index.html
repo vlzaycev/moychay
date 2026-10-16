@@ -68,6 +68,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
    ],
    "logo": "https://teaphuket.com/img/logo.png",
    "telephone": "+66817959110",
+   "email": "info@phuket.moychay.asia",
+   "parentOrganization": {
+    "@type": "Organization",
+    "name": "Moychay",
+    "url": "https://moychay.nl/",
+    "foundingDate": "2009"
+   },
    "servesCuisine": [
     "Tea",
     "Chinese tea",
@@ -218,7 +225,7 @@ window.SITE = {
       if (window.ym && S.YM_ID) ym(Number(S.YM_ID), 'reachGoal', name, params);
       if (window.fbq) {
         if (name === 'directions') fbq('track', 'FindLocation');
-        else if (name === 'whatsapp' || name === 'telegram') fbq('track', 'Contact');
+        else if (name === 'whatsapp' || name === 'telegram' || name === 'phone_call' || name === 'email_click') fbq('track', 'Contact');
         else if (/_form_submit$/.test(name)) fbq('track', 'Lead');
         else fbq('trackCustom', name, params);
       }
@@ -643,6 +650,7 @@ figure{margin:0}
 .ftr-col .ico{width:14px;height:14px}
 .ftr-contact p{margin:0 0 6px;color:rgba(243,236,225,.78)}
 .ftr-contact a{margin-top:4px}
+.ftr-contact p a{display:inline-block;min-height:0;margin:0;padding:6px 0}
 .ftr-bottom{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 32px;padding-top:20px;border-top:1px solid var(--line-d);font-size:14px;color:rgba(243,236,225,.66)}
 .ftr-bottom p{margin:0}
 .credit{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-height:44px;color:rgba(243,236,225,.66);transition:color .2s}
@@ -824,7 +832,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <figure class="ph shop-ph"><img src="img/interior/4_shop-1000.webp" srcset="img/interior/4_shop-700.webp 700w, img/interior/4_shop-1000.webp 1000w, img/interior/4_shop-1400.webp 1400w" sizes="(min-width:900px) 56vw, 100vw" loading="lazy" decoding="async" width="834" height="1280" alt="Round tea table set with teaware and books"></figure>
     <div class="shop-copy rv">
       <h2 id="shop-h">Your favorite tea, delivered</h2>
-      <p class="lead">Explore our selection of tea and teaware. Free delivery across Thailand on orders over 2000฿. International shipping available.</p>
+      <p class="lead">Explore our selection of tea and teaware. Free delivery across Thailand on online orders over 2000฿, worldwide shipping with DHL – and a discount with the promo code MOYCHAY.</p>
       <div class="shop-act">
         <a class="btn" href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="shop_section">Visit online shop<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
         <a class="tlink" href="https://wa.me/66817959110?text=Hi%21%20I%27d%20like%20to%20order%20tea%20with%20delivery" target="_blank" rel="noopener" data-track="whatsapp" data-place="delivery"><svg class="bi" aria-hidden="true"><use href="#i-wa"/></svg>Order on WhatsApp</a>
@@ -859,7 +867,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <figure class="ph about-ph"><img src="img/interior/7_shop-1000.webp" srcset="img/interior/7_shop-700.webp 700w, img/interior/7_shop-1000.webp 1000w, img/interior/7_shop-1400.webp 1400w" sizes="(min-width:900px) 60vw, 100vw" loading="lazy" decoding="async" alt="Moychay Phuket entrance on Boat Avenue"></figure>
     <div class="copy rv">
       <h2>On Boat Avenue since 2024</h2>
-      <p>Moychay Phuket is part of Moychay, an international tea community with tea houses around the world – our teas come from suppliers they have worked with for years.</p>
+      <p>Moychay Phuket is part of Moychay – an international tea culture company founded in 2009 and based in Amsterdam, with tea clubs in Barcelona, Yerevan, Tbilisi, Phuket and Atlanta. Moychay works directly with more than 700 suppliers, tea farmers and artisan workshops in China, Japan, Vietnam, Thailand and Georgia, and sells only natural loose-leaf tea – no artificially flavoured teas.</p>
       <p>The room is small: locals and travellers share one table, and the tea master is here to explain, not to upsell.</p>
     </div>
   </div>
@@ -874,6 +882,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div><dt>Hours</dt><dd>Open daily 11:00–22:00</dd></div>
       <div><dt>Parking</dt><dd>On site at Boat Avenue</dd></div>
       <div><dt>Write to us</dt><dd><a href="https://wa.me/66817959110?text=Hi%21%20I%20found%20you%20on%20teaphuket.com" target="_blank" rel="noopener" data-track="whatsapp" data-place="find">WhatsApp</a> · <a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="find">Instagram</a></dd></div>
+      <div><dt>Call or email</dt><dd><a href="tel:+66817959110" data-track="phone_call" data-place="find">+66 81 795 9110</a><br><a href="mailto:info@phuket.moychay.asia" data-track="email_click" data-place="find">info@phuket.moychay.asia</a></dd></div>
     </dl>
     <div class="act"><a class="btn" href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="find"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Get directions</a><a class="tlink" href="/contact/">Contact page and form<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
   </div>
@@ -902,7 +911,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </li>
       <li>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-5">Do you deliver outside Phuket?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <div class="acc-p" id="faq-5"><div><p>Yes – anywhere in Thailand, and we ship abroad too. Order in our online shop or message us.</p></div></div>
+        <div class="acc-p" id="faq-5"><div><p>Yes. Online orders over 2000฿ are delivered free anywhere in Thailand, and we ship worldwide with DHL. Order in our online shop – the promo code MOYCHAY gives a discount – or message us.</p></div></div>
       </li>
       <li>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-6">Do you have anything besides tea?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
@@ -944,6 +953,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <p class="ftr-h">Visit us</p>
         <p>2nd floor, Boat Avenue, Bangtao, Phuket</p>
         <p>Open daily 11:00–22:00</p>
+        <p><a href="tel:+66817959110" data-track="phone_call" data-place="footer">+66 81 795 9110</a><br><a href="mailto:info@phuket.moychay.asia" data-track="email_click" data-place="footer">info@phuket.moychay.asia</a></p>
         <a href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Get directions</a>
       </div>
     </div>

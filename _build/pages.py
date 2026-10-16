@@ -14,7 +14,15 @@ SHOP = "https://phuket.moychay.asia/"
 # ── Tea master: fill in to show the block on /ceremonies/ (and /ru/ceremonies/) ──
 # Leave as None until the real name, photo and biography are provided.
 # photo: file in img/people/ without size suffix, e.g. "people/master" → master-700/1000/1400.webp
-TEA_MASTER = None
+TEA_MASTER = dict(
+    photo="people/igor",
+    en=dict(name="Igor", role="Tea master at Moychay Phuket", alt="Igor, tea master at Moychay Phuket, at the tea table",
+            bio=["Igor is a tea master from Astrakhan. Before Moychay Phuket he worked in tea houses, and today he brews tea for guests on Boat Avenue."],
+            experience="", approach=""),
+    ru=dict(name="Игорь", role="Чайный мастер Moychay Phuket", alt="Игорь, чайный мастер Moychay Phuket, за чайным столом",
+            bio=["Игорь – чайный мастер из Астрахани. До Moychay Phuket работал в чайных, а сейчас заваривает чай для гостей на Boat Avenue."],
+            experience="", approach=""),
+)
 # TEA_MASTER = dict(
 #     photo="people/master",
 #     en=dict(name="", role="Tea master at Moychay Phuket", alt="", bio=["", ""], experience="", approach=""),
@@ -210,7 +218,9 @@ def ceremonies(L, P, cfg):
     master = ""
     if TEA_MASTER and TEA_MASTER.get(L["lang"], {}).get("name"):
         M = TEA_MASTER[L["lang"]]
-        body = paras(M["bio"]) + "\n" + info([(P["m_exp"], M["experience"]), (P["m_appr"], M["approach"])])
+        rows = [(k, v) for k, v in ((P["m_exp"], M.get("experience")), (P["m_appr"], M.get("approach"))) if v]
+        body = paras(M["bio"]) + ("\n" + info(rows) if rows else "")
+        body += '\n      <div class="actions more">\n' + btn_msg(L, "tea_master", L["msg_book_url"], P["cta"], "tlink") + "\n      </div>"
         master = f'''<section class="sec" id="tea-master">
   <div class="wrap master">
     {img(TEA_MASTER["photo"], M["alt"], "(min-width:900px) 40vw, 100vw", "master-ph", w=1120, h=1400)}
@@ -332,7 +342,8 @@ def contact(L, P, cfg):
                          btn_msg(L, "contact_hero", L["msg_url"], L["cta_message"], "tlink")])
     q = "Moychay+Phuket,+Boat+Avenue,+Bang+Tao,+Phuket"
     rows = [(L["find_addr_l"], "Moychay Phuket<br>" + L["addr_full"]), (L["find_hours_l"], L["hours"]),
-            (L["find_park_l"], L["find_park"]), (L["find_msg_l"], L["find_msgs"]), (P["social_l"], P["social"])]
+            (L["find_park_l"], L["find_park"]), (L["find_msg_l"], L["find_msgs"]),
+            (L["find_call_l"], L["find_call"].replace('data-place="find"', 'data-place="contact"')), (P["social_l"], P["social"])]
     visit = f'''<section class="sec" id="find-us">
   <div class="wrap split">
     <div>
@@ -424,6 +435,7 @@ def wholesale(L, P, cfg):
     <div>
       <h2 class="rv">{P["form_h2"]}</h2>
       <p class="muted">{P["form_lead"]}</p>
+      <p class="muted more">{P["direct"]}<br>{L["find_call"].replace('data-place="find"', 'data-place="wholesale"')}</p>
     </div>
   {form(L, "wholesale", cfg["cfg_form_endpoint"], cfg["cfg_turnstile_sitekey"])}
   </div>
@@ -555,7 +567,8 @@ PAGES = dict(
             alt_hero="Pu-erh tea cakes on dark shelves at Moychay Phuket",
             origin_h2="Where our tea comes from",
             origin=[
-                "Moychay Phuket is part of Moychay, an international tea community with tea houses around the world. Our teas come from suppliers they have worked with for years.",
+                "Moychay Phuket is part of Moychay – an international tea culture company founded in 2009 and based in Amsterdam, with tea clubs in Barcelona, Yerevan, Tbilisi, Phuket and Atlanta. Moychay works directly with more than 700 suppliers, tea farmers and artisan workshops in China, Japan, Vietnam, Thailand and Georgia, and sells only natural loose-leaf tea – no artificially flavoured teas.",
+                "Moychay's founder Sergey Moychay has spent more than 20 years travelling China's tea regions and working directly with farmers and tea masters. He is the author of the book Geography of Chinese Tea.",
                 "No need to know any of this before you come. Point at a jar, and the tea master will brew it for you.",
             ],
             cats_h2="Teas on our shelves",
@@ -578,7 +591,7 @@ PAGES = dict(
                 "The tea master will help you choose a teapot for the tea you like.",
             ],
             shop_h2="Buy tea online",
-            shop_text="Tea and teaware from our online shop, delivered anywhere in Thailand – free on orders over 2000฿. International shipping is available too.",
+            shop_text="Tea and teaware from our online shop, delivered anywhere in Thailand – free on online orders over 2000฿. We ship worldwide with DHL, and the promo code MOYCHAY gives a discount.",
         ),
         ru=dict(
             title="Китайский чай на Пхукете – Пуэр, улун и другие сорта",
@@ -589,7 +602,8 @@ PAGES = dict(
             alt_hero="Блины пуэра на тёмных полках в Moychay Phuket",
             origin_h2="Откуда наш чай",
             origin=[
-                "Moychay Phuket – часть Moychay, международного чайного сообщества с чайными домами по всему миру. Чай приходит от поставщиков, с которыми работают годами.",
+                "Moychay Phuket – часть Moychay, международной компании чайной культуры. Она основана в 2009 году, штаб-квартира – в Амстердаме, чайные клубы – в Барселоне, Ереване, Тбилиси, на Пхукете и в Атланте. Moychay работает напрямую с более чем 700 поставщиками, чайными фермерами и мастерскими в Китае, Японии, Вьетнаме, Таиланде и Грузии и продаёт только натуральный листовой чай – без ароматизаторов.",
+                "Основатель Moychay Сергей Мойчай больше 20 лет путешествует по чайным регионам Китая и работает напрямую с фермерами и чайными мастерами. Он автор книги «География китайского чая».",
                 "Заранее разбираться не нужно. Покажите на банку – и чайный мастер заварит.",
             ],
             cats_h2="Чай на наших полках",
@@ -612,7 +626,7 @@ PAGES = dict(
                 "Чайный мастер поможет подобрать чайник под ваш чай.",
             ],
             shop_h2="Купить чай онлайн",
-            shop_text="Чай и посуда из нашего интернет-магазина с доставкой по всему Таиланду – бесплатно при заказе от 2000฿. Отправляем заказы и за рубеж.",
+            shop_text="Чай и посуда из нашего интернет-магазина с доставкой по всему Таиланду – бесплатно при онлайн-заказе от 2000฿. По всему миру отправляем через DHL, а по промокоду MOYCHAY – скидка.",
         ),
     ),
     matcha=dict(
@@ -803,6 +817,7 @@ PAGES = dict(
             ],
             form_h2="Discuss a partnership",
             form_lead="Tell us about your business and what you need. We'll reply by email with the next steps.",
+            direct="Prefer to call or email? Official enquiries:",
         ),
         ru=dict(
             title="Чай оптом и решения для бизнеса на Пхукете | Moychay",
@@ -861,6 +876,7 @@ PAGES = dict(
             ],
             form_h2="Обсудить сотрудничество",
             form_lead="Расскажите о бизнесе и о том, что вам нужно. Ответим на email и предложим следующие шаги.",
+            direct="Удобнее позвонить или написать на почту? Для официальных запросов:",
         ),
     ),
 )

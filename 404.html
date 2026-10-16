@@ -101,7 +101,7 @@ window.SITE = {
       if (window.ym && S.YM_ID) ym(Number(S.YM_ID), 'reachGoal', name, params);
       if (window.fbq) {
         if (name === 'directions') fbq('track', 'FindLocation');
-        else if (name === 'whatsapp' || name === 'telegram') fbq('track', 'Contact');
+        else if (name === 'whatsapp' || name === 'telegram' || name === 'phone_call' || name === 'email_click') fbq('track', 'Contact');
         else if (/_form_submit$/.test(name)) fbq('track', 'Lead');
         else fbq('trackCustom', name, params);
       }
@@ -526,6 +526,7 @@ figure{margin:0}
 .ftr-col .ico{width:14px;height:14px}
 .ftr-contact p{margin:0 0 6px;color:rgba(243,236,225,.78)}
 .ftr-contact a{margin-top:4px}
+.ftr-contact p a{display:inline-block;min-height:0;margin:0;padding:6px 0}
 .ftr-bottom{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 32px;padding-top:20px;border-top:1px solid var(--line-d);font-size:14px;color:rgba(243,236,225,.66)}
 .ftr-bottom p{margin:0}
 .credit{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-height:44px;color:rgba(243,236,225,.66);transition:color .2s}
@@ -642,6 +643,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <p class="ftr-h">Visit us</p>
         <p>2nd floor, Boat Avenue, Bangtao, Phuket</p>
         <p>Open daily 11:00–22:00</p>
+        <p><a href="tel:+66817959110" data-track="phone_call" data-place="footer">+66 81 795 9110</a><br><a href="mailto:info@phuket.moychay.asia" data-track="email_click" data-place="footer">info@phuket.moychay.asia</a></p>
         <a href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Get directions</a>
       </div>
     </div>
@@ -714,6 +716,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <p class="ftr-h">Как нас найти</p>
         <p>2 этаж, Boat Avenue, Бангтао, Пхукет</p>
         <p>Ежедневно 11:00–22:00</p>
+        <p><a href="tel:+66817959110" data-track="phone_call" data-place="footer">+66 81 795 9110</a><br><a href="mailto:info@phuket.moychay.asia" data-track="email_click" data-place="footer">info@phuket.moychay.asia</a></p>
         <a href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Проложить маршрут</a>
       </div>
     </div>

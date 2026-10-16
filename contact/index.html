@@ -84,6 +84,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
    ],
    "logo": "https://teaphuket.com/img/logo.png",
    "telephone": "+66817959110",
+   "email": "info@phuket.moychay.asia",
+   "parentOrganization": {
+    "@type": "Organization",
+    "name": "Moychay",
+    "url": "https://moychay.nl/",
+    "foundingDate": "2009"
+   },
    "servesCuisine": [
     "Tea",
     "Chinese tea",
@@ -220,7 +227,7 @@ window.SITE = {
       if (window.ym && S.YM_ID) ym(Number(S.YM_ID), 'reachGoal', name, params);
       if (window.fbq) {
         if (name === 'directions') fbq('track', 'FindLocation');
-        else if (name === 'whatsapp' || name === 'telegram') fbq('track', 'Contact');
+        else if (name === 'whatsapp' || name === 'telegram' || name === 'phone_call' || name === 'email_click') fbq('track', 'Contact');
         else if (/_form_submit$/.test(name)) fbq('track', 'Lead');
         else fbq('trackCustom', name, params);
       }
@@ -645,6 +652,7 @@ figure{margin:0}
 .ftr-col .ico{width:14px;height:14px}
 .ftr-contact p{margin:0 0 6px;color:rgba(243,236,225,.78)}
 .ftr-contact a{margin-top:4px}
+.ftr-contact p a{display:inline-block;min-height:0;margin:0;padding:6px 0}
 .ftr-bottom{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 32px;padding-top:20px;border-top:1px solid var(--line-d);font-size:14px;color:rgba(243,236,225,.66)}
 .ftr-bottom p{margin:0}
 .credit{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-height:44px;color:rgba(243,236,225,.66);transition:color .2s}
@@ -739,7 +747,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="wrap split">
     <div>
       <h2 class="rv">Address and contacts</h2>
-      <dl class="info"><div><dt>Address</dt><dd>Moychay Phuket<br>2nd floor, Boat Avenue, Bangtao, Phuket</dd></div><div><dt>Hours</dt><dd>Open daily 11:00–22:00</dd></div><div><dt>Parking</dt><dd>On site at Boat Avenue</dd></div><div><dt>Write to us</dt><dd><a href="https://wa.me/66817959110?text=Hi%21%20I%20found%20you%20on%20teaphuket.com" target="_blank" rel="noopener" data-track="whatsapp" data-place="find">WhatsApp</a> · <a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="find">Instagram</a></dd></div><div><dt>Follow us</dt><dd><a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="contact">Instagram</a> · <a href="https://www.facebook.com/moychay.phuket/" target="_blank" rel="noopener" data-track="facebook" data-place="contact">Facebook</a></dd></div></dl>
+      <dl class="info"><div><dt>Address</dt><dd>Moychay Phuket<br>2nd floor, Boat Avenue, Bangtao, Phuket</dd></div><div><dt>Hours</dt><dd>Open daily 11:00–22:00</dd></div><div><dt>Parking</dt><dd>On site at Boat Avenue</dd></div><div><dt>Write to us</dt><dd><a href="https://wa.me/66817959110?text=Hi%21%20I%20found%20you%20on%20teaphuket.com" target="_blank" rel="noopener" data-track="whatsapp" data-place="find">WhatsApp</a> · <a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="find">Instagram</a></dd></div><div><dt>Call or email</dt><dd><a href="tel:+66817959110" data-track="phone_call" data-place="contact">+66 81 795 9110</a><br><a href="mailto:info@phuket.moychay.asia" data-track="email_click" data-place="contact">info@phuket.moychay.asia</a></dd></div><div><dt>Follow us</dt><dd><a href="https://www.instagram.com/moychay.phuket" target="_blank" rel="noopener" data-track="instagram" data-place="contact">Instagram</a> · <a href="https://www.facebook.com/moychay.phuket/" target="_blank" rel="noopener" data-track="facebook" data-place="contact">Facebook</a></dd></div></dl>
       <div class="actions more">
         <a class="btn" href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="contact_find"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Get directions</a>
       </div>
@@ -808,6 +816,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <p class="ftr-h">Visit us</p>
         <p>2nd floor, Boat Avenue, Bangtao, Phuket</p>
         <p>Open daily 11:00–22:00</p>
+        <p><a href="tel:+66817959110" data-track="phone_call" data-place="footer">+66 81 795 9110</a><br><a href="mailto:info@phuket.moychay.asia" data-track="email_click" data-place="footer">info@phuket.moychay.asia</a></p>
         <a href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Get directions</a>
       </div>
     </div>
