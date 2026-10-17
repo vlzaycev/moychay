@@ -157,8 +157,10 @@ window.SITE = {
 @font-face{font-family:'Inter';font-style:normal;font-weight:300 600;font-display:swap;src:url(../../fonts/inter-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
 :root{
   /* 1. Moychay corporate colours (brandbook p. 6 and 9).
-     Green is the logo colour – it is not repainted onto the site; gold is the colour of the official pattern. */
+     Gold is the colour of the official pattern. Light green is the colour the Moychay Phuket online shop uses for its header:
+     here it marks only what leads into the Moychay network (shop link, shop CTA, motto) – never the visit CTAs or whole sections. */
   --mc-green:#289B38; --mc-green-dark:#375A3C; --mc-green-light:#90C685; --mc-black:#02090D; --mc-gold:#C7A06A;
+  --mc-green-light-hover:#A6D39C;
   /* 2. Phuket tea house – the local direction palette (the brandbook lets each direction have its own):
      concrete, walnut, clay teapots, paper lanterns */
   --dark:#2A2421; --dark-2:#211C19; --wood:#3A2C22; --paper:#EFE8DC; --sand:#E4D8C5;
@@ -174,6 +176,8 @@ window.SITE = {
   --cta-bg:var(--clay-btn); --cta-bg-hover:var(--clay-hover); --cta-text:#fff;
   --link:var(--clay-text); --link-on-dark:var(--clay-soft); --focus:var(--clay);
   --success:var(--mc-green-dark); --error:#9B2C17;
+  /* the online shop, as on phuket.moychay.asia: light green with near-black text (11:1) */
+  --shop-bg:var(--mc-green-light); --shop-bg-hover:var(--mc-green-light-hover); --shop-text:var(--dark-2); --shop-accent:var(--mc-green-light);
   /* 6. Borders and dividers */
   --line-d:rgba(243,236,225,.16); --line-l:rgba(58,44,34,.18);
   /* decorative dividers in Moychay gold; form fields, cards and buttons keep their functional borders */
@@ -184,7 +188,7 @@ window.SITE = {
   --fs-body:17px; --fs-small:15px; --fs-caption:14px; --fw-head:500; --fw-strong:600;
   /* Layout and spacing */
   --gut:clamp(20px,5vw,64px); --max:1280px; --sec-y:clamp(72px,10vw,128px);
-  --radius:3px; --ease:cubic-bezier(.2,.7,.2,1);
+  --radius:3px; --radius-btn:999px; --ease:cubic-bezier(.2,.7,.2,1);
   --bar-h:0px;
   --bleed:calc(var(--gut) + max(0px, (100vw - var(--max)) / 2));
   --pattern:url(../../img/brand/moychay-pattern.svg);
@@ -214,13 +218,16 @@ figure{margin:0}
 
 /* Buttons & links */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:54px;padding:0 28px;
-  background:var(--cta-bg);color:var(--cta-text);font-size:var(--fs-body);font-weight:var(--fw-strong);border-radius:var(--radius);transition:background .2s,border-color .2s,color .2s}
+  background:var(--cta-bg);color:var(--cta-text);font-size:var(--fs-body);font-weight:500;border-radius:var(--radius-btn);transition:background .2s,border-color .2s,color .2s}
 .btn:hover{background:var(--cta-bg-hover)}
 /* secondary CTA: outline, for a second action next to a primary one */
 .btn-ghost{background:transparent;color:inherit;border:1px solid currentColor}
 .btn-ghost:hover{background:transparent;border-color:var(--focus);color:var(--focus)}
 .dark .btn-ghost:hover,.wood .btn-ghost:hover{border-color:var(--link-on-dark);color:var(--link-on-dark)}
 .btn .bi{width:21px;height:21px}
+/* online shop CTA: the shop's own light green, so it never competes with the clay visit CTAs */
+.btn-shop{background:var(--shop-bg);color:var(--shop-text)}
+.btn-shop:hover{background:var(--shop-bg-hover)}
 .tlink{display:inline-flex;align-items:center;gap:10px;min-height:44px;font-weight:500;line-height:1.3;transition:color .2s}
 .tlink:hover{color:var(--clay)}
 .dark .tlink:hover,.wood .tlink:hover{color:var(--clay-soft)}
@@ -245,11 +252,10 @@ figure{margin:0}
 .lang[data-cur="ru"] .lang-thumb{transform:translateX(46px)}
 .lang a:not([aria-current]):hover{opacity:1}
 .nav-shop{display:inline-flex;align-items:center;gap:6px;padding-left:28px;border-left:1px solid var(--line-gold-d)}
-.nav-shop .ico,.hdr-shop .ico{width:17px;height:17px}
+.nav-shop .ico,.hdr-shop .ico{width:17px;height:17px;color:var(--shop-accent);stroke-width:2}
 .nav-shop{gap:8px}
 .hdr-shop{display:inline-flex;align-items:center;gap:7px;margin-left:auto;white-space:nowrap;margin-right:-8px;padding:12px 4px;font-size:15px;font-weight:600;color:#fff;transition:color .2s}
-.hdr-shop .ico{color:var(--clay-soft);stroke-width:2}
-.hdr-shop:hover{color:var(--clay-soft)}
+.hdr-shop:hover,.nav-shop:hover{color:var(--shop-accent)}
 @media (min-width:1000px){.hdr-shop{display:none!important}}
 @media (min-width:1000px){.nav{display:flex}.hdr .wrap{height:76px}.hdr-logo img{height:42px}}
 
@@ -516,6 +522,8 @@ figure{margin:0}
 .shop-copy .lead{color:var(--muted-l);max-width:42ch}
 .shop-act{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin-top:32px}
 .shop-act .btn .ico{width:16px;height:16px;margin-left:2px}
+.shop-note{display:flex;align-items:center;gap:10px;margin:22px 0 0;font-size:var(--fs-small);color:var(--muted-l)}
+.shop-note::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--mc-green)}
 @media (max-width:599px){.shop-act .btn{width:100%}}
 @media (min-width:900px){
   .shop .wrap{grid-template-columns:5fr 7fr;gap:72px;align-items:center}
@@ -625,6 +633,8 @@ figure{margin:0}
 .ftr-col a{display:inline-flex;align-items:center;gap:8px;min-height:36px;color:var(--on-dark-2);transition:color .2s}
 .ftr-col a:hover{color:var(--clay-soft)}
 .ftr-col .ico{width:14px;height:14px}
+.ftr-shop .ico{width:16px;height:16px;color:var(--shop-accent);stroke-width:2}
+.ftr-col a.ftr-shop:hover{color:var(--shop-accent)}
 .ftr-contact p{margin:0 0 6px;color:var(--on-dark-2)}
 .ftr-contact p+a{margin-top:6px}
 .ftr-contact .ico,.ftr-contact .bi{width:18px;height:18px;color:var(--clay-soft)}
@@ -650,10 +660,10 @@ figure{margin:0}
 .bar .addr{display:none;font-size:14px;color:var(--muted-d)}
 .bar-act{display:flex;gap:10px;flex:1;min-width:0}
 .bar .btn{flex:1;min-height:52px;padding:0 18px}
-.bar-msg{flex:none;width:52px;height:52px;display:grid;place-items:center;border:1px solid var(--line-d);border-radius:3px;transition:background .2s,border-color .2s}
+.bar-msg{flex:none;width:52px;height:52px;display:grid;place-items:center;border:1px solid var(--line-d);border-radius:50%;transition:background .2s,border-color .2s}
 .bar-msg:hover{background:var(--clay-btn);border-color:var(--clay-btn)}
 .bar-msg .bi{width:24px;height:24px}
-.bar .motto{padding-left:14px;border-left:1px solid var(--line-gold-d);font-style:italic}
+.bar .motto{padding-left:14px;border-left:1px solid var(--line-gold-d);font-style:italic;color:var(--shop-accent)}
 @media (min-width:900px){.bar .addr{display:flex;align-items:center;gap:2px 14px}.bar-act{flex:none}.bar .btn{flex:none;padding:0 28px}}
 
 /* Reveal: text blocks only, once */
@@ -785,8 +795,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="shop-copy rv">
       <h2 id="shop-h">Купить чай онлайн</h2>
       <p class="lead">Чай и посуда из нашего интернет-магазина с доставкой по всему Таиланду – бесплатно при онлайн-заказе от 2000฿. По всему миру отправляем через DHL, а по промокоду MOYCHAY – скидка.</p>
+      <p class="shop-note">phuket.moychay.asia – официальный интернет-магазин Moychay Phuket: более 200 сортов чая, посуда и аксессуары.</p>
       <div class="shop-act">
-        <a class="btn" href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="tea_page">Купить чай онлайн<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a class="btn btn-shop" href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="tea_page">Купить чай онлайн<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
       </div>
     </div>
   </div>
@@ -819,7 +830,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <nav class="ftr-col" aria-labelledby="ftr-h2">
         <p class="ftr-h" id="ftr-h2">Сотрудничество</p>
         <a href="/ru/wholesale/">Оптовые поставки</a>
-        <a href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="footer">Интернет-магазин<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="footer" class="ftr-shop">Интернет-магазин<svg class="ico" aria-hidden="true"><use href="#i-cart"/></svg></a>
       </nav>
       <div class="ftr-col ftr-contact">
         <p class="ftr-h">Как нас найти</p>

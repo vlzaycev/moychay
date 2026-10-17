@@ -274,8 +274,9 @@ def tea(L, P, cfg):
     <div class="shop-copy rv">
       <h2 id="shop-h">{P["shop_h2"]}</h2>
       <p class="lead">{P["shop_text"]}</p>
+      <p class="shop-note">{L["shop_note"]}</p>
       <div class="shop-act">
-        <a class="btn" href="{SHOP}" target="_blank" rel="noopener" data-track="online_shop_click" data-place="tea_page">{P["shop_cta"]}{ARROW}</a>
+        <a class="btn btn-shop" href="{SHOP}" target="_blank" rel="noopener" data-track="online_shop_click" data-place="tea_page">{P["shop_cta"]}{ARROW}</a>
       </div>
     </div>
   </div>
