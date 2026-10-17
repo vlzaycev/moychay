@@ -18,6 +18,11 @@ test('build is reproducible: _build/build.py output == committed HTML', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tp-build-'));
   fs.cpSync(path.join(ROOT, '_build'), path.join(tmp, '_build'), { recursive: true });
   if (fs.existsSync(path.join(ROOT, '_content'))) fs.cpSync(path.join(ROOT, '_content'), path.join(tmp, '_content'), { recursive: true });
+  // start from the committed output: <lastmod> is kept for pages whose HTML did not change
+  for (const f of [...Object.values(PAGES), 'sitemap.xml']) {
+    fs.mkdirSync(path.dirname(path.join(tmp, f)), { recursive: true });
+    fs.copyFileSync(path.join(ROOT, f), path.join(tmp, f));
+  }
   execFileSync('python3', [path.join(tmp, '_build', 'build.py')], { stdio: 'pipe' });
   for (const f of [...Object.values(PAGES), '404.html', 'sitemap.xml']) {
     assert.equal(fs.readFileSync(path.join(tmp, f), 'utf8'), read(f), `${f} differs from build output — someone edited HTML by hand or forgot to rebuild`);

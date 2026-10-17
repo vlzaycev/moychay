@@ -515,10 +515,16 @@ def hreflang(en, ru):
     return "\n".join(out)
 
 
+CHANGED = set()   # pages whose HTML differs from the previous build: only they get a new <lastmod>
+
+
 def build(data, out):
     html = render(data, out)
     path = os.path.join(ROOT, out)
     os.makedirs(os.path.dirname(path), exist_ok=True)
+    old = open(path, encoding="utf-8").read() if os.path.exists(path) else None
+    if old != html:
+        CHANGED.add(out)
     open(path, "w", encoding="utf-8").write(html)
     print("built", out)
 
@@ -546,13 +552,21 @@ def render(data, out="404.html"):
 
 
 def sitemap():
+    # <lastmod> = date the page last changed: kept from the previous sitemap unless the page HTML changed,
+    # so a rebuild of unchanged pages is byte-identical (and the date stays honest for search engines)
     today = datetime.date.today().isoformat()
+    sm = os.path.join(ROOT, "sitemap.xml")
+    prev = dict(re.findall(r"<loc>([^<]+)</loc>\s*<lastmod>([^<]+)</lastmod>", open(sm, encoding="utf-8").read())) if os.path.exists(sm) else {}
+
+    def lastmod(loc, out):
+        return today if out in CHANGED or loc not in prev else prev[loc]
     urls = ""
     for slug in [""] + SLUGS:
         alt = "".join(f'    <xhtml:link rel="alternate" hreflang="{h}" href="{url(l, slug)}"/>\n'
                       for h, l in (("en", "en"), ("ru", "ru"), ("x-default", "en")))
         for lang in ("en", "ru"):
-            urls += f"  <url>\n    <loc>{url(lang, slug)}</loc>\n    <lastmod>{today}</lastmod>\n{alt}  </url>\n"
+            loc = url(lang, slug)
+            urls += f"  <url>\n    <loc>{loc}</loc>\n    <lastmod>{lastmod(loc, ('ru/' if lang == 'ru' else '') + (slug + '/' if slug else '') + 'index.html')}</lastmod>\n{alt}  </url>\n"
     for p in PUBLISHED:                       # published articles only; drafts never reach the sitemap
         other = B.translation(PUBLISHED, p)
         alts = [(p["language"], B.url(p["language"], p["slug"]))] + ([(other["language"], B.url(other["language"], p["slug"]))] if other else [])
@@ -560,7 +574,8 @@ def sitemap():
         urls += f'  <url>\n    <loc>{B.url(p["language"], p["slug"])}</loc>\n    <lastmod>{p.get("updated_at") or p["published_at"]}</lastmod>\n{alt}  </url>\n'
     for lang in ("en", "ru"):
         if any(p["language"] == lang for p in PUBLISHED):
-            urls += f"  <url>\n    <loc>{B.url(lang)}</loc>\n    <lastmod>{today}</lastmod>\n  </url>\n"
+            loc = B.url(lang)
+            urls += f"  <url>\n    <loc>{loc}</loc>\n    <lastmod>{lastmod(loc, ('ru/' if lang == 'ru' else '') + 'blog/index.html')}</lastmod>\n  </url>\n"
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
            + urls + "</urlset>\n")

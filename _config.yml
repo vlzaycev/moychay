@@ -1,3 +1,6 @@
+# .well-known/ is a dotfolder, which Jekyll skips unless included
+include:
+  - .well-known
 # GitHub Pages (Jekyll) — the site is plain static HTML, nothing to render.
 # Folders starting with "_" (_build, _qa) and dotfiles are never published.
 exclude:
