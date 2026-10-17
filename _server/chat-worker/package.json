@@ -1,0 +1,14 @@
+{
+  "name": "teaphuket-chat-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx wrangler@4 dev --local --port 8787 --local-upstream 127.0.0.1:8787 --var DEV_MODE:1 --var AI_PROVIDER:mock --var EXTRA_ORIGINS:http://127.0.0.1:8813",
+    "db:migrate:local": "npx wrangler@4 d1 migrations apply teaphuket-chat --local",
+    "db:migrate": "npx wrangler@4 d1 migrations apply teaphuket-chat --remote",
+    "kb:build": "node scripts/kb-build.mjs",
+    "kb:push:local": "node scripts/kb-build.mjs && npx wrangler@4 d1 execute teaphuket-chat --local --file=.kb.sql",
+    "kb:push": "node scripts/kb-build.mjs && npx wrangler@4 d1 execute teaphuket-chat --remote --file=.kb.sql",
+    "usage": "npx wrangler@4 d1 execute teaphuket-chat --remote --command \"SELECT * FROM usage_daily ORDER BY day DESC LIMIT 14\""
+  }
+}

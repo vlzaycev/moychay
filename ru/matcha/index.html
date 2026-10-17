@@ -83,7 +83,8 @@ window.SITE = {
   },
   YM_ID:         "",    // Yandex Metrika counter, e.g. "98765432"
   PIXEL_ID:      "2041380899914040", // Meta (Facebook) Pixel, e.g. "123456789012345"
-  EVENTS_SHEET:  "1zcA3xGzhUeQvWD2pFi1obgOf8mC2gi32D0l_q4tw_es"  // Google Sheet with events
+  EVENTS_SHEET:  "1zcA3xGzhUeQvWD2pFi1obgOf8mC2gi32D0l_q4tw_es", // Google Sheet with events
+  CHAT: { endpoint: "", sitekey: "0x4AAAAAAFYnqNdF-cMkUD1N", src: "../../js/cha.js?v=3d5c4e811f", lang: "ru" }  // Cha assistant; empty endpoint = off
 };
 (function (S) {
   // Google tag (GA4 + Google Ads)
@@ -669,6 +670,20 @@ figure{margin:0}
 /* Reveal: text blocks only, once */
 .js .rv{opacity:0;transform:translateY(14px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
 .js .rv.in{opacity:1;transform:none}
+/* Cha chat launcher (the panel itself is in js/cha.js, loaded on demand). Sits above the sticky bar, never over its buttons. */
+.cha-launch{position:fixed;z-index:45;right:16px;bottom:calc(16px + var(--bar-h) + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;
+  display:grid;place-items:center;background:var(--mc-green-dark);color:#fff;font:500 15px/1 var(--head);letter-spacing:-.01em;
+  box-shadow:0 6px 18px rgba(33,28,25,.3);transition:bottom .3s var(--ease),transform .2s}
+.cha-launch:hover{transform:translateY(-2px)}
+.cha-launch[hidden]{display:none}
+.cha-launch.has-new::after{content:"";position:absolute;top:1px;right:1px;width:13px;height:13px;border-radius:50%;background:var(--clay-soft);border:2px solid #fff}
+.cha-teaser{position:fixed;z-index:45;right:16px;bottom:calc(84px + var(--bar-h) + env(safe-area-inset-bottom,0px));max-width:min(280px,calc(100vw - 32px));
+  display:flex;align-items:flex-start;gap:2px;padding:10px 4px 10px 14px;background:var(--paper);color:var(--ink);border:1px solid var(--line-l);
+  border-radius:14px;box-shadow:0 10px 30px rgba(33,28,25,.22);font-size:14px;line-height:1.4}
+.cha-teaser-t{text-align:left}
+.cha-teaser-x{flex:none;width:32px;height:32px;margin-top:-6px;font-size:20px;line-height:1;color:var(--ink-2)}
+@media (min-width:900px){.cha-launch{right:24px;bottom:calc(24px + var(--bar-h))}.cha-teaser{right:24px;bottom:calc(92px + var(--bar-h))}}
+@media print{.cha-launch,.cha-teaser{display:none}}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   .js .rv{opacity:1;transform:none;transition:none}
@@ -1142,6 +1157,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }).catch(function () { clearTimeout(to); if (!finished) renderEmpty(); finished = true; });
   }
   loadEvents();   // start right away: Google's CSV export takes a few seconds
+})();
+</script>
+<!-- Cha – AI tea assistant: a small button; the chat code loads only on click or when the page is idle -->
+<button class="cha-launch" id="cha-launch" type="button" hidden aria-haspopup="dialog" aria-controls="cha-panel" aria-expanded="false" aria-label="Ча – AI-помощник Moychay Phuket"><span aria-hidden="true">Ча</span></button>
+<script>
+(function () {
+  var C = window.SITE && window.SITE.CHAT, ep = C && C.endpoint;
+  // local testing only: point the widget at a local Worker without rebuilding the site
+  try { if (C && /^(127\.0\.0\.1|localhost)$/.test(location.hostname) && localStorage.getItem('cha_endpoint')) { ep = localStorage.getItem('cha_endpoint'); C.sitekey = ''; } } catch (e) {}
+  if (!ep) return;
+  C.endpoint = ep;
+  var btn = document.getElementById('cha-launch'), loading;
+  btn.hidden = false;
+  function load(open) {
+    if (!loading) loading = new Promise(function (ok, fail) {
+      var s = document.createElement('script'); s.src = C.src; s.async = true; s.onload = ok; s.onerror = fail; document.head.appendChild(s);
+    }).then(function () { window.Cha.init(C); });
+    loading.then(function () { if (open) window.Cha.open(); }, function () { loading = null; });
+  }
+  btn.addEventListener('click', function () { if (window.Cha && btn.getAttribute('aria-expanded') === 'true') window.Cha.close(); else load(true); });
+  // Returning visitors with a chat, and the one-time greeting: load after the page is idle
+  var later = false;
+  try { later = !!localStorage.getItem('cha_session') || !localStorage.getItem('cha_teaser'); } catch (e) {}
+  if (later) window.addEventListener('load', function () {
+    (window.requestIdleCallback || function (f) { setTimeout(f, 3000); })(function () { load(false); }, { timeout: 8000 });
+  });
 })();
 </script>
 </body>

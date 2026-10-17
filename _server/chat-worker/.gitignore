@@ -1,0 +1,4 @@
+wrangler.toml
+.kb.sql
+.wrangler/
+.dev.vars

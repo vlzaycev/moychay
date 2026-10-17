@@ -8,6 +8,7 @@ Edit texts below and analytics IDs in CONFIG, then run the script.
 The _build folder is not published by GitHub Pages.
 """
 import datetime
+import hashlib
 import json
 import os
 import re
@@ -37,6 +38,9 @@ CONFIG = {
     # Contact & wholesale forms: URL of the server handler (_server/contact-worker), e.g. "/api/contact".
     # Empty = forms are shown disabled with a note to use WhatsApp/Telegram (nothing is sent anywhere).
     "cfg_form_endpoint": "/api/contact",
+    # Cha chat (AI assistant + live support). Empty = no chat button on the site. Production value: "/api/chat"
+    # (only after the chat Worker is deployed – see AI_TEA_ASSISTANT_SETUP.md).
+    "cfg_chat_endpoint": "",
     # Cloudflare Turnstile site key (public, safe to commit). The secret key lives only in the Worker.
     # The forms go live only when both cfg_form_endpoint and this key are set.
     "cfg_turnstile_sitekey": "0x4AAAAAAFYnqNdF-cMkUD1N",
@@ -533,6 +537,7 @@ def render(data, out="404.html"):
     html = open(os.path.join(HERE, "template.html"), encoding="utf-8").read()
     values = {**CONFIG, **data, "year": str(datetime.date.today().year), "og_image": f"{SITE_URL}/img/og.jpg"}
     values["font_faces"], values["font_preload"] = fonts(data["font_families"], data["font_preload_files"], data["root"])
+    values.update(cha_values(data))
     values["js_i18n"] = json.dumps({**data["js"], "root": data["root"]}, ensure_ascii=False)
     px = CONFIG["cfg_pixel"]
     values["pixel_noscript"] = (f'<noscript><img height="1" width="1" style="display:none" alt="" '
@@ -549,6 +554,32 @@ def render(data, out="404.html"):
     if left:
         raise SystemExit(f"Unfilled placeholders in {out}: " + ", ".join(p.split("}}")[0] for p in left))
     return html
+
+
+ASSISTANT = json.load(open(os.path.join(ROOT, "_content", "assistant", "assistant.json"), encoding="utf-8"))
+
+
+def build_cha():
+    """_build/cha/cha.js + cha.css + assistant.json → js/cha.js (one lazy-loaded file). Returns a short content hash."""
+    src = open(os.path.join(HERE, "cha", "cha.js"), encoding="utf-8").read()
+    css = re.sub(r"/\*.*?\*/", "", open(os.path.join(HERE, "cha", "cha.css"), encoding="utf-8").read(), flags=re.S)
+    css = re.sub(r"\s*\n\s*", "", css)
+    assistant = {k: v for k, v in ASSISTANT.items() if not k.startswith("_")}
+    out = src.replace("__ASSISTANT__", json.dumps(assistant, ensure_ascii=False)).replace("__CSS__", json.dumps(css, ensure_ascii=False))
+    os.makedirs(os.path.join(ROOT, "js"), exist_ok=True)
+    open(os.path.join(ROOT, "js", "cha.js"), "w", encoding="utf-8").write(out)
+    print("built js/cha.js")
+    return hashlib.sha256(out.encode()).hexdigest()[:10]
+
+
+CHA_VER = build_cha()
+
+
+def cha_values(data):
+    lang = data.get("lang", "en")
+    name = ASSISTANT["name"].get(lang, ASSISTANT["name"]["en"])
+    return {"cha_src": f'{data["root"]}js/cha.js?v={CHA_VER}', "cha_mark": name,
+            "cha_label": f'{name} – {ASSISTANT["title"].get(lang, ASSISTANT["title"]["en"])}'}
 
 
 def sitemap():
@@ -836,3 +867,6 @@ for slug in SLUGS:
 build_blog()
 page_404()
 sitemap()
+
+import assistant_kb  # noqa: E402  (knowledge for the Cha chat assistant, from the pages built above)
+assistant_kb.build(ROOT, SITE_URL)

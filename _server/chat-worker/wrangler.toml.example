@@ -1,0 +1,70 @@
+# Cha – AI tea assistant. Copy to wrangler.toml (git-ignored) and fill in the ids; see AI_TEA_ASSISTANT_SETUP.md.
+# No secrets in this file. Secrets are set only with `npx wrangler secret put <NAME>` (stored encrypted by Cloudflare):
+#   AI_API_KEY                   Anthropic (or other provider) API key – a key with a monthly spend limit
+#   TELEGRAM_SUPPORT_BOT_TOKEN   token of the separate live-support bot (NOT the contact-form bot)
+#   TELEGRAM_WEBHOOK_SECRET      random string, e.g. `openssl rand -hex 32`; Telegram sends it in a header
+#   TURNSTILE_SECRET             the same Turnstile secret as the contact forms
+#   HASH_SALT                    random string for hashing IPs in daily counters
+name = "teaphuket-chat"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# The site calls the chat on its own domain (no CORS in production)
+routes = [{ pattern = "teaphuket.com/api/chat/*", zone_name = "teaphuket.com" }]
+# The Telegram webhook uses the workers.dev address: zone security settings (Bot Fight Mode, rules)
+# must never block Telegram's servers.
+workers_dev = true
+
+# No request logs with personal data (the Worker logs only event codes)
+[observability]
+enabled = false
+
+[vars]
+AI_PROVIDER = "anthropic"            # anthropic | openai (OpenAI-compatible, set AI_BASE_URL) – mock works only locally
+AI_MODEL = "claude-haiku-5-5"
+AI_ENABLED = "1"                     # "0" switches the AI off; the chat, handoff and Telegram keep working
+TRANSLATE = "0"                      # "1": visitor questions get a Russian translation in Telegram, Russian staff replies are translated for the visitor
+TELEGRAM_STAFF_CHAT_ID = ""          # the staff group, e.g. -5304623826
+TELEGRAM_OPERATOR_IDS = ""           # comma-separated Telegram user ids allowed to answer, e.g. 362008939
+EVENTS_SHEET_ID = "1zcA3xGzhUeQvWD2pFi1obgOf8mC2gi32D0l_q4tw_es"   # same public sheet as the site's events block
+# Optional limits (defaults in src/config.js): AI_DAILY_LIMIT, AI_PER_CONVERSATION, AI_MAX_TOKENS, HISTORY_MESSAGES, RETENTION_DAYS
+
+# Cloudflare D1 (free tier). Create once: npx wrangler d1 create teaphuket-chat → paste the id
+[[d1_databases]]
+binding = "DB"
+database_name = "teaphuket-chat"
+database_id = "<d1-database-id>"
+migrations_dir = "migrations"
+
+# Rate limits counted by Cloudflare (free; period 10 or 60 s)
+[[ratelimits]]
+name = "RL_START"     # new conversations per visitor IP
+namespace_id = "2001"
+  [ratelimits.simple]
+  limit = 5
+  period = 60
+
+[[ratelimits]]
+name = "RL_MSG"       # messages per visitor IP
+namespace_id = "2002"
+  [ratelimits.simple]
+  limit = 20
+  period = 60
+
+[[ratelimits]]
+name = "RL_POLL"      # history checks per conversation (the widget polls every 4–15 s)
+namespace_id = "2003"
+  [ratelimits.simple]
+  limit = 40
+  period = 60
+
+[[ratelimits]]
+name = "RL_AI"        # AI calls per minute for the whole site
+namespace_id = "2004"
+  [ratelimits.simple]
+  limit = 60
+  period = 60
+
+# Daily cleanup at 03:00 Bangkok: conversations older than RETENTION_DAYS are deleted
+[triggers]
+crons = ["0 20 * * *"]

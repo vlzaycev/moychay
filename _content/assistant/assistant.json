@@ -1,0 +1,25 @@
+{
+  "_comment": "Single source for the assistant's name and fixed texts. Used by the site widget (build.py) and the chat Worker. Change the name here, rebuild the site and redeploy the Worker.",
+  "name": { "en": "Cha", "ru": "Ча", "th": "Cha" },
+  "title": {
+    "en": "AI tea assistant by Moychay Phuket",
+    "ru": "AI-помощник Moychay Phuket",
+    "th": "ผู้ช่วย AI ด้านชาของ Moychay Phuket"
+  },
+  "greeting": {
+    "en": "Hi! I'm Cha, your AI tea assistant at Moychay Phuket. I can help you explore our teas, find a ceremony, plan your visit or contact our team. How can I help?",
+    "ru": "Привет! Я Ча – AI-помощник Moychay Phuket. Помогу выбрать чай, узнать о церемониях, спланировать визит или связаться с нашей командой. Чем могу помочь?",
+    "th": "สวัสดีค่ะ! Cha เป็นผู้ช่วย AI ด้านชาของ Moychay Phuket ช่วยคุณเลือกชา หาพิธีชงชาที่ใช่ วางแผนการมาที่ร้าน หรือติดต่อทีมงานของเราได้ค่ะ มีอะไรให้ช่วยไหมคะ"
+  },
+  "quick": {
+    "en": [["ceremonies", "Tea ceremonies"], ["visit", "Visit our tea house"], ["choose", "Choose a tea"], ["shop", "Order tea online"], ["human", "Talk to our team"]],
+    "ru": [["ceremonies", "Чайные церемонии"], ["visit", "Как нас найти"], ["choose", "Помоги выбрать чай"], ["shop", "Заказать чай"], ["human", "Позвать сотрудника"]],
+    "th": [["ceremonies", "พิธีชงชา"], ["visit", "การเดินทางมาร้าน"], ["choose", "ช่วยเลือกชา"], ["shop", "สั่งชาออนไลน์"], ["human", "คุยกับทีมงาน"]]
+  },
+  "quick_prompts": {
+    "en": { "ceremonies": "Tell me about your tea ceremonies.", "visit": "Where are you and when are you open?", "choose": "Help me choose a tea.", "shop": "How can I order tea online?" },
+    "ru": { "ceremonies": "Расскажите о ваших чайных церемониях.", "visit": "Где вы находитесь и когда открыты?", "choose": "Помогите выбрать чай.", "shop": "Как заказать чай онлайн?" },
+    "th": { "ceremonies": "ช่วยเล่าเรื่องพิธีชงชาของร้านหน่อยค่ะ", "visit": "ร้านอยู่ที่ไหน เปิดกี่โมงคะ", "choose": "ช่วยแนะนำชาให้หน่อยค่ะ", "shop": "สั่งชาออนไลน์ได้อย่างไรคะ" }
+  },
+  "retention_days": 30
+}
