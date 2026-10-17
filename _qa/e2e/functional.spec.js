@@ -117,7 +117,8 @@ for (const p of PAGES) {
       await page.locator('#teas .tea-list').scrollIntoViewIfNeeded();
       await page.evaluate(() => window.scrollBy(0, 200));
       await expect(bar).toHaveClass(/\bon\b/);
-      await page.locator('#find-us .btn[data-track="directions"]').evaluate(e => e.scrollIntoView({ block: 'center' }));
+      // button low on the screen, right where the bar would be
+      await page.locator('#find-us .btn[data-track="directions"]').evaluate(e => window.scrollTo(0, e.getBoundingClientRect().bottom + scrollY - innerHeight * 0.8));
       await expect(bar).not.toHaveClass(/\bon\b/);        // the same action is already on screen
       await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
       await expect(bar).not.toHaveClass(/\bon\b/);        // footer
