@@ -852,14 +852,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p class="muted">Расскажите о бизнесе и о том, что вам нужно. Ответим на email и предложим следующие шаги.</p>
       <div class="muted more"><p>Удобнее позвонить или написать на почту? Для официальных запросов:</p><ul class="clinks"><li><a href="tel:+66817959110" data-track="phone_call" data-place="wholesale"><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg>+66 81 795 9110</a></li><li><a href="mailto:info@phuket.moychay.asia" data-track="email_click" data-place="wholesale"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg>info@phuket.moychay.asia</a></li></ul></div>
     </div>
-  <form class="form" id="wholesale-form" data-form="wholesale" data-endpoint="" data-sitekey="" novalidate>
-    <div class="form-off" role="note">
-      <p>Онлайн-форма подключается и скоро заработает. Пока быстрее всего написать нам в <a href="https://t.me/moychay_phuket" target="_blank" rel="noopener" data-track="telegram" data-place="form_offline">Telegram</a> или <a href="https://wa.me/66817959110" target="_blank" rel="noopener" data-track="whatsapp" data-place="form_offline">WhatsApp</a>.</p>
-      <div class="act">
-        <a class="tlink" href="https://t.me/moychay_phuket" target="_blank" rel="noopener" data-track="telegram" data-place="wholesale_form_offline"><svg class="bi" aria-hidden="true"><use href="#i-tg"/></svg>Telegram</a>
-      </div>
-    </div>
-    <fieldset disabled>
+  <form class="form" id="wholesale-form" data-form="wholesale" data-endpoint="/api/contact" data-sitekey="0x4AAAAAAFYnqNdF-cMkUD1N" novalidate>
+    <fieldset>
       <div class="fld"><label for="wholesale-name">Имя <span aria-hidden="true">*</span></label><input id="wholesale-name" name="name" type="text" required aria-describedby="wholesale-name-err" autocomplete="name" maxlength="100"><span class="fld-err" id="wholesale-name-err"></span></div>
       <div class="fld"><label for="wholesale-company">Название компании <span aria-hidden="true">*</span></label><input id="wholesale-company" name="company" type="text" required aria-describedby="wholesale-company-err" autocomplete="organization" maxlength="150"><span class="fld-err" id="wholesale-company-err"></span></div>
       <div class="fld"><label for="wholesale-business_type">Тип бизнеса <span class="opt">(необязательно)</span></label><select id="wholesale-business_type" name="business_type" aria-describedby="wholesale-business_type-err"><option value="">Выберите…</option><option value="restaurant">Ресторан или кафе</option><option value="hotel">Отель или курорт</option><option value="spa">SPA или wellness</option><option value="fitness">Фитнес или йога-студия</option><option value="real_estate">Недвижимость</option><option value="other">Другое</option></select><span class="fld-err" id="wholesale-business_type-err"></span></div>
@@ -974,7 +968,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (!en.isIntersecting && i > -1) btnsInView.splice(i, 1);
       });
       onScroll();
-    });
+    }, { rootMargin: '-60% 0px 0px 0px' });          // only a button in the lower 40% of the screen, next to the bar
     $$('main .btn[data-track="directions"]').forEach(function (b) { bo.observe(b); });
   }
   function onScroll() {

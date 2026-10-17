@@ -1,5 +1,5 @@
 // Inner pages (/ceremonies/ /tea/ /matcha/ /events/ /contact/ /wholesale/ + /ru/…): SEO, navigation, forms.
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./test');
 const { mockEvents, watchErrors } = require('./helpers');
 
 const H1 = {
@@ -78,18 +78,21 @@ async function enableForm(page, path, { token = 'tok-test' } = {}) {
 }
 
 for (const f of FORMS) {
-  test(`${f.path} form: not connected yet → disabled, honest note, messenger link`, async ({ page }) => {
+  test(`${f.path} form: live – our endpoint and the public Turnstile key, nothing sent on its own`, async ({ page }) => {
     const posts = [];
-    page.on('request', r => { if (r.method() === 'POST' && !/\/cdn-cgi\//.test(r.url())) posts.push(r.url()); });   // Cloudflare's own RUM beacon is not the form
+    // only requests to our own form endpoint count (the embedded Google map and Cloudflare RUM post on their own)
+    page.on('request', r => { if (r.method() === 'POST' && /\/api\/contact/.test(r.url())) posts.push(r.url()); });
+    await page.route(/challenges\.cloudflare\.com\/turnstile/, r => r.fulfill({ contentType: 'text/javascript', body: 'window.turnstile={render(){return "w"},getResponse(){return ""},reset(){}};window.onTurnstileLoad&&onTurnstileLoad()' }));
     await page.goto(f.path);
     const form = page.locator(`#${f.kind}-form`);
-    await expect(form.locator('[name=name]')).toBeDisabled();
-    await expect(form.locator('button[type=submit]')).toBeDisabled();
-    await expect(form.locator('.form-off')).toBeVisible();
-    await expect(form.locator('.form-off a').first()).toHaveAttribute('href', /wa\.me|t\.me/);
+    await expect(form).toHaveAttribute('data-endpoint', '/api/contact');
+    await expect(form).toHaveAttribute('data-sitekey', /^0x4AAAAAA/);
+    await expect(form.locator('[name=name]')).toBeEnabled();
+    await expect(form.locator('.form-off')).toHaveCount(0);
     await expect(form.locator('button[type=submit]')).toHaveText(f.submit);
+    expect(await page.content()).not.toMatch(/TELEGRAM_BOT_TOKEN|TURNSTILE_SECRET|api\.telegram\.org/);   // no secrets in the page
+    await page.waitForTimeout(500);
     expect(posts).toEqual([]);
-    expect(await page.evaluate(() => [...document.scripts].some(s => /turnstile/.test(s.src)))).toBe(false);  // no third-party load
   });
 
   test(`${f.path} form: validation, then success only after the server confirms`, async ({ page }) => {

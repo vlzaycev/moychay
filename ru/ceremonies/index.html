@@ -914,7 +914,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (!en.isIntersecting && i > -1) btnsInView.splice(i, 1);
       });
       onScroll();
-    });
+    }, { rootMargin: '-60% 0px 0px 0px' });          // only a button in the lower 40% of the screen, next to the bar
     $$('main .btn[data-track="directions"]').forEach(function (b) { bo.observe(b); });
   }
   function onScroll() {

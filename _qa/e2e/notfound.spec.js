@@ -1,5 +1,5 @@
 // 404 page: GitHub Pages serves /404.html with HTTP 404 for every unknown URL (also under /ru/).
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./test');
 const fs = require('fs');
 const path = require('path');
 const BODY = fs.readFileSync(path.join(__dirname, '..', '..', '404.html'));

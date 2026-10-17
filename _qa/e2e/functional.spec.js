@@ -1,5 +1,5 @@
 // Functional: CTAs, links, language switch, accordions, sticky bar, slideshows, anchors.
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./test');
 const { mockEvents, PAGES } = require('./helpers');
 
 const MAPS = 'https://maps.app.goo.gl/uuZkb3YwtNMGQhy18';

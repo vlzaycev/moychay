@@ -1,5 +1,5 @@
 // SEO & metadata checks on the rendered pages.
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./test');
 const { mockEvents, PAGES } = require('./helpers');
 
 test.describe.configure({ mode: 'parallel' });

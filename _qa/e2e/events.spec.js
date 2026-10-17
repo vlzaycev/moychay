@@ -1,5 +1,5 @@
 // Events block (Google Sheet → cards): ordering, filtering, XSS safety, error/empty states.
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./test');
 const { mockEvents, PAGES, EXPORT_URL } = require('./helpers');
 
 const HEADER = 'date,time,title_en,title_ru,text_en,text_ru,price_en,price_ru,link,show\n';

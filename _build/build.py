@@ -36,10 +36,10 @@ CONFIG = {
     "cfg_sheet": "1zcA3xGzhUeQvWD2pFi1obgOf8mC2gi32D0l_q4tw_es",  # events Google Sheet
     # Contact & wholesale forms: URL of the server handler (_server/contact-worker), e.g. "/api/contact".
     # Empty = forms are shown disabled with a note to use WhatsApp/Telegram (nothing is sent anywhere).
-    "cfg_form_endpoint": "",
+    "cfg_form_endpoint": "/api/contact",
     # Cloudflare Turnstile site key (public, safe to commit). The secret key lives only in the Worker.
     # The forms go live only when both cfg_form_endpoint and this key are set.
-    "cfg_turnstile_sitekey": "",
+    "cfg_turnstile_sitekey": "0x4AAAAAAFYnqNdF-cMkUD1N",
 }
 
 MAPS = "https://maps.app.goo.gl/uuZkb3YwtNMGQhy18"

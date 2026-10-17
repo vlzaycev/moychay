@@ -1,5 +1,5 @@
 // Smoke: both pages load, key content present, no JS errors, no horizontal scroll.
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./test');
 const { mockEvents, watchErrors, PAGES } = require('./helpers');
 
 for (const p of PAGES) {

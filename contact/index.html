@@ -831,14 +831,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <h2 class="rv">Get in touch</h2>
       <p class="muted">For bookings the quickest way is WhatsApp. For anything else, write to us here and we'll reply by email.</p>
     </div>
-  <form class="form" id="contact-form" data-form="contact" data-endpoint="" data-sitekey="" novalidate>
-    <div class="form-off" role="note">
-      <p>The online form is being connected and will work soon. For now the quickest way to reach us is <a href="https://wa.me/66817959110" target="_blank" rel="noopener" data-track="whatsapp" data-place="form_offline">WhatsApp</a>.</p>
-      <div class="act">
-        <a class="tlink" href="https://wa.me/66817959110?text=Hi%21%20I%20found%20you%20on%20teaphuket.com" target="_blank" rel="noopener" data-track="whatsapp" data-place="contact_form_offline"><svg class="bi" aria-hidden="true"><use href="#i-wa"/></svg>WhatsApp</a>
-      </div>
-    </div>
-    <fieldset disabled>
+  <form class="form" id="contact-form" data-form="contact" data-endpoint="/api/contact" data-sitekey="0x4AAAAAAFYnqNdF-cMkUD1N" novalidate>
+    <fieldset>
       <div class="fld"><label for="contact-name">Name <span aria-hidden="true">*</span></label><input id="contact-name" name="name" type="text" required aria-describedby="contact-name-err" autocomplete="name" maxlength="100"><span class="fld-err" id="contact-name-err"></span></div>
       <div class="fld"><label for="contact-email">Email <span aria-hidden="true">*</span></label><input id="contact-email" name="email" type="email" required aria-describedby="contact-email-err" autocomplete="email" inputmode="email" maxlength="200" spellcheck="false"><span class="fld-err" id="contact-email-err"></span></div>
       <div class="fld"><label for="contact-contact_value">WhatsApp number <span class="opt">(optional)</span></label><span class="fld-hint" id="contact-contact_value-hint">International format, e.g. +66 81 234 5678</span><input id="contact-contact_value" name="contact_value" type="tel" aria-describedby="contact-contact_value-err contact-contact_value-hint" autocomplete="tel" inputmode="tel" maxlength="24" placeholder="+66 81 234 5678"><span class="fld-err" id="contact-contact_value-err"></span></div>
@@ -949,7 +943,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (!en.isIntersecting && i > -1) btnsInView.splice(i, 1);
       });
       onScroll();
-    });
+    }, { rootMargin: '-60% 0px 0px 0px' });          // only a button in the lower 40% of the screen, next to the bar
     $$('main .btn[data-track="directions"]').forEach(function (b) { bo.observe(b); });
   }
   function onScroll() {

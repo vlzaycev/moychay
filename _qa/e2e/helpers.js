@@ -13,8 +13,9 @@ async function mockEvents(page, body = CSV_FIXTURE, status = 200) {
 /** Collect uncaught page errors and console errors (third-party noise filtered). */
 function watchErrors(page) {
   const errors = [];
-  const noise = /googletagmanager|mc\.yandex|facebook|fonts\.g|maps\.google|google\.com\/maps|gstatic|doubleclick|ERR_BLOCKED_BY_CLIENT|favicon/i;
-  page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
+  // Turnstile error 110200 = 'domain not allowed': the widget is registered for teaphuket.com only, so it fires on localhost runs
+const noise = /googletagmanager|mc\.yandex|facebook|fonts\.g|maps\.google|google\.com\/maps|gstatic|doubleclick|ERR_BLOCKED_BY_CLIENT|favicon|Turnstile\] Error: 110200/i;
+  page.on('pageerror', (e) => { if (!noise.test(e.message)) errors.push('pageerror: ' + e.message); });
   page.on('console', (m) => { if (m.type() === 'error' && !noise.test(m.text())) errors.push('console: ' + m.text()); });
   page.on('requestfailed', (r) => {
     const u = r.url();

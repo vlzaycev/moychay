@@ -831,14 +831,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <h2 class="rv">Напишите нам</h2>
       <p class="muted">Записаться на церемонию быстрее всего в Telegram. По другим вопросам напишите здесь – ответим на email.</p>
     </div>
-  <form class="form" id="contact-form" data-form="contact" data-endpoint="" data-sitekey="" novalidate>
-    <div class="form-off" role="note">
-      <p>Онлайн-форма подключается и скоро заработает. Пока быстрее всего написать нам в <a href="https://t.me/moychay_phuket" target="_blank" rel="noopener" data-track="telegram" data-place="form_offline">Telegram</a> или <a href="https://wa.me/66817959110" target="_blank" rel="noopener" data-track="whatsapp" data-place="form_offline">WhatsApp</a>.</p>
-      <div class="act">
-        <a class="tlink" href="https://t.me/moychay_phuket" target="_blank" rel="noopener" data-track="telegram" data-place="contact_form_offline"><svg class="bi" aria-hidden="true"><use href="#i-tg"/></svg>Telegram</a>
-      </div>
-    </div>
-    <fieldset disabled>
+  <form class="form" id="contact-form" data-form="contact" data-endpoint="/api/contact" data-sitekey="0x4AAAAAAFYnqNdF-cMkUD1N" novalidate>
+    <fieldset>
       <div class="fld"><label for="contact-name">Имя <span aria-hidden="true">*</span></label><input id="contact-name" name="name" type="text" required aria-describedby="contact-name-err" autocomplete="name" maxlength="100"><span class="fld-err" id="contact-name-err"></span></div>
       <div class="fld"><label for="contact-email">Email <span aria-hidden="true">*</span></label><input id="contact-email" name="email" type="email" required aria-describedby="contact-email-err" autocomplete="email" inputmode="email" maxlength="200" spellcheck="false"><span class="fld-err" id="contact-email-err"></span></div>
       <div class="fld"><label for="contact-contact_value">Telegram username <span class="opt">(необязательно)</span></label><span class="fld-hint" id="contact-contact_value-hint">Например, moychay_phuket – символ @ не обязателен</span><input id="contact-contact_value" name="contact_value" type="text" aria-describedby="contact-contact_value-err contact-contact_value-hint" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="40" placeholder="username"><span class="fld-err" id="contact-contact_value-err"></span></div>
@@ -951,7 +945,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (!en.isIntersecting && i > -1) btnsInView.splice(i, 1);
       });
       onScroll();
-    });
+    }, { rootMargin: '-60% 0px 0px 0px' });          // only a button in the lower 40% of the screen, next to the bar
     $$('main .btn[data-track="directions"]').forEach(function (b) { bo.observe(b); });
   }
   function onScroll() {

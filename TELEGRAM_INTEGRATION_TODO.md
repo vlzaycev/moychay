@@ -1,4 +1,12 @@
-# Подключение форм к Telegram – что осталось сделать
+# Подключение форм к Telegram
+
+> **Статус на 17.10.2026: подключено.**
+> - Worker `teaphuket-contact` развёрнут на `teaphuket.com/api/contact`, заданы 4 секрета, KV и лимиты подключены.
+> - Формы на сайте включены: `cfg_form_endpoint` и `cfg_turnstile_sitekey` заданы.
+> - Проверено на проде: запросы без Turnstile, с поддельным токеном и с заполненным honeypot отклоняются (400), запросы с чужого сайта – 403.
+> - `wrangler.toml` с ID аккаунта и KV хранится только локально (в `.gitignore`).
+>
+> Ниже – исходная инструкция для справки.
 
 Код готов в `_server/contact-worker/` и покрыт тестами (`_qa/unit/contact.test.mjs` и `_qa/e2e/pages.spec.js`).
 
