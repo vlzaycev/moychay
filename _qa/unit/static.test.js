@@ -134,13 +134,18 @@ test('blog: drafts never published – no /blog/ output, not in sitemap or foote
   const md = fs.readdirSync(path.join(ROOT, '_content', 'blog')).filter(f => f.endsWith('.md'));
   const published = md.filter(f => /\nstatus:\s*published/.test(read('_content/blog/' + f)));
   const sm = read('sitemap.xml');
+  // _preview/ is git-ignored, so build a fresh copy instead of relying on a local one (CI has none)
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tp-preview-'));
+  fs.cpSync(path.join(ROOT, '_build'), path.join(tmp, '_build'), { recursive: true });
+  fs.cpSync(path.join(ROOT, '_content'), path.join(tmp, '_content'), { recursive: true });
+  execFileSync('python3', [path.join(tmp, '_build', 'build.py')], { stdio: 'pipe' });
   for (const f of md) {
     const slug = f.split('.')[0], lang = f.split('.')[1];
     const pub = published.includes(f);
     const out = (lang === 'ru' ? 'ru/' : '') + 'blog/' + slug + '/index.html';
     assert.equal(fs.existsSync(path.join(ROOT, out)), pub, out);
     assert.equal(sm.includes('/blog/' + slug + '/'), pub, 'sitemap ' + slug);
-    const prev = read('_preview/' + out);
+    const prev = fs.readFileSync(path.join(tmp, '_preview', out), 'utf8');
     assert.match(prev, /<meta name="robots" content="noindex">/, 'preview noindex ' + out);
   }
   if (!published.length) {

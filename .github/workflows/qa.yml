@@ -30,6 +30,8 @@ jobs:
       - run: npm ci
       - name: Static checks (build reproducible, assets, SEO files, no secrets)
         run: npm run unit
+      - name: Build (recreates the git-ignored _preview/ with blog drafts for the E2E checks)
+        run: python3 ../_build/build.py
       - run: npx playwright install --with-deps chromium
       - name: E2E (local copy of the site, Chromium desktop + mobile)
         if: github.event_name != 'schedule'
