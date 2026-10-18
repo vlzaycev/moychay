@@ -205,7 +205,12 @@ test('privacy policy: EN/RU pages, linked from every footer, covers the chat, PD
   for (const [f, lp] of [['privacy/index.html', '/'], ['ru/privacy/index.html', '/ru/']]) {
     const h = read(f);
     assert.match(h, /PDPA/);
-    for (const w of ['Anthropic', 'Cloudflare', 'Telegram', 'Google', 'Meta', '30', 'PDPC', 'info@phuket.moychay.asia']) assert.ok(h.includes(w), `${f}: ${w}`);
+    for (const w of ['30', 'PDPC', 'info@phuket.moychay.asia']) assert.ok(h.includes(w), `${f}: ${w}`);
+    // recipients are named by category (what PDPA asks for), not by company: no map of our infrastructure in public
+    const sec5 = h.slice(h.indexOf('<h2>5.'), h.indexOf('<h2>6.'));
+    assert.ok(sec5.length > 200, `${f}: recipients section`);
+    assert.equal((sec5.match(/<li>/g) || []).length, 5, `${f}: 5 categories of recipients`);
+    assert.doesNotMatch(h.slice(h.indexOf('<h2>1.'), h.indexOf('</main>')), /Anthropic|Cloudflare|GitHub|Google|Yandex|Яндекс|Meta Pixel|Meta Platforms|Turnstile|Telegram-чат|staff Telegram/, f);
     assert.match(h, new RegExp(`<link rel="canonical" href="https://teaphuket.com${lp}privacy/">`));
   }
   for (const f of [...Object.values(PAGES), 'privacy/index.html', 'ru/privacy/index.html']) {
@@ -233,6 +238,6 @@ test('Yandex Metrica: official counter on every page, skipped for bots; Webvisor
   const cha = read('js/cha.js');
   assert.match(cha, /cha-log ym-hide-content/);
   assert.match(cha, /cha-in ym-disable-keys/);
-  assert.match(read('privacy/index.html'), /Yandex Metrica/);
-  assert.match(read('ru/privacy/index.html'), /Яндекс Метрика/);
+  assert.match(read('privacy/index.html'), /What you type into the chat and the forms is excluded/);
+  assert.match(read('ru/privacy/index.html'), /Текст, который вы вводите в чат и формы, в эти записи не попадает/);
 });

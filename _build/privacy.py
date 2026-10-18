@@ -30,23 +30,22 @@ EN = """
 <h2>4. Cha, our virtual tea guide</h2>
 <ul>
 <li>Cha is a virtual assistant that answers automatically with the help of artificial intelligence. Its answers can be inaccurate; prices, bookings and availability are confirmed only by our team.</li>
-<li>To generate answers, your messages and the recent part of the conversation are sent to our AI provider, Anthropic PBC (USA). Under its commercial terms, this data is not used to train its models.</li>
-<li>If you choose "Talk to a person", the conversation is shared in our staff Telegram chat, where team members reply.</li>
-<li>Chats are stored on Cloudflare's servers and deleted automatically 30 days after the last message. Your browser keeps a random session key so you can come back to the same chat; you can remove it by clearing the site data in your browser.</li>
+<li>To generate answers, your messages and the recent part of the conversation are sent to an external AI service provider that works under a contract with us. Under its terms, this data is not used to train its models.</li>
+<li>If you choose "Talk to a person", the conversation is shared in our team's work chat, where team members reply.</li>
+<li>Chats are stored on the servers of our cloud provider and deleted automatically 30 days after the last message. Your browser keeps a random session key so you can come back to the same chat; you can remove it by clearing the site data in your browser.</li>
 <li>The content of chats is never sent to analytics or advertising systems: they only receive that the chat was opened or a button was pressed.</li>
 </ul>
 
 <h2>5. Who helps us (data processors and recipients)</h2>
+<p>We share personal data only with service providers who need it to run the site and answer you, and only to the extent needed:</p>
 <ul>
-<li><b>Cloudflare, Inc.</b> – website delivery, security, anti-spam check (Turnstile), processing of forms and chat, chat storage.</li>
-<li><b>GitHub, Inc.</b> – website hosting.</li>
-<li><b>Telegram</b> – delivery of form enquiries and chat requests to our staff chat.</li>
-<li><b>Anthropic PBC</b> – AI answers in the chat.</li>
-<li><b>Google LLC / Google Ireland</b> – Google Analytics 4, Google Tag Manager and Google Ads (visit and conversion statistics), Google Maps (the map on the site), Google Sheets (the events schedule).</li>
-<li><b>YANDEX LLC</b> – Yandex Metrica (visit statistics, click maps and Webvisor – an anonymised replay of how pages are scrolled and clicked). What you type into the chat and the forms is excluded from Webvisor.</li>
-<li><b>Meta Platforms</b> – Meta Pixel (statistics for our ads on Facebook and Instagram).</li>
+<li><b>Hosting, cloud and security providers</b> – website delivery, protection from attacks and spam, processing of forms and the chat, chat storage.</li>
+<li><b>Messaging services</b> – delivery of form enquiries and chat requests to our team.</li>
+<li><b>An artificial intelligence service provider</b> – automatic answers in the chat.</li>
+<li><b>Analytics and advertising services</b> – visit statistics, click maps and an anonymised replay of how pages are scrolled and clicked, measurement of our ads. What you type into the chat and the forms is excluded from these recordings.</li>
+<li><b>Map and spreadsheet services</b> – the map on the site and the events schedule.</li>
 </ul>
-<p>They process data on our behalf or as independent controllers under their own privacy policies. We may also disclose data where the law requires it.</p>
+<p>They process data on our behalf or as independent controllers under their own privacy policies. You can ask us for the list of current providers at <a href="mailto:info@phuket.moychay.asia">info@phuket.moychay.asia</a>. We may also disclose data where the law requires it.</p>
 
 <h2>6. Transfers outside Thailand</h2>
 <p>Some of these providers store or process data outside Thailand (for example in the USA or the EU). We use providers that apply appropriate safeguards, such as standard contractual clauses and certified security programmes, as permitted by sections 28–29 of the PDPA.</p>
@@ -56,11 +55,11 @@ EN = """
 <li>Chats with Cha – 30 days after the last message.</li>
 <li>Enquiries from forms and messages to our team – as long as needed to answer and to continue the cooperation you asked for, then deleted, unless the law requires longer storage.</li>
 <li>Technical anti-spam records – hashed (not readable) IP values for up to 2 days.</li>
-<li>Analytics and advertising data – according to the retention settings of Google, Yandex and Meta.</li>
+<li>Analytics and advertising data – according to the retention settings of the analytics and advertising services.</li>
 </ul>
 
 <h2>8. Cookies and similar technologies</h2>
-<p>Google Analytics, Google Tag Manager, Google Ads, Yandex Metrica and Meta Pixel use cookies and similar identifiers. The anti-spam check (Cloudflare Turnstile) may process technical browser data. The chat keeps its session key in your browser's local storage. You can block or delete cookies and site data in your browser settings; the site keeps working without them.</p>
+<p>Analytics and advertising services use cookies and similar identifiers. The anti-spam check may process technical browser data. The chat keeps its session key in your browser's local storage. You can block or delete cookies and site data in your browser settings; the site keeps working without them.</p>
 
 <h2>9. Your rights under the PDPA</h2>
 <p>You may ask us to give you access to and a copy of your data, to transfer it, to correct it, to delete or anonymise it, to restrict its use, to object to processing, and to withdraw consent where we rely on it. Write to <a href="mailto:info@phuket.moychay.asia">info@phuket.moychay.asia</a>; we will answer within 30 days. To help us find a chat, tell us roughly when it took place and on which page. You also have the right to complain to the Office of the Personal Data Protection Committee (PDPC) of Thailand.</p>
@@ -98,23 +97,22 @@ RU = """
 <h2>4. Ча – виртуальный помощник</h2>
 <ul>
 <li>Ча – виртуальный помощник, который отвечает автоматически с помощью искусственного интеллекта. Ответы могут быть неточными; цены, запись и наличие подтверждает только наша команда.</li>
-<li>Чтобы сформировать ответ, ваши сообщения и последняя часть переписки передаются нашему AI-провайдеру – Anthropic PBC (США). По его коммерческим условиям эти данные не используются для обучения моделей.</li>
-<li>Если вы нажмёте «Связаться с человеком», переписка передаётся в рабочий Telegram-чат команды, где вам отвечают сотрудники.</li>
-<li>Чаты хранятся на серверах Cloudflare и автоматически удаляются через 30 дней после последнего сообщения. Браузер хранит случайный ключ сессии, чтобы вы могли вернуться в тот же чат; его можно удалить, очистив данные сайта в браузере.</li>
+<li>Чтобы сформировать ответ, ваши сообщения и последняя часть переписки передаются внешнему поставщику услуг искусственного интеллекта, который работает с нами по договору. По его условиям эти данные не используются для обучения моделей.</li>
+<li>Если вы нажмёте «Связаться с человеком», переписка передаётся в рабочий чат команды, где вам отвечают сотрудники.</li>
+<li>Чаты хранятся на серверах нашего облачного провайдера и автоматически удаляются через 30 дней после последнего сообщения. Браузер хранит случайный ключ сессии, чтобы вы могли вернуться в тот же чат; его можно удалить, очистив данные сайта в браузере.</li>
 <li>Содержание чатов не передаётся в системы аналитики и рекламы: они получают только сам факт открытия чата или нажатия кнопки.</li>
 </ul>
 
 <h2>5. Кто нам помогает (обработчики и получатели)</h2>
+<p>Мы передаём персональные данные только поставщикам услуг, без которых не работает сайт и мы не можем вам ответить, и только в нужном объёме:</p>
 <ul>
-<li><b>Cloudflare, Inc.</b> – доставка сайта, защита, антиспам-проверка (Turnstile), обработка форм и чата, хранение чатов.</li>
-<li><b>GitHub, Inc.</b> – хостинг сайта.</li>
-<li><b>Telegram</b> – доставка заявок из форм и запросов из чата в рабочий чат команды.</li>
-<li><b>Anthropic PBC</b> – ответы AI в чате.</li>
-<li><b>Google LLC / Google Ireland</b> – Google Analytics 4, Google Tag Manager и Google Ads (статистика посещений и конверсий), Google Maps (карта на сайте), Google Sheets (расписание мероприятий).</li>
-<li><b>ООО «ЯНДЕКС»</b> – Яндекс Метрика (статистика посещений, карта кликов и Вебвизор – обезличенная запись прокрутки и нажатий на страницах). Текст, который вы вводите в чат и формы, в Вебвизор не попадает.</li>
-<li><b>Meta Platforms</b> – Meta Pixel (статистика рекламы в Facebook и Instagram).</li>
+<li><b>Хостинг, облачные сервисы и системы защиты</b> – доставка сайта, защита от атак и спама, обработка форм и чата, хранение чатов.</li>
+<li><b>Сервисы обмена сообщениями</b> – доставка заявок из форм и запросов из чата нашей команде.</li>
+<li><b>Поставщик услуг искусственного интеллекта</b> – автоматические ответы в чате.</li>
+<li><b>Сервисы аналитики и рекламы</b> – статистика посещений, карта кликов и обезличенная запись прокрутки и нажатий на страницах, оценка рекламы. Текст, который вы вводите в чат и формы, в эти записи не попадает.</li>
+<li><b>Картографические и табличные сервисы</b> – карта на сайте и расписание мероприятий.</li>
 </ul>
-<p>Они обрабатывают данные по нашему поручению или как самостоятельные контролёры по своим политикам конфиденциальности. Мы также можем раскрыть данные, если этого требует закон.</p>
+<p>Они обрабатывают данные по нашему поручению или как самостоятельные контролёры по своим политикам конфиденциальности. Список текущих поставщиков можно запросить по адресу <a href="mailto:info@phuket.moychay.asia">info@phuket.moychay.asia</a>. Мы также можем раскрыть данные, если этого требует закон.</p>
 
 <h2>6. Передача за пределы Таиланда</h2>
 <p>Часть этих сервисов хранит или обрабатывает данные за пределами Таиланда (например, в США или ЕС). Мы используем сервисы, которые применяют надлежащие меры защиты – стандартные договорные условия и сертифицированные программы безопасности – как это допускают разделы 28–29 PDPA.</p>
@@ -124,11 +122,11 @@ RU = """
 <li>Чаты с Ча – 30 дней после последнего сообщения.</li>
 <li>Заявки из форм и сообщения команде – столько, сколько нужно, чтобы ответить и продолжить сотрудничество, о котором вы просили, затем удаляются, если закон не требует хранить их дольше.</li>
 <li>Технические записи антиспама – хэшированные (нечитаемые) значения IP до 2 дней.</li>
-<li>Данные аналитики и рекламы – по настройкам хранения Google, Яндекса и Meta.</li>
+<li>Данные аналитики и рекламы – по настройкам хранения сервисов аналитики и рекламы.</li>
 </ul>
 
 <h2>8. Cookies и похожие технологии</h2>
-<p>Google Analytics, Google Tag Manager, Google Ads, Яндекс Метрика и Meta Pixel используют cookies и похожие идентификаторы. Антиспам-проверка Cloudflare Turnstile может обрабатывать технические данные браузера. Чат хранит ключ сессии в локальном хранилище браузера. Вы можете запретить или удалить cookies и данные сайта в настройках браузера – сайт продолжит работать.</p>
+<p>Сервисы аналитики и рекламы используют cookies и похожие идентификаторы. Антиспам-проверка может обрабатывать технические данные браузера. Чат хранит ключ сессии в локальном хранилище браузера. Вы можете запретить или удалить cookies и данные сайта в настройках браузера – сайт продолжит работать.</p>
 
 <h2>9. Ваши права по PDPA</h2>
 <p>Вы можете попросить доступ к своим данным и их копию, передачу данных, исправление, удаление или обезличивание, ограничение использования, возразить против обработки и отозвать согласие, если мы на него опираемся. Напишите на <a href="mailto:info@phuket.moychay.asia">info@phuket.moychay.asia</a> – мы ответим в течение 30 дней. Чтобы мы нашли нужный чат, укажите примерное время и страницу. Вы также можете подать жалобу в Управление Комитета по защите персональных данных Таиланда (PDPC).</p>
