@@ -169,10 +169,10 @@ window.SITE = {
     directions:  "",
     message:     ""
   },
-  YM_ID:         "",    // Yandex Metrika counter, e.g. "98765432"
+  YM_ID:         "113664767",    // Yandex Metrika counter, e.g. "98765432"
   PIXEL_ID:      "2041380899914040", // Meta (Facebook) Pixel, e.g. "123456789012345"
   EVENTS_SHEET:  "1zcA3xGzhUeQvWD2pFi1obgOf8mC2gi32D0l_q4tw_es", // Google Sheet with events
-  CHAT: { endpoint: "/api/chat", sitekey: "0x4AAAAAAFYnqNdF-cMkUD1N", src: "js/cha.js?v=806d4b0633", lang: "en" }  // Cha assistant; empty endpoint = off
+  CHAT: { endpoint: "/api/chat", sitekey: "0x4AAAAAAFYnqNdF-cMkUD1N", src: "js/cha.js?v=30ff5c0cbd", lang: "en" }  // Cha assistant; empty endpoint = off
 };
 (function (S) {
   // Google tag (GA4 + Google Ads)
@@ -189,12 +189,17 @@ window.SITE = {
     if (S.GA4_ID) gtag('config', S.GA4_ID);
     if (S.ADS_ID) gtag('config', S.ADS_ID);
   }
-  // Yandex Metrika
+  // Yandex Metrika (official snippet). Webvisor never sees what visitors type: the chat and the forms
+  // carry ym-disable-keys / ym-hide-content (cha.js, pages.py)
   if (S.YM_ID && !bot) {
-    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-    m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
-    (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
-    ym(Number(S.YM_ID), "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true });
+    (function(m,e,t,r,i,k,a){
+      m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+      m[i].l=1*new Date();
+      for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+      k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id=' + S.YM_ID, 'ym');
+    ym(Number(S.YM_ID), 'init', { ssr: true, webvisor: true, clickmap: true, ecommerce: 'dataLayer', referrer: document.referrer,
+      url: location.href, accurateTrackBounce: true, trackLinks: true });
   }
   // Meta Pixel
   if (S.PIXEL_ID && !bot) {
@@ -789,6 +794,7 @@ figure{margin:0}
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <noscript><img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=2041380899914040&amp;ev=PageView&amp;noscript=1"></noscript>
+<noscript><div><img src="https://mc.yandex.ru/watch/113664767" style="position:absolute; left:-9999px;" alt=""></div></noscript>
 <script>document.documentElement.classList.add('js')</script>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">

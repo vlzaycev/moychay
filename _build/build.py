@@ -31,7 +31,7 @@ CONFIG = {
     "cfg_ads": "",              # "AW-XXXXXXXXX"
     "cfg_ads_directions": "",   # conversion label for "Get directions"
     "cfg_ads_message": "",      # conversion label for WhatsApp / Telegram
-    "cfg_ym": "",               # Yandex Metrika counter ID
+    "cfg_ym": "113664767",      # Yandex Metrika counter ID
     "cfg_pixel": "2041380899914040",  # Meta Pixel ID (loaded in window.SITE below; skipped for automated browsers)
     "cfg_fb_verify": "2xbz3ulgnxnpw9oo6wmnhndoz5n8xl",  # Meta Business domain verification
     "cfg_sheet": "1zcA3xGzhUeQvWD2pFi1obgOf8mC2gi32D0l_q4tw_es",  # events Google Sheet
@@ -542,6 +542,8 @@ def render(data, out="404.html"):
     values.update(cha_values(data))
     values["js_i18n"] = json.dumps({**data["js"], "root": data["root"]}, ensure_ascii=False)
     px = CONFIG["cfg_pixel"]
+    values["ym_noscript"] = (f'<noscript><div><img src="https://mc.yandex.ru/watch/{CONFIG["cfg_ym"]}" style="position:absolute; left:-9999px;" alt=""></div></noscript>'
+                             if CONFIG["cfg_ym"] else "")
     values["pixel_noscript"] = (f'<noscript><img height="1" width="1" style="display:none" alt="" '
                                 f'src="https://www.facebook.com/tr?id={px}&amp;ev=PageView&amp;noscript=1"></noscript>' if px else "")
     if "hreflang" not in values:

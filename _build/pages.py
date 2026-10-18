@@ -139,9 +139,10 @@ def form(L, kind, endpoint, sitekey=""):
         mark = ' <span aria-hidden="true">*</span>' if req else f' <span class="opt">{F["optional"]}</span>'
         desc = f"{fid}-err" + (f" {fid}-hint" if hint else "")
         hint_html = f'<span class="fld-hint" id="{fid}-hint">{hint}</span>' if hint else ""
-        ctl = (f'<textarea id="{fid}" name="{name}" rows="5" maxlength="3000"{" required" if req else ""} aria-describedby="{desc}"></textarea>'
+        # ym-disable-keys: Yandex Metrika's Webvisor never records what is typed into the forms
+        ctl = (f'<textarea class="ym-disable-keys" id="{fid}" name="{name}" rows="5" maxlength="3000"{" required" if req else ""} aria-describedby="{desc}"></textarea>'
                if typ == "textarea" else
-               f'<input id="{fid}" name="{name}" type="{typ}"{" required" if req else ""} aria-describedby="{desc}" {attrs}>')
+               f'<input class="ym-disable-keys" id="{fid}" name="{name}" type="{typ}"{" required" if req else ""} aria-describedby="{desc}" {attrs}>')
         return (f'      <div class="fld"><label for="{fid}">{label}{mark}</label>{hint_html}{ctl}'
                 f'<span class="fld-err" id="{fid}-err"></span></div>')
 
@@ -151,7 +152,7 @@ def form(L, kind, endpoint, sitekey=""):
         fid = "wholesale-business_type"     # optional; values must match BUSINESS_TYPES in the Worker (validate.js)
         opts = "".join(f'<option value="{v}">{lbl}</option>' for v, lbl in F["btypes"])
         rows.append(f'      <div class="fld"><label for="{fid}">{F["btype"]} <span class="opt">{F["optional"]}</span></label>'
-                    f'<select id="{fid}" name="business_type" aria-describedby="{fid}-err"><option value="">{F["btype_none"]}</option>{opts}</select>'
+                    f'<select class="ym-disable-keys" id="{fid}" name="business_type" aria-describedby="{fid}-err"><option value="">{F["btype_none"]}</option>{opts}</select>'
                     f'<span class="fld-err" id="{fid}-err"></span></div>')
     rows.append(fld("email", F["email"], "email", attrs='autocomplete="email" inputmode="email" maxlength="200" spellcheck="false"'))
     if how == "whatsapp":
@@ -171,7 +172,7 @@ def form(L, kind, endpoint, sitekey=""):
       </div>
     </div>
 '''
-    return f'''<form class="form" id="{kind}-form" data-form="{kind}" data-endpoint="{escape(endpoint)}" data-sitekey="{escape(sitekey)}" novalidate>
+    return f'''<form class="form ym-hide-content" id="{kind}-form" data-form="{kind}" data-endpoint="{escape(endpoint)}" data-sitekey="{escape(sitekey)}" novalidate>
 {notice}    <fieldset{" disabled" if off else ""}>
 {chr(10).join(rows)}
       <div class="hp" aria-hidden="true"><label for="{kind}-website">{F["hp"]}</label><input id="{kind}-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>

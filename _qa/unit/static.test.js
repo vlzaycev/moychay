@@ -213,3 +213,26 @@ test('privacy policy: EN/RU pages, linked from every footer, covers the chat, PD
     assert.ok(read(f).includes(`class="ftr-legal" href="${lp}privacy/"`), `${f}: footer privacy link`);
   }
 });
+
+test('Yandex Metrica: official counter on every page, skipped for bots; Webvisor never records chat or form input', () => {
+  for (const f of [...Object.values(PAGES), '404.html', 'privacy/index.html', 'ru/privacy/index.html']) {
+    const h = read(f);
+    assert.match(h, /YM_ID:\s+"113664767"/, f);
+    assert.match(h, /mc\.yandex\.ru\/metrika\/tag\.js\?id=' \+ S\.YM_ID/, f);
+    assert.match(h, /if \(S\.YM_ID && !bot\)/, f);
+    assert.match(h, /webvisor: true, clickmap: true, ecommerce: 'dataLayer'/, f);
+    assert.match(h, /<noscript><div><img src="https:\/\/mc\.yandex\.ru\/watch\/113664767"/, f);
+    assert.equal((h.match(/metrika\/tag\.js/g) || []).length, 1, f);
+  }
+  for (const f of ['contact/index.html', 'ru/contact/index.html', 'wholesale/index.html', 'ru/wholesale/index.html']) {
+    const h = read(f);
+    assert.match(h, /<form class="form ym-hide-content"/, f);
+    const fields = h.match(/<(input|textarea|select)\b(?![^>]*type="hidden")[^>]*>/g).filter((x) => !/name="website"/.test(x));
+    assert.ok(fields.length >= 3 && fields.every((x) => /ym-disable-keys/.test(x)), f);
+  }
+  const cha = read('js/cha.js');
+  assert.match(cha, /cha-log ym-hide-content/);
+  assert.match(cha, /cha-in ym-disable-keys/);
+  assert.match(read('privacy/index.html'), /Yandex Metrica/);
+  assert.match(read('ru/privacy/index.html'), /Яндекс Метрика/);
+});

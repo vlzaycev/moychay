@@ -191,7 +191,7 @@
 
   function leadForm(parent) {
     if (el.log.querySelector('.cha-lead')) return;
-    var f = h('form', 'cha-lead'), i = h('input'), b = h('button', 'cha-chip', u().leadBtn);
+    var f = h('form', 'cha-lead'), i = h('input', 'ym-disable-keys'), b = h('button', 'cha-chip', u().leadBtn);
     i.type = 'text'; i.maxLength = 120; i.placeholder = u().leadPh; i.setAttribute('aria-label', u().leadPh); i.autocomplete = 'off';
     b.type = 'submit';
     f.appendChild(i); f.appendChild(b);
@@ -419,8 +419,8 @@
     var box = el.box = h('section', 'cha'); box.id = 'cha-panel'; box.hidden = true; box.setAttribute('role', 'dialog');
     box.innerHTML = '<div class="cha-hd"><span class="cha-mark" aria-hidden="true"></span><div class="cha-who"><span class="cha-name"></span><span class="cha-sub"></span></div>' +
       '<button class="cha-x" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
-      '<div class="cha-state" role="status" hidden></div><div class="cha-log" role="log" aria-live="polite" aria-relevant="additions"></div><div class="cha-ts"></div>' +
-      '<div class="cha-ft"><button class="cha-human" type="button"></button><form class="cha-form"><textarea class="cha-in" rows="1" maxlength="1000"></textarea>' +
+      '<div class="cha-state" role="status" hidden></div><div class="cha-log ym-hide-content" role="log" aria-live="polite" aria-relevant="additions"></div><div class="cha-ts"></div>' +
+      '<div class="cha-ft"><button class="cha-human" type="button"></button><form class="cha-form"><textarea class="cha-in ym-disable-keys" rows="1" maxlength="1000"></textarea>' +
       '<button class="cha-send" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button></form><p class="cha-err" role="alert"></p></div>';
     document.body.appendChild(box);
     var q = function (s) { return box.querySelector(s); };

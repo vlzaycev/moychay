@@ -82,10 +82,10 @@ window.SITE = {
     directions:  "",
     message:     ""
   },
-  YM_ID:         "",    // Yandex Metrika counter, e.g. "98765432"
+  YM_ID:         "113664767",    // Yandex Metrika counter, e.g. "98765432"
   PIXEL_ID:      "2041380899914040", // Meta (Facebook) Pixel, e.g. "123456789012345"
   EVENTS_SHEET:  "1zcA3xGzhUeQvWD2pFi1obgOf8mC2gi32D0l_q4tw_es", // Google Sheet with events
-  CHAT: { endpoint: "/api/chat", sitekey: "0x4AAAAAAFYnqNdF-cMkUD1N", src: "../js/cha.js?v=806d4b0633", lang: "en" }  // Cha assistant; empty endpoint = off
+  CHAT: { endpoint: "/api/chat", sitekey: "0x4AAAAAAFYnqNdF-cMkUD1N", src: "../js/cha.js?v=30ff5c0cbd", lang: "en" }  // Cha assistant; empty endpoint = off
 };
 (function (S) {
   // Google tag (GA4 + Google Ads)
@@ -102,12 +102,17 @@ window.SITE = {
     if (S.GA4_ID) gtag('config', S.GA4_ID);
     if (S.ADS_ID) gtag('config', S.ADS_ID);
   }
-  // Yandex Metrika
+  // Yandex Metrika (official snippet). Webvisor never sees what visitors type: the chat and the forms
+  // carry ym-disable-keys / ym-hide-content (cha.js, pages.py)
   if (S.YM_ID && !bot) {
-    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-    m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
-    (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
-    ym(Number(S.YM_ID), "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true });
+    (function(m,e,t,r,i,k,a){
+      m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+      m[i].l=1*new Date();
+      for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+      k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id=' + S.YM_ID, 'ym');
+    ym(Number(S.YM_ID), 'init', { ssr: true, webvisor: true, clickmap: true, ecommerce: 'dataLayer', referrer: document.referrer,
+      url: location.href, accurateTrackBounce: true, trackLinks: true });
   }
   // Meta Pixel
   if (S.PIXEL_ID && !bot) {
@@ -702,6 +707,7 @@ figure{margin:0}
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <noscript><img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=2041380899914040&amp;ev=PageView&amp;noscript=1"></noscript>
+<noscript><div><img src="https://mc.yandex.ru/watch/113664767" style="position:absolute; left:-9999px;" alt=""></div></noscript>
 <script>document.documentElement.classList.add('js')</script>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -787,6 +793,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><b>Telegram</b> – delivery of form enquiries and chat requests to our staff chat.</li>
 <li><b>Anthropic PBC</b> – AI answers in the chat.</li>
 <li><b>Google LLC / Google Ireland</b> – Google Analytics 4, Google Tag Manager and Google Ads (visit and conversion statistics), Google Maps (the map on the site), Google Sheets (the events schedule).</li>
+<li><b>YANDEX LLC</b> – Yandex Metrica (visit statistics, click maps and Webvisor – an anonymised replay of how pages are scrolled and clicked). What you type into the chat and the forms is excluded from Webvisor.</li>
 <li><b>Meta Platforms</b> – Meta Pixel (statistics for our ads on Facebook and Instagram).</li>
 </ul>
 <p>They process data on our behalf or as independent controllers under their own privacy policies. We may also disclose data where the law requires it.</p>
@@ -799,11 +806,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>Chats with Cha – 30 days after the last message.</li>
 <li>Enquiries from forms and messages to our team – as long as needed to answer and to continue the cooperation you asked for, then deleted, unless the law requires longer storage.</li>
 <li>Technical anti-spam records – hashed (not readable) IP values for up to 2 days.</li>
-<li>Analytics and advertising data – according to the retention settings of Google and Meta.</li>
+<li>Analytics and advertising data – according to the retention settings of Google, Yandex and Meta.</li>
 </ul>
 
 <h2>8. Cookies and similar technologies</h2>
-<p>Google Analytics, Google Tag Manager, Google Ads and Meta Pixel use cookies and similar identifiers. The anti-spam check (Cloudflare Turnstile) may process technical browser data. The chat keeps its session key in your browser's local storage. You can block or delete cookies and site data in your browser settings; the site keeps working without them.</p>
+<p>Google Analytics, Google Tag Manager, Google Ads, Yandex Metrica and Meta Pixel use cookies and similar identifiers. The anti-spam check (Cloudflare Turnstile) may process technical browser data. The chat keeps its session key in your browser's local storage. You can block or delete cookies and site data in your browser settings; the site keeps working without them.</p>
 
 <h2>9. Your rights under the PDPA</h2>
 <p>You may ask us to give you access to and a copy of your data, to transfer it, to correct it, to delete or anonymise it, to restrict its use, to object to processing, and to withdraw consent where we rely on it. Write to <a href="mailto:info@phuket.moychay.asia">info@phuket.moychay.asia</a>; we will answer within 30 days. To help us find a chat, tell us roughly when it took place and on which page. You also have the right to complain to the Office of the Personal Data Protection Committee (PDPC) of Thailand.</p>

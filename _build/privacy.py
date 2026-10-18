@@ -43,6 +43,7 @@ EN = """
 <li><b>Telegram</b> – delivery of form enquiries and chat requests to our staff chat.</li>
 <li><b>Anthropic PBC</b> – AI answers in the chat.</li>
 <li><b>Google LLC / Google Ireland</b> – Google Analytics 4, Google Tag Manager and Google Ads (visit and conversion statistics), Google Maps (the map on the site), Google Sheets (the events schedule).</li>
+<li><b>YANDEX LLC</b> – Yandex Metrica (visit statistics, click maps and Webvisor – an anonymised replay of how pages are scrolled and clicked). What you type into the chat and the forms is excluded from Webvisor.</li>
 <li><b>Meta Platforms</b> – Meta Pixel (statistics for our ads on Facebook and Instagram).</li>
 </ul>
 <p>They process data on our behalf or as independent controllers under their own privacy policies. We may also disclose data where the law requires it.</p>
@@ -55,11 +56,11 @@ EN = """
 <li>Chats with Cha – 30 days after the last message.</li>
 <li>Enquiries from forms and messages to our team – as long as needed to answer and to continue the cooperation you asked for, then deleted, unless the law requires longer storage.</li>
 <li>Technical anti-spam records – hashed (not readable) IP values for up to 2 days.</li>
-<li>Analytics and advertising data – according to the retention settings of Google and Meta.</li>
+<li>Analytics and advertising data – according to the retention settings of Google, Yandex and Meta.</li>
 </ul>
 
 <h2>8. Cookies and similar technologies</h2>
-<p>Google Analytics, Google Tag Manager, Google Ads and Meta Pixel use cookies and similar identifiers. The anti-spam check (Cloudflare Turnstile) may process technical browser data. The chat keeps its session key in your browser's local storage. You can block or delete cookies and site data in your browser settings; the site keeps working without them.</p>
+<p>Google Analytics, Google Tag Manager, Google Ads, Yandex Metrica and Meta Pixel use cookies and similar identifiers. The anti-spam check (Cloudflare Turnstile) may process technical browser data. The chat keeps its session key in your browser's local storage. You can block or delete cookies and site data in your browser settings; the site keeps working without them.</p>
 
 <h2>9. Your rights under the PDPA</h2>
 <p>You may ask us to give you access to and a copy of your data, to transfer it, to correct it, to delete or anonymise it, to restrict its use, to object to processing, and to withdraw consent where we rely on it. Write to <a href="mailto:info@phuket.moychay.asia">info@phuket.moychay.asia</a>; we will answer within 30 days. To help us find a chat, tell us roughly when it took place and on which page. You also have the right to complain to the Office of the Personal Data Protection Committee (PDPC) of Thailand.</p>
@@ -110,6 +111,7 @@ RU = """
 <li><b>Telegram</b> – доставка заявок из форм и запросов из чата в рабочий чат команды.</li>
 <li><b>Anthropic PBC</b> – ответы AI в чате.</li>
 <li><b>Google LLC / Google Ireland</b> – Google Analytics 4, Google Tag Manager и Google Ads (статистика посещений и конверсий), Google Maps (карта на сайте), Google Sheets (расписание мероприятий).</li>
+<li><b>ООО «ЯНДЕКС»</b> – Яндекс Метрика (статистика посещений, карта кликов и Вебвизор – обезличенная запись прокрутки и нажатий на страницах). Текст, который вы вводите в чат и формы, в Вебвизор не попадает.</li>
 <li><b>Meta Platforms</b> – Meta Pixel (статистика рекламы в Facebook и Instagram).</li>
 </ul>
 <p>Они обрабатывают данные по нашему поручению или как самостоятельные контролёры по своим политикам конфиденциальности. Мы также можем раскрыть данные, если этого требует закон.</p>
@@ -122,11 +124,11 @@ RU = """
 <li>Чаты с Ча – 30 дней после последнего сообщения.</li>
 <li>Заявки из форм и сообщения команде – столько, сколько нужно, чтобы ответить и продолжить сотрудничество, о котором вы просили, затем удаляются, если закон не требует хранить их дольше.</li>
 <li>Технические записи антиспама – хэшированные (нечитаемые) значения IP до 2 дней.</li>
-<li>Данные аналитики и рекламы – по настройкам хранения Google и Meta.</li>
+<li>Данные аналитики и рекламы – по настройкам хранения Google, Яндекса и Meta.</li>
 </ul>
 
 <h2>8. Cookies и похожие технологии</h2>
-<p>Google Analytics, Google Tag Manager, Google Ads и Meta Pixel используют cookies и похожие идентификаторы. Антиспам-проверка Cloudflare Turnstile может обрабатывать технические данные браузера. Чат хранит ключ сессии в локальном хранилище браузера. Вы можете запретить или удалить cookies и данные сайта в настройках браузера – сайт продолжит работать.</p>
+<p>Google Analytics, Google Tag Manager, Google Ads, Яндекс Метрика и Meta Pixel используют cookies и похожие идентификаторы. Антиспам-проверка Cloudflare Turnstile может обрабатывать технические данные браузера. Чат хранит ключ сессии в локальном хранилище браузера. Вы можете запретить или удалить cookies и данные сайта в настройках браузера – сайт продолжит работать.</p>
 
 <h2>9. Ваши права по PDPA</h2>
 <p>Вы можете попросить доступ к своим данным и их копию, передачу данных, исправление, удаление или обезличивание, ограничение использования, возразить против обработки и отозвать согласие, если мы на него опираемся. Напишите на <a href="mailto:info@phuket.moychay.asia">info@phuket.moychay.asia</a> – мы ответим в течение 30 дней. Чтобы мы нашли нужный чат, укажите примерное время и страницу. Вы также можете подать жалобу в Управление Комитета по защите персональных данных Таиланда (PDPC).</p>
