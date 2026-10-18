@@ -6,19 +6,22 @@ export function telegramReady(env) {
   return Boolean(env.TELEGRAM_SUPPORT_BOT_TOKEN && env.TELEGRAM_STAFF_CHAT_ID && env.TELEGRAM_OPERATOR_IDS && env.TELEGRAM_WEBHOOK_SECRET);
 }
 
-/** Calls a Bot API method; returns `result` or null. The URL with the token is never logged or returned. */
-export async function tg(env, method, payload, fetchImpl = fetch) {
+/** Calls a Bot API method; returns { ok, result, error } – error is Telegram's short description. The URL with the token is never logged or returned. */
+export async function tgCall(env, method, payload, fetchImpl = fetch) {
   try {
     // TELEGRAM_API_BASE: only for local testing with a fake Telegram server; production uses the real API
     const base = (env.TELEGRAM_API_BASE || 'https://api.telegram.org').replace(/\/$/, '');
     const r = await fetchImpl(`${base}/bot${env.TELEGRAM_SUPPORT_BOT_TOKEN}/${method}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: AbortSignal.timeout(8000) });
     const j = await r.json().catch(() => ({}));
-    return r.ok && j.ok ? j.result : null;
+    return r.ok && j.ok ? { ok: true, result: j.result } : { ok: false, error: String(j.description || r.status).slice(0, 120) };
   } catch {
-    return null;
+    return { ok: false, error: 'network' };
   }
 }
+
+/** Same, returning just `result` or null. */
+export const tg = async (env, method, payload, fetchImpl = fetch) => (await tgCall(env, method, payload, fetchImpl)).result || null;
 
 export const isOperator = (env, userId) =>
   String(env.TELEGRAM_OPERATOR_IDS || '').split(',').map((s) => s.trim()).filter(Boolean).includes(String(userId));

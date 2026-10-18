@@ -44,10 +44,15 @@
 .cha-chip{display:inline-flex;align-items:center;min-height:34px;padding:5px 12px;border:1px solid rgba(55,90,60,.45);border-radius:999px;
   font-size:13.5px;font-weight:500;line-height:1.2;color:#2C4A31;background:transparent;text-decoration:none;transition:background .15s,border-color .15s}
 .cha-chip:hover{background:rgba(55,90,60,.08);border-color:var(--mc-green-dark,#375A3C)}
-.cha-typing{align-self:flex-start;display:flex;gap:4px;padding:12px 14px;background:#FBF8F2;border:1px solid var(--line-l,rgba(58,44,34,.14));border-radius:16px}
-.cha-typing i{width:6px;height:6px;border-radius:50%;background:rgba(34,29,25,.45);animation:cha-dot 1.2s infinite}
-.cha-typing i:nth-child(2){animation-delay:.15s}.cha-typing i:nth-child(3){animation-delay:.3s}
-@keyframes cha-dot{0%,60%,100%{opacity:.3;transform:none}30%{opacity:1;transform:translateY(-2px)}}
+/* three dots: Cha is writing (or, softer, waiting for the team – see cha.js) */
+.cha-typing{align-self:flex-start;display:flex;align-items:center;gap:5px;padding:12px 14px;background:#F8F4EC;border:1px solid rgba(58,44,34,.1);border-radius:15px;border-bottom-left-radius:5px}
+.cha-typing i{width:6px;height:6px;border-radius:50%;background:var(--mc-green-dark,#375A3C);opacity:.35;animation:cha-dot 1.3s ease-in-out infinite}
+.cha-typing i:nth-child(2){animation-delay:.16s}.cha-typing i:nth-child(3){animation-delay:.32s}
+.cha-typing.wait{padding:10px 12px;background:transparent;border-color:rgba(55,90,60,.22)}
+.cha-typing.wait i{width:5px;height:5px;animation-duration:1.8s}
+@keyframes cha-dot{0%,70%,100%{opacity:.3;transform:none}35%{opacity:.95;transform:translateY(-3px)}}
+.cha-m.live{min-height:2.1em}
+.cha-note{margin:0;font-style:normal}
 .cha-lead{align-self:stretch;display:flex;gap:6px;margin:2px 0}
 .cha-lead input{flex:1;min-width:0;height:40px;padding:0 12px;border:1px solid rgba(58,44,34,.3);border-radius:999px;background:#FBF8F2;font:inherit;font-size:16px;color:inherit}
 
@@ -76,4 +81,4 @@
   .cha.kb{border-radius:0}
 }
 html.cha-lock,html.cha-lock body{overflow:hidden}
-@media (prefers-reduced-motion:reduce){.cha,.cha-typing i{transition:none;animation:none}}
+@media (prefers-reduced-motion:reduce){.cha,.cha-typing i,.cha-state.busy::after{transition:none;animation:none}.cha-typing i{opacity:.6}}

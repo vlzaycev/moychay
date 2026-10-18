@@ -3,6 +3,8 @@
 //   AI_MODEL    = e.g. claude-haiku-5-5
 //   AI_API_KEY  = secret (wrangler secret put AI_API_KEY)
 // One attempt per message, hard timeout, capped output: no retry loops, no runaway costs.
+// Streaming (Anthropic, mock): onDelta(text) gets the answer as it is written, for the browser to show early;
+// the stored answer is always the complete, parsed and checked text.
 import { num, BUTTONS } from './config.js';
 
 /** Conversation rows → alternating user/assistant messages starting with the visitor. */
@@ -25,6 +27,14 @@ export function toChat(rows) {
 const HANDOFF = /\[\[\s*handoff\s*\]\]/i;
 const MARKER = /\[\[\s*button\s*:\s*([a-z]+)\s*\]\]/gi;
 
+/** Partial model text → what may be shown while it is still being written: markers are hidden, an unfinished one is held back. */
+export function visiblePart(raw) {
+  let s = String(raw || '').replace(/\[\[[^\]]*\]\]/g, '');
+  const open = s.search(/\[[^\]]*$/);
+  if (open >= 0) s = s.slice(0, open);                                       // "[[butt…" – wait for the rest
+  return s.replace(/\u2014/g, '–').replace(/\*\*/g, '').replace(/^#+\s*/gm, '').replace(/<[^>]*$/, '').replace(/<\/?[a-z][^>]*>/gi, '').replace(/\s+$/, '');
+}
+
 /** Model text → { text, buttons, handoff }. Unknown markers and any HTML-looking tags are removed. */
 export function parseAnswer(raw) {
   let text = String(raw || '');
@@ -39,7 +49,8 @@ export function parseAnswer(raw) {
   return { text, buttons, handoff };
 }
 
-async function anthropic(env, { system, messages, maxTokens }, fetchImpl) {
+async function anthropic(env, { system, messages, maxTokens, onDelta }, fetchImpl) {
+  const stream = typeof onDelta === 'function';
   const r = await fetchImpl('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': env.AI_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
@@ -53,17 +64,41 @@ async function anthropic(env, { system, messages, maxTokens }, fetchImpl) {
         { type: 'text', text: system.live },
       ],
       messages,
+      ...(stream ? { stream: true } : {}),
     }),
     signal: AbortSignal.timeout(num(env, 'AI_TIMEOUT_MS')),
   });
   if (!r.ok) throw new Error('ai_http_' + r.status);
-  const j = await r.json();
-  const u = j.usage || {};
-  return { text: (j.content || []).filter((c) => c.type === 'text').map((c) => c.text).join('\n'),
-    usage: { input: u.input_tokens || 0, output: u.output_tokens || 0, cacheRead: u.cache_read_input_tokens || 0, cacheWrite: u.cache_creation_input_tokens || 0 } };
+  const usage = (u) => ({ input: u.input_tokens || 0, output: u.output_tokens || 0, cacheRead: u.cache_read_input_tokens || 0, cacheWrite: u.cache_creation_input_tokens || 0 });
+  if (!stream || !r.body || !/event-stream/.test(r.headers.get('content-type') || '')) {
+    const j = await r.json();
+    const text = (j.content || []).filter((c) => c.type === 'text').map((c) => c.text).join('\n');
+    if (stream && text) onDelta(text);
+    return { text, usage: usage(j.usage || {}) };
+  }
+  // Server-sent events: message_start (usage) → content_block_delta (text) … → message_delta (output tokens)
+  let text = '', u = {}, buf = '';
+  const reader = r.body.pipeThrough(new TextDecoderStream()).getReader();
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += value;
+    let i;
+    while ((i = buf.indexOf('\n\n')) >= 0) {
+      const block = buf.slice(0, i); buf = buf.slice(i + 2);
+      const data = block.split('\n').filter((l) => l.startsWith('data:')).map((l) => l.slice(5).trim()).join('');
+      if (!data) continue;
+      let e; try { e = JSON.parse(data); } catch { continue; }
+      if (e.type === 'message_start' && e.message && e.message.usage) u = { ...u, ...e.message.usage };
+      else if (e.type === 'content_block_delta' && e.delta && e.delta.type === 'text_delta') { text += e.delta.text; onDelta(text); }
+      else if (e.type === 'message_delta' && e.usage) u = { ...u, ...e.usage };
+      else if (e.type === 'error') throw new Error('ai_stream_' + String((e.error && e.error.type) || 'error').slice(0, 30));
+    }
+  }
+  return { text, usage: usage(u) };
 }
 
-async function openai(env, { system, messages, maxTokens }, fetchImpl) {
+async function openai(env, { system, messages, maxTokens, onDelta }, fetchImpl) {
   const base = (env.AI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '');
   const r = await fetchImpl(`${base}/chat/completions`, {
     method: 'POST',
@@ -75,12 +110,13 @@ async function openai(env, { system, messages, maxTokens }, fetchImpl) {
   if (!r.ok) throw new Error('ai_http_' + r.status);
   const j = await r.json();
   const u = j.usage || {};
-  return { text: j.choices && j.choices[0] && j.choices[0].message ? j.choices[0].message.content || '' : '',
-    usage: { input: u.prompt_tokens || 0, output: u.completion_tokens || 0, cacheRead: 0, cacheWrite: 0 } };
+  const text = j.choices && j.choices[0] && j.choices[0].message ? j.choices[0].message.content || '' : '';
+  if (typeof onDelta === 'function' && text) onDelta(text);                  // no streaming here: shown in one piece
+  return { text, usage: { input: u.prompt_tokens || 0, output: u.completion_tokens || 0, cacheRead: 0, cacheWrite: 0 } };
 }
 
 // Local development and tests only (index.js allows it only with DEV_MODE on localhost): no network, no cost.
-function mock(env, { messages, system }) {
+async function mock(env, { messages, system, onDelta }) {
   const q = (messages[messages.length - 1] || {}).content || '';
   if (system.translate) return { text: `[${system.translate}] ${q}`, usage: {} };
   const ru = /[а-яё]/i.test(q), th = /[฀-๿]/.test(q);
@@ -89,6 +125,10 @@ function mock(env, { messages, system }) {
   if (/shop|магазин|ร้านออนไลน์|online/i.test(q)) text += '\n[[button:shop]]';
   if (/mock-handoff/.test(q)) text += '\n[[handoff]]';
   if (/mock-fail/.test(q)) throw new Error('ai_http_500');
+  if (typeof onDelta === 'function') {                                       // a few pieces, like a real stream
+    const words = text.split(/(?<= )/);
+    for (let i = 1; i <= words.length; i++) { onDelta(words.slice(0, i).join('')); await new Promise((r) => setTimeout(r, Number(env.MOCK_STREAM_MS) || 0)); }
+  }
   return { text, usage: { input: 100, output: 20, cacheRead: 0, cacheWrite: 0 } };
 }
 

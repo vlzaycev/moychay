@@ -199,3 +199,22 @@ Worker подхватит новую базу в течение 5 минут, д
 > **Chat assistant (Cha).** Our website offers an AI chat assistant. When you use it, your messages and the page you started from are processed to answer you: by Cloudflare (hosting and storage) and by our AI provider (Anthropic, PBC) to generate answers. If you ask to talk to our team, the conversation is shared in our staff Telegram chat (Telegram FZ-LLC), where team members reply. We do not ask for personal data in the chat; please do not share sensitive information. If you leave a phone number, messenger name or email, we use it only to answer your request. Chat conversations are deleted 30 days after the last message. Chat contents are not sent to analytics or advertising systems and are not used for marketing. You can ask us to delete a conversation earlier at info@phuket.moychay.asia (tell us the time of the chat and the page). Legal basis: your request (Thai PDPA – performance of a contract / legitimate interest in answering enquiries).
 
 Для Таиланда действует PDPA. Финальный текст политики стоит согласовать с юристом. Сейчас страницы политики на сайте нет, она нужна и для форм.
+
+## 9. Telegram Topics: отдельная тема на каждого посетителя (итерация 4)
+
+**Почему отдельная группа.** Текущая группа заявок (`-5304623826`) – обычная группа. Если включить в ней Topics, Telegram превратит её в супергруппу с **новым id** – уведомления контактной и B2B-форм, которые шлёт другой бот на старый id, перестанут приходить. Поэтому для чата с сайта нужна отдельная группа, а группа заявок остаётся как есть.
+
+**Что сделать (5 минут, всё в Telegram):**
+1. Создайте группу, например «Moychay – чат с сайта». Добавьте сотрудников, которые отвечают посетителям, и бота поддержки (тот же, что сейчас в группе заявок).
+2. Настройки группы → **Темы (Topics)** → включить.
+3. Участники → бот → **Сделать администратором**. Нужно одно право: **Управление темами (Manage Topics)**. Остальные можно выключить. Админ-права нужны ещё и затем, чтобы бот видел обычные сообщения в темах (без Reply).
+4. Напишите в группе `/chatid` (от имени сотрудника из списка). Бот ответит `chat id: -100… (topics on)`. Пришлите этот id.
+
+**Что сделаю я после вашего разрешения на деплой:**
+- `TELEGRAM_STAFF_CHAT_ID` = новый id, `TELEGRAM_TOPICS = "1"` в `wrangler.toml`;
+- `npm run db:migrate` (миграция `0003`), затем `npx wrangler@4 deploy`;
+- проверка: тестовое обращение → тема `CH-XXXX – RU` → сообщение в теме → ответ на сайте.
+
+**Как отвечать сотруднику:** откройте тему посетителя и пишите как в обычном чате. Reply не нужен (но тоже работает). Кнопки в первом сообщении темы: Take over, Return to AI, Close request. Сообщения в General посетителям не уходят. Фото и голосовые на сайт не передаются – бот подскажет.
+
+**Без новой группы** всё тоже работает: режим Reply в текущей группе, как сейчас.

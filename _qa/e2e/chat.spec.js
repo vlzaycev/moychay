@@ -7,7 +7,7 @@ const { mockEvents } = require('./helpers');
 // same origin as the site, like production: browsers send no Origin header on these GET requests
 const EP = '/api/chat';
 
-function fakeApi(page, { reply } = {}) {
+function fakeApi(page, { reply, stream = false, delay = 0 } = {}) {
   const s = { status: 'ai_active', seq: 0, msgs: [], calls: [] };
   const add = (m) => { m.seq = ++s.seq; m.at = Date.now(); s.msgs.push(m); return m; };
   s.add = add;
@@ -16,7 +16,7 @@ function fakeApi(page, { reply } = {}) {
     const u = new URL(req.url());
     const action = u.pathname.split('/').pop();
     const body = req.postData() ? JSON.parse(req.postData()) : {};
-    s.calls.push({ action, body, auth: req.headers().authorization || '', origin: req.headers().origin || '' });
+    s.calls.push({ action, body, wait: u.searchParams.get('wait'), auth: req.headers().authorization || '', origin: req.headers().origin || '' });
     const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' };
     if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
     const out = (o) => route.fulfill({ status: 200, contentType: 'application/json', headers: cors, body: JSON.stringify({ ok: true, ...o }) });
@@ -25,8 +25,17 @@ function fakeApi(page, { reply } = {}) {
     if (action === 'poll') return out({ status: s.status, messages: after(Number(u.searchParams.get('after') || 0)) });
     if (action === 'send') {
       const before = s.seq;
-      add({ sender: 'visitor', text: body.text });
+      const v = add({ sender: 'visitor', text: body.text });
+      if (delay) await new Promise((r) => setTimeout(r, delay));
       if (s.status === 'ai_active') add(reply ? reply(body.text) : { sender: 'assistant', text: 'We hold gong fu cha ceremonies daily.', buttons: ['ceremonies', 'shop'] });
+      if (stream && body.stream) {                 // the Worker's server-sent events: visitor → deltas → done
+        const a = s.msgs.find((m) => m.seq > v.seq && m.sender === 'assistant');
+        const words = a ? a.text.split(/(?<= )/) : [];
+        const ev = (e, d) => `event: ${e}\ndata: ${JSON.stringify(d)}\n\n`;
+        const body2 = ev('visitor', { message: v }) + words.map((w, i) => ev('delta', i ? { add: w } : { text: w })).join('') +
+          ev('delta', { add: '' }) + ev('done', { ok: true, status: s.status, messages: after(before) });
+        return route.fulfill({ status: 200, contentType: 'text/event-stream', headers: cors, body: body2 });
+      }
       return out({ status: s.status, messages: after(before) });
     }
     if (action === 'human') {
@@ -199,6 +208,7 @@ test('handoff: waiting state, team reply appears without reload, conversation re
   api.add({ sender: 'system', text: "You're chatting with our team", event: 'handoff_accepted' });
   api.add({ sender: 'operator', text: 'Hi! Igor here, how can I help?' });
   await expect(page.locator('.cha-m.o')).toContainText('Igor here', { timeout: 8000 });
+  await expect(page.locator('.cha-m.o .cha-by')).toHaveText('Moychay Phuket Team');            // no names or usernames of staff
   await expect(page.locator('.cha-state')).toHaveText("You're chatting with our team");
   await expect(page.locator('.cha-m.s')).toHaveCount(0);
   await page.reload();
@@ -300,4 +310,77 @@ test('phones: the page behind the open chat does not scroll and comes back to th
   await page.keyboard.press('Escape');
   await expect(page.locator('#cha-panel')).toBeHidden();
   expect(Math.abs(await page.evaluate(() => scrollY) - y)).toBeLessThan(2);
+});
+
+test('AI: three dots right away, then the streamed answer; markers never show; the dots are gone after', async ({ page }) => {
+  await enable(page);
+  const api = fakeApi(page, { stream: true, delay: 900, reply: () => ({ sender: 'assistant', text: 'Our gong fu cha ceremony is 600฿ per person.', buttons: ['ceremonies'] }) });
+  await page.goto('/');
+  await page.locator('#cha-launch').click();
+  await page.locator('.cha-in').fill('ceremony?');
+  await page.locator('.cha-in').press('Enter');
+  await expect(page.locator('.cha-m.v')).toHaveText('ceremony?');                          // at once, before any answer
+  await expect(page.locator('.cha-typing')).toBeVisible();
+  await expect(page.locator('.cha-typing')).toHaveAttribute('aria-label', 'Cha is typing');
+  await expect(page.locator('.cha-typing i')).toHaveCount(3);
+  await expect(page.locator('.cha-m.a').last()).toHaveText('Our gong fu cha ceremony is 600฿ per person.');
+  await expect(page.locator('.cha-typing, .cha-m.live')).toHaveCount(0);
+  await expect(page.locator('.cha-acts .cha-chip').first()).toHaveText('Tea ceremonies');
+  expect(await page.locator('.cha-log').innerText()).not.toMatch(/\[\[/);
+  expect(api.calls.find((c) => c.action === 'send').body.stream).toBe(true);
+  await expect(page.locator('.cha-m.v')).toHaveCount(1);                                    // no duplicate of the visitor message
+});
+
+test('team: after the visitor writes, the dots mean "waiting" (never "typing"), stop after 45 s; a reply clears it', async ({ page }) => {
+  await page.clock.install();
+  await enable(page);
+  const api = fakeApi(page);
+  await page.goto('/ru/');
+  await page.locator('#cha-launch').click();
+  await page.locator('.cha-human').click();
+  await expect(page.locator('.cha-state')).toHaveText('Ждём сотрудника');
+  api.status = 'human_active';
+  api.add({ sender: 'system', text: 'С вами сотрудник', event: 'handoff_accepted' });
+  await page.clock.fastForward(5000);
+  await expect(page.locator('.cha-state')).toHaveText('С вами сотрудник');
+  await page.locator('.cha-in').fill('Добрый день!');
+  await page.locator('.cha-in').press('Enter');
+  const dots = page.locator('.cha-typing.wait');
+  await expect(dots).toBeVisible();
+  await expect(dots).toHaveAttribute('aria-label', 'Ожидаем ответ');
+  expect(await page.locator('.cha-panel, #cha-panel').innerText()).not.toMatch(/печатает|typing/i);
+  await page.clock.fastForward(46000);
+  await expect(dots).toHaveCount(0);                                                        // no endless animation
+  await expect(page.locator('.cha-note')).toHaveText('Ожидаем ответ');
+  api.add({ sender: 'operator', text: 'Здравствуйте! Чем помочь?' });
+  await page.clock.fastForward(3000);
+  await expect(page.locator('.cha-m.o')).toContainText('Здравствуйте');
+  await expect(page.locator('.cha-m.o .cha-by')).toHaveText('Сотрудник Moychay Phuket');
+  await expect(page.locator('.cha-note, .cha-typing')).toHaveCount(0);
+});
+
+test('team chat: the open panel keeps one long request (wait=20), never a burst of requests', async ({ page }) => {
+  await enable(page);
+  const api = fakeApi(page);                         // the fake answers at once – the widget must still pace itself
+  await page.goto('/');
+  await page.locator('#cha-launch').click();
+  await page.locator('.cha-human').click();
+  await expect(page.locator('.cha-state')).toHaveText('Waiting for our team');
+  await page.waitForTimeout(3500);
+  const polls = api.calls.filter((c) => c.action === 'poll');
+  expect(polls.length).toBeGreaterThan(0);
+  expect(polls.length).toBeLessThanOrEqual(6);
+  expect(polls.some((c) => c.wait === '20')).toBe(true);
+});
+
+test('reduced motion: the dots stand still', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await enable(page);
+  fakeApi(page, { delay: 1500 });
+  await page.goto('/');
+  await page.locator('#cha-launch').click();
+  await page.locator('.cha-in').fill('hi');
+  await page.locator('.cha-in').press('Enter');
+  await expect(page.locator('.cha-typing')).toBeVisible();
+  expect(await page.locator('.cha-typing i').first().evaluate((e) => getComputedStyle(e).animationName)).toBe('none');
 });

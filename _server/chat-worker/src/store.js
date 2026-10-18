@@ -41,7 +41,7 @@ export const conversationById = (db, id) =>
 export async function setStatus(db, id, status, extra = {}) {
   const sets = ['status = ?', 'last_activity = ?'], vals = [status, now()];
   for (const [k, v] of Object.entries(extra)) {
-    if (!['operator_id', 'operator_name', 'tg_root_message_id', 'tg_thread_id', 'lang'].includes(k)) throw new Error('bad column');
+    if (!['operator_id', 'operator_name', 'tg_root_message_id', 'tg_chat_id', 'tg_thread_id', 'lang'].includes(k)) throw new Error('bad column');
     sets.push(`${k} = ?`); vals.push(v);
   }
   await db.prepare(`UPDATE conversations SET ${sets.join(', ')} WHERE id = ?`).bind(...vals, id).run();
@@ -61,15 +61,31 @@ export const releaseAiLock = (db, id) =>
 
 /* ── messages ──────────────────────────────────────────────────────────── */
 
+// One round trip: the counter and the message are written in one transaction (D1 batch)
 export async function addMessage(db, convId, { sender, text, meta = null, clientId = null }) {
-  const row = await db.prepare('UPDATE conversations SET seq = seq + 1, last_activity = ? WHERE id = ? RETURNING seq')
-    .bind(now(), convId).first();
+  const m = { sender, text, meta: meta ? JSON.stringify(meta) : null, created_at: now() };
+  const res = await db.batch([
+    db.prepare('UPDATE conversations SET seq = seq + 1, last_activity = ? WHERE id = ?').bind(m.created_at, convId),
+    db.prepare(`INSERT INTO messages (conv_id, seq, sender, text, meta, client_id, created_at)
+      SELECT id, seq, ?, ?, ?, ?, ? FROM conversations WHERE id = ? RETURNING seq`).bind(sender, text, m.meta, clientId, m.created_at, convId),
+  ]);
+  const row = res[1] && res[1].results && res[1].results[0];
   if (!row) throw new Error('conversation not found');
-  const m = { seq: row.seq, sender, text, meta: meta ? JSON.stringify(meta) : null, created_at: now() };
-  await db.prepare('INSERT INTO messages (conv_id, seq, sender, text, meta, client_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
-    .bind(convId, m.seq, sender, text, m.meta, clientId, m.created_at).run();
-  return publicMessage(m);
+  return publicMessage({ ...m, seq: row.seq });
 }
+
+/** Status and new messages in one round trip (what every API answer carries). */
+export async function stateAfter(db, convId, after, limit = 100) {
+  const [c, m] = await db.batch([
+    db.prepare('SELECT status, lang, seq FROM conversations WHERE id = ?').bind(convId),
+    db.prepare('SELECT seq, sender, text, meta, created_at FROM messages WHERE conv_id = ? AND seq > ? ORDER BY seq LIMIT ?').bind(convId, after, limit),
+  ]);
+  const conv = c.results && c.results[0];
+  return conv ? { status: conv.status, lang: conv.lang, seq: conv.seq, messages: (m.results || []).map(publicMessage) } : null;
+}
+
+/** Just the counters – cheap enough to check every second while the visitor waits for the team. */
+export const convHead = (db, id) => db.prepare('SELECT status, seq FROM conversations WHERE id = ?').bind(id).first();
 
 export const messageByClientId = (db, convId, clientId) =>
   db.prepare('SELECT seq FROM messages WHERE conv_id = ? AND client_id = ?').bind(convId, clientId).first();
@@ -117,13 +133,22 @@ export async function convByTelegram(db, chatId, messageId) {
   const r = await db.prepare('SELECT conv_id FROM tg_links WHERE chat_id = ? AND message_id = ?').bind(String(chatId), messageId).first();
   return r ? conversationById(db, r.conv_id) : null;
 }
-export const convByThread = (db, threadId) =>
-  Number.isInteger(threadId) ? db.prepare('SELECT * FROM conversations WHERE tg_thread_id = ?').bind(threadId).first() : null;
+/** Topic routing: group id AND topic id → conversation (never "the last active visitor"). */
+export const convByThread = (db, chatId, threadId) =>
+  Number.isInteger(threadId) ? db.prepare('SELECT * FROM conversations WHERE tg_chat_id = ? AND tg_thread_id = ?').bind(String(chatId), threadId).first() : null;
 /** true the first time an update_id is seen, false for a repeated delivery */
 export async function firstUpdate(db, updateId) {
   const r = await db.prepare('INSERT OR IGNORE INTO tg_updates (update_id, at) VALUES (?, ?)').bind(updateId, now()).run();
   return (r.meta && r.meta.changes) === 1;
 }
+
+export const forgetUpdate = (db, updateId) => db.prepare('DELETE FROM tg_updates WHERE update_id = ?').bind(updateId).run();
+
+/* ── response times (no text, no ids) ── */
+
+export const addPerf = (db, kind, p) =>
+  db.prepare('INSERT INTO perf (at, kind, total, pre, ttft, ai, post) VALUES (?, ?, ?, ?, ?, ?, ?)')
+    .bind(now(), kind, p.total ?? null, p.pre ?? null, p.ttft ?? null, p.ai ?? null, p.post ?? null).run();
 
 /* ── knowledge ─────────────────────────────────────────────────────────── */
 
@@ -171,6 +196,7 @@ export async function purge(db, retentionDays) {
     db.prepare('DELETE FROM conversations WHERE last_activity < ?').bind(cutoff),
     db.prepare('DELETE FROM tg_updates WHERE at < ?').bind(now() - 3 * 86400000),
     db.prepare('DELETE FROM counters WHERE expires_at < ?').bind(now()),
+    db.prepare('DELETE FROM perf WHERE at < ?').bind(cutoff),
     db.prepare('DELETE FROM usage_daily WHERE day < ?').bind(new Date(now() - 400 * 86400000).toISOString().slice(0, 10)),
   ]);
 }

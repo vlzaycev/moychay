@@ -15,7 +15,7 @@
       human: 'Talk to a person',
       calling: 'Connecting you…', waiting: 'Waiting for our team', active: "You're chatting with our team", closed: 'Chat closed',
       waitHint: "If it's easier, leave a contact or message us:", ask: 'Ask Cha', hideAsk: 'Hide',
-      typing: 'Cha is typing', team: 'Moychay Phuket team', newChat: 'Start a new chat',
+      typing: 'Cha is typing', awaiting: 'Waiting for a reply', team: 'Moychay Phuket Team', newChat: 'Start a new chat',
       leadPh: 'WhatsApp, Telegram or email', leadBtn: 'Send', err: "Couldn't send. Check your connection and try again.", retry: 'Retry',
       rate: 'Too many messages. Please wait a minute.', busy: 'Please wait for the answer.', captcha: 'Please complete the security check.',
       unavailable: 'The chat is unavailable right now. Please message us on WhatsApp or Telegram.', lang: 'Language', newMsg: 'New message',
@@ -25,7 +25,7 @@
       human: 'Связаться с человеком',
       calling: 'Зовём сотрудника…', waiting: 'Ждём сотрудника', active: 'С вами сотрудник', closed: 'Разговор завершён',
       waitHint: 'Если удобнее, оставьте контакт или напишите нам:', ask: 'Спросить Ча', hideAsk: 'Скрыть',
-      typing: 'Ча печатает', team: 'Сотрудник Moychay Phuket', newChat: 'Начать новый чат',
+      typing: 'Ча печатает', awaiting: 'Ожидаем ответ', team: 'Сотрудник Moychay Phuket', newChat: 'Начать новый чат',
       leadPh: 'WhatsApp, Telegram или email', leadBtn: 'Отправить', err: 'Не удалось отправить. Проверьте соединение и попробуйте ещё раз.', retry: 'Повторить',
       rate: 'Слишком много сообщений. Подождите минуту.', busy: 'Дождитесь ответа.', captcha: 'Пройдите проверку безопасности.',
       unavailable: 'Чат сейчас недоступен. Напишите нам в Telegram или WhatsApp.', lang: 'Язык', newMsg: 'Новое сообщение',
@@ -36,6 +36,9 @@
   var C, lang, el = {}, state = { token: '', status: 'ai_active', seq: 0, msgs: {} }, busy = false, pollT = 0, lastNew = Date.now();
   var tsLoading = null, opened = false, retryFn = null, loadedAt = Date.now(), calling = false, waitT = 0, handoffAt = 0, savedY = 0;
   var WAIT_HINT_MS = 2 * 60 * 1000;   // no team reply after 2 minutes: offer a contact field and messengers
+  var LIVE_WAIT_MS = 45 * 1000;       // the "waiting" dots stop after 45 s and become a quiet "Waiting for a reply"
+  var lpBusy = false, lpFails = 0, staffT = 0;
+  var STREAM = typeof ReadableStream !== 'undefined' && typeof TextDecoder !== 'undefined';
 
   function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
   function track(name, url) { try { if (window.track) window.track(name, 'chat', url); } catch (e) {} }
@@ -58,6 +61,40 @@
           if (!r.ok) { var e = new Error(j.error || ('http_' + r.status)); e.status = r.status; throw e; }
           return j;
         });
+      });
+  }
+
+  // POST /send as server-sent events: on(event, data) gets "visitor" and "delta"; resolves with the final "done" state.
+  // Falls back to the plain JSON answer if the server (or a proxy) does not stream.
+  function sendStream(body, on) {
+    var headers = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + state.token };
+    return fetch(C.endpoint.replace(/\/$/, '') + '/send', { method: 'POST', headers: headers, body: JSON.stringify(body), credentials: 'omit', cache: 'no-store' })
+      .then(function (r) {
+        var ct = r.headers.get('content-type') || '';
+        if (!r.ok || ct.indexOf('event-stream') < 0 || !r.body || !r.body.getReader) {
+          return r.json().catch(function () { return {}; }).then(function (j) {
+            if (r.status === 401) reset();
+            if (!r.ok) { var e = new Error(j.error || ('http_' + r.status)); e.status = r.status; throw e; }
+            return j;
+          });
+        }
+        var reader = r.body.getReader(), dec = new TextDecoder(), buf = '', fin = null;
+        function pump() {
+          return reader.read().then(function (x) {
+            if (x.done) { if (!fin) throw new Error('stream'); return fin; }
+            buf += dec.decode(x.value, { stream: true });
+            var i;
+            while ((i = buf.indexOf('\n\n')) >= 0) {
+              var block = buf.slice(0, i), ev = (/^event: (.*)$/m.exec(block) || [])[1], d = (/^data: (.*)$/m.exec(block) || [])[1];
+              buf = buf.slice(i + 2);
+              if (!d) continue;
+              var data = JSON.parse(d);
+              if (ev === 'done') fin = data; else on(ev, data);
+            }
+            return pump();
+          });
+        }
+        return pump().then(function (j) { if (j.ok === false) { var e = new Error(j.error || 'server'); e.status = 500; throw e; } return j; });
       });
   }
 
@@ -146,6 +183,9 @@
       el.log.appendChild(acts);
     }
     if (m.lead_form) leadForm();
+    if (cls === 'o') staffWait(false);
+    var dots = el.log.querySelector('.cha-typing');
+    if (dots) el.log.appendChild(dots);                      // the indicator stays below the newest message
     if (cls !== 'v') { lastNew = Date.now(); if (!opened) badge(true); }
   }
 
@@ -189,10 +229,30 @@
   }
 
   function scroll() { el.log.scrollTop = el.log.scrollHeight; }
-  function typing(on) {
+  // Three dots. AI: shown at once, gone with the first words of the answer (or the answer itself).
+  // Team: Telegram gives no reliable "is typing" signal, so after the visitor writes the dots mean "waiting",
+  // are labelled so, and stop after 45 s – then a quiet "Waiting for a reply" stays until the team answers.
+  // If the server ever sends a real signal (poll → typing: true), the same dots show with "is typing".
+  function typing(on, kind) {
     var t = el.log.querySelector('.cha-typing');
-    if (on && !t) { t = h('div', 'cha-typing'); t.setAttribute('aria-label', u().typing); t.innerHTML = '<i></i><i></i><i></i>'; el.log.appendChild(t); scroll(); }
-    if (!on && t) t.remove();
+    if (on) {
+      if (!t) { t = h('div', 'cha-typing'); t.innerHTML = '<i></i><i></i><i></i>'; t.setAttribute('role', 'status'); }
+      t.className = 'cha-typing' + (kind === 'wait' ? ' wait' : '');
+      t.setAttribute('aria-label', kind === 'wait' ? u().awaiting : u().typing);
+      el.log.appendChild(t); scroll();                       // always the last thing in the chat
+    } else if (t) t.remove();
+  }
+  function staffWait(on) {
+    clearTimeout(staffT);
+    var n = el.log.querySelector('.cha-note');
+    if (n) n.remove();
+    if (!on) { if (el.log.querySelector('.cha-typing.wait')) typing(false); return; }
+    typing(true, 'wait');
+    staffT = setTimeout(function () {
+      if (!el.log.querySelector('.cha-typing.wait')) return;
+      typing(false);
+      el.log.appendChild(h('p', 'cha-m s cha-note', u().awaiting)); scroll();
+    }, LIVE_WAIT_MS);
   }
   function error(e) {
     var s = e && e.status, m = e && e.message;
@@ -207,7 +267,10 @@
     }
     var t = calling ? u().calling : state.status === 'human_requested' ? u().waiting : state.status === 'human_active' ? u().active : '';
     el.state.textContent = t; el.state.hidden = !t;
-    el.state.classList.toggle('busy', calling || state.status === 'human_requested');
+    // the pulsing dot is for the first moments only – no endless "something is happening" animation
+    el.state.classList.toggle('busy', calling || (state.status === 'human_requested' && Date.now() - (handoffAt || Date.now()) < LIVE_WAIT_MS));
+    if (state.status === 'human_requested' && !calling) setTimeout(function () { if (el.state) el.state.classList.remove('busy'); }, Math.max(0, (handoffAt || Date.now()) + LIVE_WAIT_MS - Date.now()));
+    if (state.status !== 'human_requested' && state.status !== 'human_active') staffWait(false);
     // still waiting after a while: one compact offer of a contact field and messengers (once)
     clearTimeout(waitT);
     var wait = el.log.querySelector('.cha-wait');
@@ -238,6 +301,7 @@
   function merge(j) {
     (j.messages || []).forEach(addMessage);
     setStatus(j.status);
+    if (j.typing === true) typing(true);                     // a real "is typing" signal, if the server ever has one
     scroll();
   }
 
@@ -252,21 +316,41 @@
     if (!pend) { pend = h('div', 'cha-m v pending', text); pend.setAttribute('data-cid', cid); el.log.appendChild(pend); }
     else pend.classList.remove('failed');
     busy = true; el.sendBtn.disabled = true;
-    if (state.status === 'ai_active' || state.status === 'closed') typing(true);
+    var toTeam = state.status === 'human_requested' || state.status === 'human_active';
+    if (!toTeam) typing(true);
     scroll();
     track('chat_message_sent');
+    var live = null, stored = false;
     ensureSession().then(function () {
-      return api('send', { body: { text: text, client_id: cid, lang: lang } });
+      var body = { text: text, client_id: cid, lang: lang };
+      if (!STREAM || toTeam) return api('send', { body: body });
+      body.stream = true;
+      return sendStream(body, function (ev, d) {
+        if (ev === 'visitor' && d.message) { stored = true; pend.remove(); addMessage(d.message); }
+        if (ev === 'delta') {
+          if (!live) { typing(false); live = h('div', 'cha-m a live'); el.log.appendChild(live); }
+          live.textContent = d.text !== undefined ? d.text : live.textContent + d.add;
+          var near = el.log.scrollHeight - el.log.scrollTop - el.log.clientHeight < 80;
+          if (near) scroll();
+        }
+      });
     }).then(function (j) {
+      if (live) live.remove();
       pend.remove(); merge(j);
+      if (toTeam && (state.status === 'human_requested' || state.status === 'human_active')) staffWait(true);
     }).catch(function (e) {
+      if (live) live.remove();
+      // the message reached the server but the connection broke: the answer is being stored, fetch it
+      if (stored) { typing(true); return poll(15); }
       // the conversation expired on the server (30 days): start a new one once, transparently
       if (e.status === 401 && !clientId) { busy = false; pend.remove(); return send(text, cid + '-r'); }
       pend.classList.add('failed');
       error(e);
       if (!e.status || e.status >= 500) retryFn = function () { send(text, cid); };
     }).then(function () {
-      busy = false; el.sendBtn.disabled = false; typing(false); scroll();
+      busy = false; el.sendBtn.disabled = false;
+      if (!el.log.querySelector('.cha-typing.wait')) typing(false);
+      scroll();
     });
   }
 
@@ -280,17 +364,34 @@
       .then(function () { busy = false; });
   }
 
-  function poll() {
+  // wait > 0: long polling – the server answers as soon as something new arrives (a team reply in ~1 s)
+  function poll(wait) {
     if (!state.token) return Promise.resolve();
-    return api('poll?after=' + state.seq, { method: 'GET' }).then(merge).catch(function () {});
+    return api('poll?after=' + state.seq + (wait ? '&wait=' + wait : ''), { method: 'GET' }).then(merge).catch(function () {});
   }
-  // Only while a person is requested or in the chat: every 4 s with the panel open, 15 s otherwise, 30 s after 30 idle minutes
+  // While a person is requested or in the chat: a held-open request with the panel open and visible,
+  // a check every 15 s otherwise, every 30 s after 30 idle minutes. Nothing at all in the AI mode.
   function schedule() {
     clearTimeout(pollT);
     if (!state.token || (state.status !== 'human_requested' && state.status !== 'human_active')) return;
     var idle = Date.now() - lastNew > 30 * 60 * 1000;
-    var ms = idle ? 30000 : opened && !document.hidden ? 4000 : 15000;
-    pollT = setTimeout(function () { poll().then(schedule); }, ms);
+    if (opened && !document.hidden && !idle) { if (!lpBusy) pollT = setTimeout(longPoll, 0); return; }
+    pollT = setTimeout(function () { poll().then(schedule); }, idle ? 30000 : 15000);
+  }
+  function longPoll() {
+    if (lpBusy || !state.token) return;
+    lpBusy = true;
+    var t = Date.now(), seq = state.seq;
+    api('poll?after=' + seq + '&wait=20', { method: 'GET' }).then(function (j) {
+      lpFails = 0; lpBusy = false;
+      clearTimeout(pollT);
+      merge(j);                                               // → setStatus → schedule (next request)
+      // never a tight loop: at most one request per second when nothing came
+      if (state.seq === seq && Date.now() - t < 1000) { clearTimeout(pollT); pollT = setTimeout(schedule, 1000); }
+    }, function () {
+      lpBusy = false; lpFails++;
+      clearTimeout(pollT); pollT = setTimeout(schedule, Math.min(30000, 2000 * lpFails));   // offline: back off, then resume
+    });
   }
 
   function reset() {

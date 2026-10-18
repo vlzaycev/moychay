@@ -9,6 +9,7 @@
     "kb:build": "node scripts/kb-build.mjs",
     "kb:push:local": "node scripts/kb-build.mjs && npx wrangler@4 d1 execute teaphuket-chat --local --file=.kb.sql",
     "kb:push": "node scripts/kb-build.mjs && npx wrangler@4 d1 execute teaphuket-chat --remote --file=.kb.sql",
-    "usage": "npx wrangler@4 d1 execute teaphuket-chat --remote --command \"SELECT * FROM usage_daily ORDER BY day DESC LIMIT 14\""
+    "usage": "npx wrangler@4 d1 execute teaphuket-chat --remote --command \"SELECT * FROM usage_daily ORDER BY day DESC LIMIT 14\"",
+    "perf": "node scripts/perf.mjs"
   }
 }

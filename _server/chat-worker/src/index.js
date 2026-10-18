@@ -1,7 +1,9 @@
 // Cloudflare Worker: Cha – AI tea assistant and live support for teaphuket.com
 //   POST /api/chat/start      new conversation (Turnstile once per conversation)
-//   GET  /api/chat/poll       new messages and status (visitor token)
-//   POST /api/chat/send       visitor message → AI answer, or → staff in Telegram
+//   GET  /api/chat/poll       new messages and status (visitor token); ?wait=N holds the request up to N s
+//                             until something new arrives (long polling: a team reply shows up within ~1 s)
+//   POST /api/chat/send       visitor message → AI answer, or → staff in Telegram; {stream:true} → the answer
+//                             as server-sent events while it is written (event: visitor | delta | done)
 //   POST /api/chat/human      "Talk to our team"
 //   POST /api/chat/contact    visitor leaves a contact for the team (optional)
 //   POST /api/chat/lang       interface language switch
@@ -16,11 +18,24 @@ import { verifyTurnstile } from '../../contact-worker/src/turnstile.js';
 
 const log = (e, x = '') => console.log(`chat:${e}${x ? ' ' + x : ''}`);
 
-function json(status, body, origin) {
-  const h = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
+function headers(origin, type, extra) {
+  const h = { 'Content-Type': type, 'Cache-Control': 'no-store, no-transform', 'X-Content-Type-Options': 'nosniff', ...extra };
   if (origin) { h['Access-Control-Allow-Origin'] = origin; h['Vary'] = 'Origin'; }
-  return new Response(JSON.stringify(body), { status, headers: h });
+  return h;
 }
+function json(status, body, origin, extra) {
+  return new Response(JSON.stringify(body), { status, headers: headers(origin, 'application/json; charset=utf-8', extra) });
+}
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const LONG_POLL_MAX_S = 20;        // a check every 0.75 s: ≤ 30 single-row reads per request, inside the Workers limits
+const LONG_POLL_TICK_MS = 750;
+
+// Stage times of an AI answer → perf table (numbers only) and the Server-Timing header (browser dev tools)
+function aiPerf(t, total) {
+  if (t.ai0 === undefined) return null;
+  return { total, pre: t.ai0, ttft: Math.max(0, (t.ttft ?? t.ai1) - t.ai0), ai: t.ai1 - t.ai0, post: total - t.ai1 };
+}
+const serverTiming = (p) => (p ? { 'Server-Timing': `pre;dur=${p.pre}, ttft;dur=${p.ttft}, ai;dur=${p.ai}, post;dur=${p.post}, total;dur=${p.total}` } : {});
 
 async function readJSON(request, max) {
   const len = Number(request.headers.get('Content-Length'));
@@ -50,6 +65,8 @@ async function ipHash(env, request) {
 }
 
 async function handle(request, env, ctx) {
+  const t0 = Date.now();
+  const waitUntil = ctx && ctx.waitUntil ? ctx.waitUntil.bind(ctx) : undefined;
   const url = new URL(request.url);
   const path = url.pathname.replace(/\/+$/, '');
   if (!path.startsWith('/api/chat/')) return json(404, { ok: false, error: 'not_found' });
@@ -63,9 +80,17 @@ async function handle(request, env, ctx) {
     if (missingConfig(env).length || !telegramReady(env)) return json(503, { ok: false });
     const update = await readJSON(request, 64 * 1024);
     if (!update) return json(400, { ok: false });
-    try { log('webhook', await handleUpdate(env, update)); }
-    catch (e) { log('webhook_error'); }
-    return json(200, { ok: true });               // always 200 after auth: Telegram must not retry forever
+    try { log('webhook', await handleUpdate(env, update, { waitUntil, t0 })); }
+    catch (e) {
+      // A temporary failure (database, network) must not lose a team message: the update is "unseen" again and
+      // Telegram delivers it once more. After 3 failed attempts it is dropped, so one bad update cannot block the queue.
+      log('webhook_error');
+      if (Number.isInteger(update.update_id) && (await S.bump(env.DB, `tgfail:${update.update_id}`, 86400000).catch(() => 9)) < 3) {
+        await S.forgetUpdate(env.DB, update.update_id).catch(() => {});
+        return json(500, { ok: false });
+      }
+    }
+    return json(200, { ok: true });
   }
 
   // ── browser API: same origin only ──
@@ -110,7 +135,20 @@ async function handle(request, env, ctx) {
     if (request.method !== 'GET') return json(405, { ok: false }, okOrigin);
     if (env.RL_POLL && !(await env.RL_POLL.limit({ key: conv.id })).success) return json(429, { ok: false, error: 'rate_limited' }, okOrigin);
     const after = Math.max(0, Math.min(1e9, parseInt(url.searchParams.get('after') || '0', 10) || 0));
-    return json(200, { ok: true, status: conv.status, lang: conv.lang, messages: await S.messagesAfter(env.DB, conv.id, after) }, okOrigin);
+    const wait = Math.max(0, Math.min(LONG_POLL_MAX_S, parseInt(url.searchParams.get('wait') || '0', 10) || 0));
+    // Long polling: nothing new yet → check every 0.75 s (a single-row read) until a message or a status change arrives
+    if (wait && conv.seq <= after) {
+      const end = t0 + wait * 1000;
+      while (Date.now() < end && !(request.signal && request.signal.aborted)) {
+        await sleep(Math.min(LONG_POLL_TICK_MS, end - Date.now()));
+        const head = await S.convHead(env.DB, conv.id);
+        if (!head || head.seq > after || head.status !== conv.status) break;
+      }
+    }
+    const st = await S.stateAfter(env.DB, conv.id, after);
+    const op = st.messages.find((m) => m.sender === 'operator' && m.at);
+    if (op && waitUntil) waitUntil(S.addPerf(env.DB, 'deliver', { total: Math.max(0, Date.now() - op.at) }).catch(() => {}));
+    return json(200, { ok: true, status: st.status, lang: st.lang, messages: st.messages }, okOrigin);
   }
 
   if (request.method !== 'POST') return json(405, { ok: false }, okOrigin);
@@ -126,7 +164,7 @@ async function handle(request, env, ctx) {
 
   if (action === 'human') {
     const before = conv.seq;
-    await requestHuman(env, conv);
+    await requestHuman(env, conv, { ack: true });
     return json(200, { ok: true, ...(await state(env, conv.id, before)) }, okOrigin);
   }
 
@@ -158,8 +196,9 @@ async function handle(request, env, ctx) {
     // the AI lock is taken before the message is stored: a second tab cannot start a parallel AI call
     if (!human && !(await S.acquireAiLock(env.DB, conv.id, num(env, 'AI_LOCK_MS')))) return json(409, { ok: false, error: 'busy' }, okOrigin);
     const before = conv.seq;
+    let visitorMsg;
     try {
-      await S.addMessage(env.DB, conv.id, { sender: 'visitor', text, clientId: body.client_id });
+      visitorMsg = await S.addMessage(env.DB, conv.id, { sender: 'visitor', text, clientId: body.client_id });
     } catch {
       if (!human) await S.releaseAiLock(env.DB, conv.id);
       return json(200, { ok: true, duplicate: true, ...(await state(env, conv.id, before)) }, okOrigin);   // unique client_id race
@@ -169,22 +208,55 @@ async function handle(request, env, ctx) {
       if (!sent) log('forward_failed');
       return json(200, { ok: true, ...(await state(env, conv.id, before)) }, okOrigin);
     }
-    try {
-      if (conv.status === 'closed') await S.setStatus(env.DB, conv.id, 'ai_active');     // writing again reopens the chat
-      if (wantsHuman(text)) await requestHuman(env, conv);
-      else await answerWithAI(env, conv, { dev });
-    } finally {
-      await S.releaseAiLock(env.DB, conv.id);
+    if (conv.status === 'closed') { await S.setStatus(env.DB, conv.id, 'ai_active'); conv.status = 'ai_active'; }   // writing again reopens the chat
+    if (wantsHuman(text)) {
+      try { await requestHuman(env, conv, { ack: true }); } finally { await S.releaseAiLock(env.DB, conv.id); }
+      return json(200, { ok: true, ...(await state(env, conv.id, before)) }, okOrigin);
     }
-    return json(200, { ok: true, ...(await state(env, conv.id, before)) }, okOrigin);
+    const timing = { t0 };
+    if (body.stream !== true) {
+      try { await answerWithAI(env, conv, { dev, waitUntil, timing }); } finally { await S.releaseAiLock(env.DB, conv.id); }
+      const st = await state(env, conv.id, before);
+      const p = aiPerf(timing, Date.now() - t0);
+      if (p && waitUntil) waitUntil(S.addPerf(env.DB, 'ai', p).catch(() => {}));
+      return json(200, { ok: true, ...st }, okOrigin, serverTiming(p));
+    }
+    return streamAnswer(env, conv, { dev, waitUntil, timing, before, visitorMsg, okOrigin });
   }
 
   return json(404, { ok: false, error: 'not_found' }, okOrigin);
 }
 
 async function state(env, convId, after) {
-  const c = await S.conversationById(env.DB, convId);
-  return { status: c.status, lang: c.lang, messages: await S.messagesAfter(env.DB, convId, after) };
+  const st = await S.stateAfter(env.DB, convId, after);
+  return { status: st.status, lang: st.lang, messages: st.messages };
+}
+
+// The AI answer as server-sent events: "visitor" (the stored message), "delta" (the answer so far: {add} appends,
+// {text} replaces), "done" (status and all new messages – the stored, checked answer replaces the preview).
+// If the visitor's connection drops, the answer is still finished and stored: the next poll brings it.
+function streamAnswer(env, conv, { dev, waitUntil, timing, before, visitorMsg, okOrigin }) {
+  const { readable, writable } = new TransformStream();
+  const w = writable.getWriter(), enc = new TextEncoder();
+  let alive = true, sent = '';
+  const emit = (event, data) => { if (alive) w.write(enc.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)).catch(() => { alive = false; }); };
+  const run = (async () => {
+    emit('visitor', { message: visitorMsg });
+    try {
+      await answerWithAI(env, conv, { dev, waitUntil, timing, onDelta: (v) => {
+        emit('delta', v.startsWith(sent) ? { add: v.slice(sent.length) } : { text: v });
+        sent = v;
+      } });
+    } catch { log('stream_error'); }
+    finally { await S.releaseAiLock(env.DB, conv.id).catch(() => {}); }
+    const st = await state(env, conv.id, before).catch(() => null);
+    emit('done', st ? { ok: true, ...st } : { ok: false, error: 'server' });
+    const p = aiPerf(timing, Date.now() - timing.t0);
+    if (p) await S.addPerf(env.DB, 'ai_stream', p).catch(() => {});
+    await w.close().catch(() => {});
+  })();
+  if (waitUntil) waitUntil(run);
+  return new Response(readable, { status: 200, headers: headers(okOrigin, 'text/event-stream; charset=utf-8', { 'X-Accel-Buffering': 'no' }) });
 }
 
 export default {
