@@ -19,7 +19,7 @@ ask() {   # $1 prompt, $2 regex, $3 name for messages → prints the value
     echo "  ✗ That does not look like a $3. Copy it again and press Enter (Ctrl-C to stop)." >&2
   done
 }
-AI_KEY=$(ask "1/3 Anthropic API key" '^sk-ant-[A-Za-z0-9_-]{20,}$' "Anthropic key")
+AI_KEY=$(ask "1/3 Anthropic API key" '^sk-ant-[A-Za-z0-9_-]{60,140}$' "Anthropic key")
 BOT=$(ask "2/3 Live support bot token (BotFather)" '^[0-9]{6,}:[A-Za-z0-9_-]{30,}$' "bot token")
 TS=$(ask "3/3 Turnstile secret key (Cloudflare → Turnstile → teaphuket.com → Settings)" '^0x[A-Za-z0-9_-]{20,}$' "Turnstile secret")
 SECRET=$(openssl rand -hex 32)
