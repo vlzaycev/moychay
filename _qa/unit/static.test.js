@@ -136,6 +136,20 @@ test('404 page and web manifest are valid', () => {
   for (const i of man.icons) assert.ok(fs.existsSync(path.join(ROOT, i.src)), i.src);
 });
 
+test('favicon: square files at stable root URLs, ICO has 16/32/48, every page links the same set', () => {
+  const png = (f) => { const b = fs.readFileSync(path.join(ROOT, f)); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
+  for (const [f, n] of [['img/favicon-32.png', 32], ['img/favicon-96.png', 96], ['img/icon-192.png', 192], ['img/icon-512.png', 512], ['apple-touch-icon.png', 180]])
+    assert.deepEqual(png(f), [n, n], f);
+  const ico = fs.readFileSync(path.join(ROOT, 'favicon.ico'));
+  assert.deepEqual([...Array(ico.readUInt16LE(4))].map((_, i) => ico[6 + 16 * i]), [16, 32, 48]);
+  assert.match(read('favicon.svg'), /^<svg[^>]+viewBox="0 0 512 512"/);
+  assert.doesNotMatch(read('robots.txt'), /Disallow:\s*\/(img\/|favicon|$)/m);
+  for (const f of [...Object.values(PAGES), '404.html', 'privacy/index.html', 'ru/privacy/index.html']) {
+    const icons = [...read(f).matchAll(/<link rel="(?:icon|apple-touch-icon)"[^>]*href="([^"]+)"/g)].map(m => m[1].replace(/^(\.\.\/)+|^\//, ''));
+    assert.deepEqual(icons, ['favicon.ico', 'favicon.svg', 'img/favicon-96.png', 'apple-touch-icon.png'], f);
+  }
+});
+
 test('blog: drafts never published – no /blog/ output, not in sitemap or footer, preview is noindex and git-ignored', () => {
   const md = fs.readdirSync(path.join(ROOT, '_content', 'blog')).filter(f => f.endsWith('.md'));
   const published = md.filter(f => /\nstatus:\s*published/.test(read('_content/blog/' + f)));
