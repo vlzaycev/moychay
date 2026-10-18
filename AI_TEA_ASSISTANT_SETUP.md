@@ -1,5 +1,12 @@
 # Cha: запуск, секреты, сотрудники, база знаний, расходы
 
+> **Статус на 18.10.2026: запущено.**
+> - Worker `teaphuket-chat`: `teaphuket.com/api/chat/*`, webhook на `https://teaphuket-chat.salavat-vlad.workers.dev/api/chat/telegram`.
+> - База: D1 `teaphuket-chat` (APAC), миграция применена, база знаний загружена (10 документов).
+> - Секреты (5): `AI_API_KEY`, `TELEGRAM_SUPPORT_BOT_TOKEN`, `TURNSTILE_SECRET`, `TELEGRAM_WEBHOOK_SECRET`, `HASH_SALT`. Введены владельцем через `scripts/setup-secrets.sh`, значения никто не видел.
+> - Модель – `claude-haiku-5-5`. Сотрудники – `362008939, 8514396543, 881365553`, группа – `-5304623826`.
+> - На сайте: `cfg_chat_endpoint = "/api/chat"`, политика конфиденциальности – `/privacy/`, `/ru/privacy/`.
+
 Токенов и ключей в этом файле нет и не должно быть. Все секреты вводятся только командой `npx wrangler secret put`: значение набирается в терминале и хранится у Cloudflare в зашифрованном виде.
 
 ## 0. Что нужно от вас перед запуском (чек-лист)

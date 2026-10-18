@@ -55,13 +55,14 @@ async function enable(page, { teaserSeen = true } = {}) {
 
 test.beforeEach(async ({ page }) => { await mockEvents(page); });
 
-test('off by default: no chat button, no chat code, no chat requests (production config has no endpoint yet)', async ({ page }) => {
+test('live config: the chat button is on, but nothing calls the chat API until the visitor uses it', async ({ page }) => {
   const reqs = [];
-  page.on('request', (r) => { if (/cha\.js|\/api\/chat/.test(r.url())) reqs.push(r.url()); });
+  page.on('request', (r) => { if (/\/api\/chat/.test(r.url())) reqs.push(r.url()); });
   await page.goto('/');
   await page.waitForLoadState('load');
   await page.waitForTimeout(500);
-  await expect(page.locator('#cha-launch')).toBeHidden();
+  await expect(page.locator('#cha-launch')).toBeVisible();
+  expect(await page.evaluate(() => window.SITE.CHAT.endpoint)).toBe('/api/chat');
   expect(reqs).toEqual([]);
 });
 

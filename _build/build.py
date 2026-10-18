@@ -40,7 +40,7 @@ CONFIG = {
     "cfg_form_endpoint": "/api/contact",
     # Cha chat (AI assistant + live support). Empty = no chat button on the site. Production value: "/api/chat"
     # (only after the chat Worker is deployed – see AI_TEA_ASSISTANT_SETUP.md).
-    "cfg_chat_endpoint": "",
+    "cfg_chat_endpoint": "/api/chat",
     # Cloudflare Turnstile site key (public, safe to commit). The secret key lives only in the Worker.
     # The forms go live only when both cfg_form_endpoint and this key are set.
     "cfg_turnstile_sitekey": "0x4AAAAAAFYnqNdF-cMkUD1N",

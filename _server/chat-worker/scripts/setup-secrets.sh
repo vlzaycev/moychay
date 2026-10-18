@@ -8,10 +8,20 @@ cd "$(dirname "$0")/.."
 BASE="${1:?usage: bash scripts/setup-secrets.sh https://teaphuket-chat.<subdomain>.workers.dev}"
 BASE="${BASE%/}"
 
-read -rsp "1/3 Anthropic API key: " AI_KEY; echo
-read -rsp "2/3 Live support bot token (from BotFather): " BOT; echo
-read -rsp "3/3 Turnstile secret key (Cloudflare → Turnstile → teaphuket.com widget → Settings): " TS; echo
-[ -n "$AI_KEY" ] && [ -n "$BOT" ] && [ -n "$TS" ] || { echo "Empty value – nothing was changed."; exit 1; }
+# Each value: copy it (Cmd+C), then press Enter here – the script takes it from the clipboard.
+# (Pasting into the hidden prompt also works; nothing is shown either way.)
+ask() {   # $1 prompt, $2 regex, $3 name for messages → prints the value
+  local v
+  while true; do
+    read -rsp "$1 – copy it, then press Enter: " v; echo >&2
+    [ -z "$v" ] && v=$(pbpaste 2>/dev/null | tr -d '[:space:]')
+    if printf '%s' "$v" | grep -Eq "$2"; then echo "  ✓ $3 received (${#v} characters)" >&2; printf '%s' "$v"; return; fi
+    echo "  ✗ That does not look like a $3. Copy it again and press Enter (Ctrl-C to stop)." >&2
+  done
+}
+AI_KEY=$(ask "1/3 Anthropic API key" '^sk-ant-[A-Za-z0-9_-]{20,}$' "Anthropic key")
+BOT=$(ask "2/3 Live support bot token (BotFather)" '^[0-9]{6,}:[A-Za-z0-9_-]{30,}$' "bot token")
+TS=$(ask "3/3 Turnstile secret key (Cloudflare → Turnstile → teaphuket.com → Settings)" '^0x[A-Za-z0-9_-]{20,}$' "Turnstile secret")
 SECRET=$(openssl rand -hex 32)
 SALT=$(openssl rand -hex 32)
 
@@ -29,4 +39,5 @@ R=$(curl -s "https://api.telegram.org/bot${BOT}/setWebhook" \
   -d drop_pending_updates=true)
 case "$R" in *'"ok":true'*) echo "✓ Telegram webhook";; *) echo "✗ Telegram webhook: $(printf '%s' "$R" | sed 's/bot[0-9]*:[A-Za-z0-9_-]*/bot***/g')";; esac
 unset AI_KEY BOT TS SECRET SALT
+pbcopy < /dev/null 2>/dev/null || true   # clear the clipboard
 echo "Done. Tell Claude: готово"
