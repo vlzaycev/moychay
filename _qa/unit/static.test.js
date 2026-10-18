@@ -206,11 +206,19 @@ test('privacy policy: EN/RU pages, linked from every footer, covers the chat, PD
     const h = read(f);
     assert.match(h, /PDPA/);
     for (const w of ['30', 'PDPC', 'info@phuket.moychay.asia']) assert.ok(h.includes(w), `${f}: ${w}`);
+    // PDPA section 23: controller and contacts, purposes and legal bases, data and retention, recipients, transfers, rights
+    for (const id of ['controller', 'data', 'purposes', 'required', 'chat', 'recipients', 'transfers', 'retention', 'cookies', 'security', 'rights'])
+      assert.match(h, new RegExp(`<h2 id="${id}">`), `${f}: section ${id}`);
+    assert.match(h, /0835566044401/, `${f}: registration number`);
+    assert.match(h, /Moychay Thai Co\., Ltd\./);
+    for (const s of ['24\\(3\\)', '24\\(5\\)', '24\\(6\\)', '28–29']) assert.match(h, new RegExp(s), `${f}: ${s}`);
     // recipients are named by category (what PDPA asks for), not by company: no map of our infrastructure in public
-    const sec5 = h.slice(h.indexOf('<h2>5.'), h.indexOf('<h2>6.'));
-    assert.ok(sec5.length > 200, `${f}: recipients section`);
-    assert.equal((sec5.match(/<li>/g) || []).length, 5, `${f}: 5 categories of recipients`);
-    assert.doesNotMatch(h.slice(h.indexOf('<h2>1.'), h.indexOf('</main>')), /Anthropic|Cloudflare|GitHub|Google|Yandex|Яндекс|Meta Pixel|Meta Platforms|Turnstile|Telegram-чат|staff Telegram/, f);
+    const rec = h.slice(h.indexOf('<h2 id="recipients">'), h.indexOf('<h2 id="transfers">'));
+    assert.equal((rec.match(/<li>/g) || []).length, 7, `${f}: 7 categories of recipients`);
+    const text = h.slice(h.indexOf('<h2 id="controller">'), h.indexOf('</main>'));
+    assert.doesNotMatch(text, /Anthropic|Cloudflare|GitHub|Google|Yandex|Яндекс|Meta Pixel|Meta Platforms|Turnstile|Telegram-чат|staff Telegram/, f);
+    // internal company data from the registration certificate stays private
+    assert.doesNotMatch(h, /วิกันดา|ชูใหม|4,000,000|ทุนจดทะเบียน|registered capital|уставн/i, f);
     assert.match(h, new RegExp(`<link rel="canonical" href="https://teaphuket.com${lp}privacy/">`));
   }
   for (const f of [...Object.values(PAGES), 'privacy/index.html', 'ru/privacy/index.html']) {
