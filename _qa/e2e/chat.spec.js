@@ -98,23 +98,34 @@ test('launcher never covers the sticky bar buttons', async ({ page }) => {
   }
 });
 
-test('panel: dialog semantics, greeting and quick actions by page language, Esc closes and returns focus', async ({ page }) => {
-  await enable(page);
-  fakeApi(page);
-  await page.goto('/ru/');
-  await page.locator('#cha-launch').click();
-  const panel = page.locator('#cha-panel');
-  await expect(panel).toHaveAttribute('role', 'dialog');
-  await expect(page.locator('#cha-launch')).toHaveAttribute('aria-expanded', 'true');
-  await expect(panel.locator('.cha-log')).toHaveAttribute('aria-live', 'polite');
-  await expect(panel.locator('.cha-m.a').first()).toContainText('Привет! Я Ча');
-  await expect(panel.locator('.cha-quick .cha-chip')).toHaveCount(5);
-  await expect(panel.locator('.cha-note')).toContainText('AI');
-  await expect(panel.locator('.cha-in')).toBeFocused();
-  await page.keyboard.press('Escape');
-  await expect(panel).toBeHidden();
-  await expect(page.locator('#cha-launch')).toBeFocused();
-});
+for (const [path, name, sub, greet, human] of [
+  ['/', 'Cha', 'Tea Concierge at Moychay Phuket', "Hi! I'm Cha, your virtual tea concierge at Moychay Phuket. I can help you explore our teas, discover tea ceremonies and plan your visit. How can I help?", 'Talk to our team'],
+  ['/ru/', 'Ча', 'Чайный консультант Moychay Phuket', 'Привет! Я Ча, виртуальный чайный консультант Moychay Phuket. Помогу выбрать чай, узнать о церемониях и спланировать визит. Чем могу помочь?', 'Позвать сотрудника'],
+]) {
+  test(`panel ${path}: clean header, page language, greeting, 4 quick actions, keyboard`, async ({ page }) => {
+    await enable(page);
+    fakeApi(page);
+    await page.goto(path);
+    await page.locator('#cha-launch').click();
+    const panel = page.locator('#cha-panel');
+    await expect(panel).toHaveAttribute('role', 'dialog');
+    await expect(page.locator('#cha-launch')).toHaveAttribute('aria-expanded', 'true');
+    await expect(panel.locator('.cha-log')).toHaveAttribute('aria-live', 'polite');
+    await expect(panel.locator('.cha-name')).toHaveText(name);
+    await expect(panel.locator('.cha-sub')).toHaveText(sub);
+    await expect(panel.locator('.cha-m.a').first()).toHaveText(greet);
+    await expect(panel.locator('.cha-quick .cha-chip')).toHaveCount(4);
+    await expect(panel.locator('.cha-human')).toHaveText(human);
+    // no language switch, no notice block, no privacy / AI links inside the widget
+    await expect(panel.locator('.cha-langs, .cha-note, a[href*="privacy"]')).toHaveCount(0);
+    const text = await panel.innerText();
+    expect(text).not.toMatch(/AI[- ]?(assistant|помощник|tea assistant)|Privacy|Конфиденциальн|ไทย|\bTH\b/i);
+    await expect(panel.locator('.cha-in')).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(panel).toBeHidden();
+    await expect(page.locator('#cha-launch')).toBeFocused();
+  });
+}
 
 test('messages: answer with fixed-URL buttons, HTML shown as text, only known links clickable', async ({ page }) => {
   await enable(page);
@@ -134,7 +145,7 @@ test('messages: answer with fixed-URL buttons, HTML shown as text, only known li
   await expect(page.locator('.cha-acts a', { hasText: 'Get directions' })).toHaveAttribute('href', /maps\.app\.goo\.gl/);
 });
 
-test('language switch keeps the conversation; analytics get event names only, never message text', async ({ page }) => {
+test('switching EN → RU on the site: the widget follows the page, the conversation stays; analytics get event names only', async ({ page }) => {
   await enable(page);
   const api = fakeApi(page);
   await page.goto('/');
@@ -142,16 +153,23 @@ test('language switch keeps the conversation; analytics get event names only, ne
   await page.locator('.cha-in').fill('my secret question about oolong');
   await page.locator('.cha-in').press('Enter');
   await expect(page.locator('.cha-m.a').nth(1)).toBeVisible();
-  await page.locator('.cha-langs button', { hasText: 'TH' }).click();
-  await expect(page.locator('.cha-m.v')).toContainText('my secret question about oolong');
-  await expect(page.locator('.cha-human')).toHaveText('คุยกับทีมงาน');
-  expect(api.calls.some((c) => c.action === 'lang' && c.body.lang === 'th')).toBe(true);
   await page.locator('.cha-acts a[href$="ceremonies/"]').first().evaluate((a) => a.addEventListener('click', (e) => e.preventDefault()));
   await page.locator('.cha-acts a[href$="ceremonies/"]').first().click();
   const tr = await page.evaluate(() => window.__track);
   const names = tr.map((x) => x[0]);
   for (const n of ['chat_open', 'chat_started', 'chat_message_sent', 'chat_ceremony_click']) expect(names).toContain(n);
   expect(JSON.stringify(tr)).not.toContain('oolong');
+  // the visitor switches the site language
+  await page.goto('/ru/');
+  await page.locator('#cha-launch').click();
+  await expect(page.locator('.cha-sub')).toHaveText('Чайный консультант Moychay Phuket');
+  await expect(page.locator('.cha-human')).toHaveText('Позвать сотрудника');
+  await expect(page.locator('.cha-m.v')).toContainText('my secret question about oolong');   // not translated, not lost
+  await expect(page.locator('.cha-m.a').first()).toContainText('Привет! Я Ча');
+  expect(api.calls.some((c) => c.action === 'lang' && c.body.lang === 'ru')).toBe(true);
+  await page.locator('.cha-in').fill('А матча есть?');
+  await page.locator('.cha-in').press('Enter');
+  await expect.poll(() => api.calls.filter((c) => c.action === 'send').at(-1)?.body.lang).toBe('ru');
 });
 
 test('handoff: waiting state, team reply appears without reload, conversation restores after reload', async ({ page }) => {
@@ -159,15 +177,15 @@ test('handoff: waiting state, team reply appears without reload, conversation re
   const api = fakeApi(page);
   await page.goto('/ceremonies/');
   await page.locator('#cha-launch').click();
-  await page.locator('.cha-quick .cha-chip').last().click();          // "Talk to our team"
+  await page.locator('.cha-human').click();          // "Talk to our team"
   await expect(page.locator('.cha-state')).toContainText('Waiting for the team');
   await expect(page.locator('.cha-human')).toBeHidden();
   await expect(page.locator('.cha-lead input')).toBeVisible();
   api.status = 'human_active';
-  api.add({ sender: 'system', text: 'Moychay Team has joined the conversation.', event: 'handoff_accepted' });
+  api.add({ sender: 'system', text: 'A Moychay Phuket team member has joined the chat.', event: 'handoff_accepted' });
   api.add({ sender: 'operator', text: 'Hi! Igor here, how can I help?' });
   await expect(page.locator('.cha-m.o')).toContainText('Igor here', { timeout: 8000 });
-  await expect(page.locator('.cha-state')).toContainText('Moychay Team is in this chat');
+  await expect(page.locator('.cha-state')).toContainText('A Moychay Phuket team member is in the chat');
   await page.reload();
   await page.locator('#cha-launch').click();
   await expect(page.locator('.cha-m.o')).toContainText('Igor here');

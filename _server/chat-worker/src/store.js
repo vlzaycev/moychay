@@ -111,7 +111,7 @@ export const closeHandoff = (db, convId, reason) =>
 /* ── Telegram routing ──────────────────────────────────────────────────── */
 
 export const linkTelegram = (db, chatId, messageId, convId) =>
-  db.prepare('INSERT OR IGNORE INTO tg_links (chat_id, message_id, conv_id, created_at) VALUES (?, ?, ?, ?)')
+  db.prepare('INSERT OR REPLACE INTO tg_links (chat_id, message_id, conv_id, created_at) VALUES (?, ?, ?, ?)')   // newest mapping wins
     .bind(String(chatId), messageId, convId, now()).run();
 export async function convByTelegram(db, chatId, messageId) {
   const r = await db.prepare('SELECT conv_id FROM tg_links WHERE chat_id = ? AND message_id = ?').bind(String(chatId), messageId).first();

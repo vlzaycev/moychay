@@ -6,13 +6,13 @@ const T = {
     th: 'ส่งคำถามของคุณให้ทีม Moychay แล้วค่ะ ทีมงานจะตอบกลับในแชทนี้โดยเร็วที่สุด ปกติในเวลาทำการ 11:00-22:00 น. (เวลากรุงเทพฯ) ปิดหน้าต่างนี้ได้เลย คำตอบจะถูกเก็บไว้ในแชทนี้ หากเร่งด่วน ติดต่อเราทาง WhatsApp หรือ Telegram ได้ค่ะ',
   },
   operator_joined: {
-    en: 'Moychay Team has joined the conversation.',
-    ru: 'К разговору подключилась команда Moychay.',
+    en: 'A Moychay Phuket team member has joined the chat.',
+    ru: 'К разговору подключился сотрудник Moychay Phuket.',
     th: 'ทีม Moychay เข้าร่วมการสนทนาแล้วค่ะ',
   },
   returned_to_ai: {
-    en: 'The team has handed the conversation back to Cha, the AI assistant.',
-    ru: 'Команда вернула разговор AI-помощнику Ча.',
+    en: 'The team has handed the conversation back to Cha.',
+    ru: 'Команда вернула разговор Ча.',
     th: 'ทีมงานส่งการสนทนากลับไปให้ Cha ผู้ช่วย AI แล้วค่ะ',
   },
   closed: {
@@ -21,8 +21,8 @@ const T = {
     th: 'ทีมงานปิดการสนทนานี้แล้ว คุณสามารถส่งข้อความใหม่ได้ทุกเมื่อค่ะ',
   },
   ai_unavailable: {
-    en: "Sorry, the AI assistant isn't available right now. You can ask our team here, or message us on WhatsApp or Telegram.",
-    ru: 'Извините, AI-помощник сейчас недоступен. Вы можете позвать сотрудника здесь или написать нам в Telegram или WhatsApp.',
+    en: "Sorry, Cha can't answer right now. You can ask our team here, or message us on WhatsApp or Telegram.",
+    ru: 'Извините, сейчас Ча не может ответить. Вы можете позвать сотрудника здесь или написать нам в Telegram или WhatsApp.',
     th: 'ขออภัยค่ะ ผู้ช่วย AI ไม่พร้อมใช้งานในขณะนี้ คุณสามารถเรียกทีมงานในแชทนี้ หรือติดต่อเราทาง WhatsApp หรือ Telegram ได้ค่ะ',
   },
   ai_error: {

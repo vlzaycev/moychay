@@ -286,7 +286,7 @@ test('webhook: secret header, staff chat and operator ids are checked; duplicate
   await hook(env, press(`t:${id}`, rootId));
   p = await (await call(env, '/api/chat/poll?after=0', { method: 'GET', token })).json();
   assert.equal(p.status, 'human_active');
-  assert.ok(p.messages.some((m) => m.sender === 'system' && m.text === 'Moychay Team has joined the conversation.'));
+  assert.ok(p.messages.some((m) => m.sender === 'system' && m.text === 'A Moychay Phuket team member has joined the chat.'));
   // operator reply reaches the visitor; the same update delivered twice is processed once
   const u = reply(rootId, 'Hello! Shu pu-erh is great after a heavy meal.');
   await hook(env, u); await hook(env, u);
@@ -407,4 +407,16 @@ test('retention: conversations older than the retention period are deleted with 
   await purge(env.DB, 30);
   for (const t of ['conversations', 'messages', 'handoffs', 'tg_links']) assert.equal(env.DB.raw.prepare(`SELECT COUNT(*) n FROM ${t}`).get().n, 0, t);
   assert.equal((await call(env, '/api/chat/poll?after=0', { method: 'GET', token })).status, 401);
+});
+
+test('Telegram not connected yet: "talk to our team" says so honestly, no fake "joined", AI keeps working', async () => {
+  const env = makeEnv({ TELEGRAM_SUPPORT_BOT_TOKEN: '' });
+  const token = await start(env, 'ru');
+  const r = await (await call(env, '/api/chat/human', { token, body: {} })).json();
+  assert.equal(r.status, 'ai_active');
+  assert.equal(net.tg.length, 0);
+  const sys = r.messages.find((m) => m.sender === 'system');
+  assert.match(sys.text, /не удалось передать вопрос команде/);
+  assert.ok(sys.buttons.includes('telegram'));
+  assert.ok(!r.messages.some((m) => /подключился/.test(m.text)));
 });

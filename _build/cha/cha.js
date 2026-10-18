@@ -11,33 +11,24 @@
   var SAFE_HOSTS = /^(teaphuket\.com|phuket\.moychay\.asia|wa\.me|t\.me|maps\.app\.goo\.gl|(www\.)?google\.com|(www\.)?instagram\.com)$/;
 
   var UI = {
-    en: { open: 'Chat with Cha, AI tea assistant', close: 'Close chat', placeholder: 'Ask about tea or your visit…', send: 'Send',
-      human: 'Talk to our team', note: "You're chatting with an AI assistant. To answer you, messages are processed by an external AI provider; if you ask for our team, the conversation is shared in our staff Telegram chat. Chats are kept for 30 days. Please don't share sensitive personal data.",
-      waiting: 'Waiting for the team. You can close this window – the reply will stay here.', active: 'Moychay Team is in this chat.', closed: 'This chat is closed.',
-      typing: 'Cha is typing', team: 'Moychay Team', newChat: 'Start a new chat', teaser: 'Hi! Questions about tea, ceremonies or your visit? Ask Cha.',
+    en: { open: 'Chat with Cha, tea concierge at Moychay Phuket', close: 'Close chat', placeholder: 'Ask about tea or your visit…', send: 'Send',
+      human: 'Talk to our team',
+      waiting: 'Waiting for the team. You can close this window – the reply will stay here.', active: 'A Moychay Phuket team member is in the chat.', closed: 'This chat is closed.',
+      typing: 'Cha is typing', team: 'Moychay Phuket team', newChat: 'Start a new chat', teaser: 'Hi! Questions about tea, ceremonies or your visit? Ask Cha.',
       leadPh: 'WhatsApp, Telegram or email', leadBtn: 'Send', err: "Couldn't send. Check your connection and try again.", retry: 'Retry',
       rate: 'Too many messages. Please wait a minute.', busy: 'Please wait for the answer.', captcha: 'Please complete the security check.',
       unavailable: 'The chat is unavailable right now. Please message us on WhatsApp or Telegram.', lang: 'Language', newMsg: 'New message',
       buttons: { ceremonies: 'Tea ceremonies', tea: 'Our teas', matcha: 'Matcha', events: 'Events', wholesale: 'For business', contact: 'Contact page',
         shop: 'Online shop', directions: 'Get directions', whatsapp: 'WhatsApp', telegram: 'Telegram', human: 'Talk to our team' } },
-    ru: { open: 'Чат с Ча, AI-помощником Moychay Phuket', close: 'Закрыть чат', placeholder: 'Спросите о чае или визите…', send: 'Отправить',
-      human: 'Позвать сотрудника', note: 'Вы общаетесь с AI-помощником. Чтобы ответить, сообщения обрабатываются внешним AI-сервисом; если вы позовёте сотрудника, переписка передаётся в рабочий Telegram-чат команды. Чаты хранятся 30 дней. Пожалуйста, не отправляйте чувствительные личные данные.',
-      waiting: 'Ждём ответа команды. Окно можно закрыть – ответ сохранится здесь.', active: 'В чате команда Moychay.', closed: 'Чат завершён.',
-      typing: 'Ча печатает', team: 'Команда Moychay', newChat: 'Начать новый чат', teaser: 'Здравствуйте! Вопросы о чае, церемониях или визите? Спросите Ча.',
+    ru: { open: 'Чат с Ча, чайным консультантом Moychay Phuket', close: 'Закрыть чат', placeholder: 'Спросите о чае или визите…', send: 'Отправить',
+      human: 'Позвать сотрудника',
+      waiting: 'Ждём ответа команды. Окно можно закрыть – ответ сохранится здесь.', active: 'В чате сотрудник Moychay Phuket.', closed: 'Чат завершён.',
+      typing: 'Ча печатает', team: 'Сотрудник Moychay Phuket', newChat: 'Начать новый чат', teaser: 'Здравствуйте! Вопросы о чае, церемониях или визите? Спросите Ча.',
       leadPh: 'WhatsApp, Telegram или email', leadBtn: 'Отправить', err: 'Не удалось отправить. Проверьте соединение и попробуйте ещё раз.', retry: 'Повторить',
       rate: 'Слишком много сообщений. Подождите минуту.', busy: 'Дождитесь ответа.', captcha: 'Пройдите проверку безопасности.',
       unavailable: 'Чат сейчас недоступен. Напишите нам в Telegram или WhatsApp.', lang: 'Язык', newMsg: 'Новое сообщение',
       buttons: { ceremonies: 'Чайные церемонии', tea: 'Наш чай', matcha: 'Матча', events: 'Мероприятия', wholesale: 'Для бизнеса', contact: 'Контакты',
-        shop: 'Интернет-магазин', directions: 'Проложить маршрут', whatsapp: 'WhatsApp', telegram: 'Telegram', human: 'Позвать сотрудника' } },
-    th: { open: 'แชทกับ Cha ผู้ช่วย AI ด้านชา', close: 'ปิดแชท', placeholder: 'ถามเรื่องชาหรือการมาที่ร้าน…', send: 'ส่ง',
-      human: 'คุยกับทีมงาน', note: 'คุณกำลังคุยกับผู้ช่วย AI ข้อความจะถูกประมวลผลโดยผู้ให้บริการ AI ภายนอกเพื่อตอบคุณ หากคุณขอคุยกับทีมงาน บทสนทนาจะถูกส่งไปยังแชท Telegram ของทีม แชทจะถูกเก็บไว้ 30 วัน กรุณาอย่าส่งข้อมูลส่วนบุคคลที่ละเอียดอ่อน',
-      waiting: 'กำลังรอทีมงาน ปิดหน้าต่างนี้ได้ คำตอบจะอยู่ในแชทนี้', active: 'ทีม Moychay อยู่ในแชทนี้', closed: 'แชทนี้ปิดแล้ว',
-      typing: 'Cha กำลังพิมพ์', team: 'ทีม Moychay', newChat: 'เริ่มแชทใหม่', teaser: 'สวัสดีค่ะ มีคำถามเรื่องชา พิธีชงชา หรือการมาที่ร้านไหมคะ ถาม Cha ได้เลย',
-      leadPh: 'WhatsApp, Telegram หรืออีเมล', leadBtn: 'ส่ง', err: 'ส่งไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง', retry: 'ลองอีกครั้ง',
-      rate: 'ส่งข้อความมากเกินไป กรุณารอสักครู่', busy: 'กรุณารอคำตอบก่อน', captcha: 'กรุณายืนยันความปลอดภัย',
-      unavailable: 'แชทไม่พร้อมใช้งานในขณะนี้ กรุณาติดต่อเราทาง WhatsApp หรือ Telegram', lang: 'ภาษา', newMsg: 'ข้อความใหม่',
-      buttons: { ceremonies: 'พิธีชงชา', tea: 'ชาของเรา', matcha: 'มัทฉะ', events: 'กิจกรรม', wholesale: 'สำหรับธุรกิจ', contact: 'หน้าติดต่อ',
-        shop: 'ร้านออนไลน์', directions: 'นำทาง', whatsapp: 'WhatsApp', telegram: 'Telegram', human: 'คุยกับทีมงาน' } }
+        shop: 'Интернет-магазин', directions: 'Проложить маршрут', whatsapp: 'WhatsApp', telegram: 'Telegram', human: 'Позвать сотрудника' } }
   };
 
   var C, lang, el = {}, state = { token: '', status: 'ai_active', seq: 0, msgs: {} }, busy = false, pollT = 0, lastNew = Date.now();
@@ -171,7 +162,6 @@
   function greeting() {
     el.log.textContent = '';
     state.msgs = {};
-    el.log.appendChild(h('p', 'cha-note', u().note));
     var g = h('div', 'cha-m a'); g.textContent = A.greeting[lang] || A.greeting.en;
     el.log.appendChild(g);
     if (!state.token) quick();
@@ -283,16 +273,6 @@
     if (el.state) { el.state.hidden = true; el.human.hidden = false; }
   }
 
-  function switchLang(l) {
-    if (!UI[l] || l === lang) return;
-    lang = l;
-    paintChrome();
-    var note = el.log.querySelector('.cha-note'); if (note) note.textContent = u().note;
-    if (state.token) { api('lang', { body: { lang: l } }).catch(function () {}); save(); }
-    else greeting();
-    setStatus();
-  }
-
   /* ── panel ── */
   function paintChrome() {
     el.name.textContent = A.name[lang] || A.name.en;
@@ -303,8 +283,6 @@
     el.input.setAttribute('aria-label', u().placeholder);
     el.sendBtn.setAttribute('aria-label', u().send);
     el.human.textContent = u().human;
-    el.langs.setAttribute('aria-label', u().lang);
-    Array.prototype.forEach.call(el.langs.children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.l === lang)); });
     el.launch.setAttribute('aria-label', u().open);
   }
 
@@ -312,17 +290,16 @@
     var st = h('style'); st.textContent = CSS; document.head.appendChild(st);
     var box = el.box = h('section', 'cha'); box.id = 'cha-panel'; box.hidden = true; box.setAttribute('role', 'dialog');
     box.innerHTML = '<div class="cha-hd"><span class="cha-mark" aria-hidden="true"></span><div class="cha-who"><span class="cha-name"></span><span class="cha-sub"></span></div>' +
-      '<div class="cha-langs" role="group"></div><button class="cha-x" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
+      '<button class="cha-x" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
       '<div class="cha-state" role="status" hidden></div><div class="cha-log" role="log" aria-live="polite" aria-relevant="additions"></div><div class="cha-ts"></div>' +
       '<div class="cha-ft"><button class="cha-human" type="button"></button><form class="cha-form"><textarea class="cha-in" rows="1" maxlength="1000"></textarea>' +
       '<button class="cha-send" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button></form><p class="cha-err" role="alert"></p></div>';
     document.body.appendChild(box);
     var q = function (s) { return box.querySelector(s); };
-    el.name = q('.cha-name'); el.sub = q('.cha-sub'); el.langs = q('.cha-langs'); el.close = q('.cha-x'); el.state = q('.cha-state');
+    el.name = q('.cha-name'); el.sub = q('.cha-sub'); el.close = q('.cha-x'); el.state = q('.cha-state');
     el.log = q('.cha-log'); el.ts = q('.cha-ts'); el.human = q('.cha-human'); el.form = q('.cha-form'); el.input = q('.cha-in');
     el.sendBtn = q('.cha-send'); el.err = q('.cha-err');
-    q('.cha-mark').textContent = A.name[lang] === 'Ча' ? 'Ча' : 'Cha';
-    ['en', 'ru', 'th'].forEach(function (l) { var b = h('button', '', l.toUpperCase()); b.type = 'button'; b.dataset.l = l; b.onclick = function () { switchLang(l); }; el.langs.appendChild(b); });
+    q('.cha-mark').textContent = A.name[lang] || A.name.en;
     el.close.onclick = close;
     el.human.onclick = askHuman;
     el.form.onsubmit = function (e) { e.preventDefault(); var v = el.input.value; if (!v.trim() || busy) return; el.input.value = ''; grow(); send(v); };
@@ -335,12 +312,19 @@
   }
   function grow() { el.input.style.height = 'auto'; el.input.style.height = Math.min(120, el.input.scrollHeight) + 'px'; }
 
-  // Phones: the panel height follows the visible viewport, so the input stays above the keyboard
+  // Phones: a bottom sheet (~86 % of the screen); with the keyboard open it fills the visible area,
+  // so the input always stays above the keyboard (iOS and Android report it through visualViewport)
   function fitViewport() {
-    var vv = window.visualViewport;
-    if (!vv) return;
-    document.documentElement.style.setProperty('--cha-vh', Math.round(vv.height) + 'px');
-    if (opened && el.box && innerWidth < 600) el.box.style.top = Math.round(vv.offsetTop) + 'px'; else if (el.box) el.box.style.top = '';
+    if (!el.box) return;
+    var st = el.box.style;
+    if (innerWidth >= 600) { st.removeProperty('--cha-h'); st.removeProperty('--cha-top'); return; }
+    var vv = window.visualViewport, H = vv ? vv.height : innerHeight, T = vv ? vv.offsetTop : 0;
+    var keyboard = H < innerHeight * 0.8;
+    var hgt = Math.round(keyboard ? H : Math.min(H, Math.max(440, H * 0.86)));
+    st.setProperty('--cha-h', hgt + 'px');
+    st.setProperty('--cha-top', Math.round(T + H - hgt) + 'px');
+    el.box.classList.toggle('kb', keyboard);
+    if (keyboard) scroll();
   }
 
   function badge(on) { el.launch.classList.toggle('has-new', on); if (on) el.launch.setAttribute('aria-label', u().open + '. ' + u().newMsg); }
@@ -392,7 +376,9 @@
       lang = UI[cfg.lang] ? cfg.lang : 'en';
       if (saved && saved.token && Date.now() - saved.at < (A.retention_days || 30) * 86400000) {
         state.token = saved.token; state.status = saved.status || 'ai_active';
-        if (saved.lang && UI[saved.lang]) lang = saved.lang;
+        // the visitor switched EN/RU on the site: the interface follows the page, history stays as it was written,
+        // new answers and team notices come in the page language
+        if (saved.lang && saved.lang !== lang) api('lang', { body: { lang: lang } }).then(save, function () {});
         // a conversation with the team continues in the background: new replies show a dot on the launcher
         if (state.status === 'human_requested' || state.status === 'human_active') { build(); poll().then(schedule); }
       }
