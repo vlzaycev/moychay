@@ -71,7 +71,8 @@ test('robots.txt, sitemap.xml and CNAME are valid', () => {
   const sm = read('sitemap.xml');
   assert.match(sm, /<loc>https:\/\/teaphuket\.com\/<\/loc>/);
   const locs = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
-  assert.equal(locs.length, 14);
+  assert.equal(locs.length, 16);                    // 7 pages × EN/RU + privacy policy EN/RU
+  for (const u of ['https://teaphuket.com/privacy/', 'https://teaphuket.com/ru/privacy/']) assert.ok(locs.includes(u), u);
   for (const s of SLUGS) for (const u of ['https://teaphuket.com/' + s, 'https://teaphuket.com/ru/' + s]) assert.ok(locs.includes(u), u);
   assert.doesNotMatch(sm, /404/);
   assert.equal(read('CNAME').trim(), 'teaphuket.com');
@@ -184,4 +185,17 @@ test('Moychay brand: official pattern asset, tokens, logo safe space, motto casi
   assert.doesNotMatch(html, /\}\},Inter/);
   assert.match(html, /class="motto">in tea we trust</);
   assert.doesNotMatch(read('_config.yml') + execFileSync('git', ['ls-files'], { cwd: ROOT }).toString(), /\.pdf/i, 'no brandbook PDF in the repo');
+});
+
+test('privacy policy: EN/RU pages, linked from every footer, covers the chat, PDPA and the processors', () => {
+  for (const [f, lp] of [['privacy/index.html', '/'], ['ru/privacy/index.html', '/ru/']]) {
+    const h = read(f);
+    assert.match(h, /PDPA/);
+    for (const w of ['Anthropic', 'Cloudflare', 'Telegram', 'Google', 'Meta', '30', 'PDPC', 'info@phuket.moychay.asia']) assert.ok(h.includes(w), `${f}: ${w}`);
+    assert.match(h, new RegExp(`<link rel="canonical" href="https://teaphuket.com${lp}privacy/">`));
+  }
+  for (const f of [...Object.values(PAGES), 'privacy/index.html', 'ru/privacy/index.html']) {
+    const lp = f.startsWith('ru/') ? '/ru/' : '/';
+    assert.ok(read(f).includes(`class="ftr-legal" href="${lp}privacy/"`), `${f}: footer privacy link`);
+  }
 });

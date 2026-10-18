@@ -610,6 +610,9 @@ figure{margin:0}
 .ftr-contact .ico,.ftr-contact .bi{width:18px;height:18px;color:var(--clay-soft)}
 .ftr-bottom{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 32px;padding-top:20px;border-top:1px solid var(--line-gold-d);font-size:14px;color:var(--on-dark-3)}
 .ftr-bottom p{margin:0}
+.ftr-legal{display:inline-block;margin-left:16px;padding:10px 0;color:var(--on-dark-2);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line-gold-d)}
+.ftr-legal:hover{color:var(--clay-soft)}
+.phero-text{padding-bottom:clamp(32px,5vw,56px)}
 .credit{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-height:44px;color:var(--on-dark-3);transition:color .2s}
 .credit-brand{display:inline-flex;align-items:center;gap:8px;font-weight:500;color:var(--on-dark);transition:color .2s}
 .credit-brand img{width:22px;height:22px}
@@ -740,7 +743,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
     <div class="ftr-bottom">
-      <p>© 2024–{{year}} Moychay Thai Co. LTD</p>
+      <p>© 2024–{{year}} Moychay Thai Co. LTD <a class="ftr-legal" href="{{lp}}privacy/">{{ftr_privacy}}</a></p>
       <a class="credit" href="https://vlad.marketing/?utm_source=teaphuket.com&amp;utm_medium=referral&amp;utm_campaign=website_credit" target="_blank" rel="noopener noreferrer" aria-label="{{credit_label}}">
         <span class="credit-by">{{credit_by}}</span>
         <span class="credit-brand"><img src="{{root}}img/vlad-marketing.svg" width="120" height="120" loading="lazy" alt="">vlad.marketing<span class="credit-arr" aria-hidden="true">↗</span></span>

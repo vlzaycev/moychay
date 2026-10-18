@@ -452,7 +452,9 @@ def wholesale(L, P, cfg):
                                     how, terms, partners, faq, frm] if x)
 
 
-BUILDERS = dict(ceremonies=ceremonies, tea=tea, matcha=matcha, events=events, contact=contact, wholesale=wholesale)
+import privacy as _privacy  # noqa: E402  (/privacy/ – PDPA privacy policy, texts in _build/privacy.py)
+
+BUILDERS = dict(ceremonies=ceremonies, tea=tea, matcha=matcha, events=events, contact=contact, wholesale=wholesale, privacy=_privacy.builder)
 
 
 def _social(items):
@@ -909,4 +911,5 @@ PAGES = dict(
 )
 
 # Page order (footer, sitemap)
-SLUGS = ["ceremonies", "tea", "matcha", "events", "contact", "wholesale"]
+SLUGS = ["ceremonies", "tea", "matcha", "events", "contact", "wholesale", "privacy"]
+PAGES["privacy"] = _privacy.PAGE
