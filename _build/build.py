@@ -174,28 +174,22 @@ def sbp_note():
     svg = open(os.path.join(HERE, "assets", "sbp.svg"), encoding="utf-8").read()
     svg = svg[svg.index("<svg"):].strip().replace(
         '<svg width="97" height="120" viewBox="0 0 97 120" fill="none" xmlns="http://www.w3.org/2000/svg">',
-        '<svg class="pay-logo" viewBox="0 0 97 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="СБП – Система быстрых платежей">', 1)
+        '<svg class="pay-logo" viewBox="0 0 97 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">', 1)
     svg = "".join(line.strip() for line in svg.splitlines())
-    return (f'<div class="pay"><span class="pay-mark">{svg}</span><p><b>Принимаем оплату по СБП</b>'
+    return (f'<div class="pay"><p><b>{svg}Принимаем оплату по СБП</b>'
             f'<span>В нашей чайной и при заказе чая через Telegram можно оплатить покупку в рублях через Систему быстрых платежей.</span></p></div>')
 
 
 # styles of the SBP note – only on pages that show it (RU), so the EN pages stay byte-for-byte unchanged
 PAY_CSS = """
-/* Payment via SBP (RU pages): the official mark on a small light plate, so it stays legible on dark sections too */
-.pay{display:flex;align-items:flex-start;gap:14px;max-width:62ch}
-.find .pay-row .pay{gap:12px}
-.find .pay-row .pay p{font-size:14px;line-height:1.45}
-.find .pay-row .pay-mark{width:38px;height:46px}
-.find .pay-row .pay-logo{width:22px}
-.pay-mark{flex:none;display:grid;place-items:center;width:44px;height:52px;border-radius:10px;background:#FBF8F2;border:1px solid var(--line-l)}
-.pay-logo{width:26px;height:auto;display:block}
+/* Payment via SBP (RU pages): the official mark at the size of the contact icons, no plate, colours unchanged */
+.pay{max-width:62ch}
 .pay p{margin:0;font-size:15px;line-height:1.5}
-.pay b{display:block;margin-bottom:2px;font-weight:600;color:var(--ink)}
-.pay span{display:block}
+.pay b{display:inline-flex;align-items:center;gap:10px;font-weight:600;color:var(--ink)}
+.pay-logo{width:15px;height:18px;flex:none;display:block}
+.pay span{display:block;margin-top:2px;padding-left:25px}
 .dark .pay b{color:var(--on-dark)}
-.find .pay p{color:var(--on-dark-2)}
-.dark .pay-mark{border-color:transparent}"""
+.find .pay p{font-size:14px;line-height:1.45;color:var(--on-dark-2)}"""
 
 
 EN = dict(

@@ -258,10 +258,12 @@ test('SBP payment note: RU home and contacts only, official mark unchanged, no c
     const h = read(f);
     const block = h.slice(h.indexOf('<div class="pay">'), h.indexOf('</div>', h.indexOf('<div class="pay">')) + 6);
     assert.equal((h.match(/<div class="pay">/g) || []).length, 1, f);
-    assert.match(block, /<b>Принимаем оплату по СБП<\/b>/);
+    assert.match(block, /<\/svg>Принимаем оплату по СБП<\/b>/);
     assert.match(block, /В нашей чайной и при заказе чая через Telegram можно оплатить покупку в рублях через Систему быстрых платежей\./);
     assert.match(block, /viewBox="0 0 97 120"/);
-    assert.match(block, /aria-label="СБП – Система быстрых платежей"/);
+    assert.match(block, /<b><svg class="pay-logo"[^>]*aria-hidden="true">/, `${f}: small mark before the title, decorative (the title names SBP)`);
+    assert.doesNotMatch(block + h.slice(h.indexOf('.pay{'), h.indexOf('.pay{') + 900), /pay-mark|background/, `${f}: no plate behind the mark`);
+    assert.match(h, /\.pay-logo\{width:15px;height:18px/, `${f}: the size of the contact icons`);
     for (const c of colours) assert.ok(block.includes(c), `${f}: ${c}`);
     assert.doesNotMatch(block, /магазин|shop|moychay\.asia|комисси|курс/i, `${f}: only the tea house and Telegram orders`);
     assert.match(h, /\.pay-logo\{/, `${f}: styles`);
