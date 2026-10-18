@@ -578,8 +578,8 @@ CHA_VER = build_cha()
 def cha_values(data):
     lang = data.get("lang", "en")
     name = ASSISTANT["name"].get(lang, ASSISTANT["name"]["en"])
-    return {"cha_src": f'{data["root"]}js/cha.js?v={CHA_VER}', "cha_mark": name,
-            "cha_label": f'{name} – {ASSISTANT["title"].get(lang, ASSISTANT["title"]["en"])}'}
+    return {"cha_src": f'{data["root"]}js/cha.js?v={CHA_VER}', "cha_mark": name, "cha_ask": ASSISTANT["ask"].get(lang, ASSISTANT["ask"]["en"]),
+            "cha_label": ASSISTANT["ask"].get(lang, ASSISTANT["ask"]["en"])}
 
 
 def sitemap():

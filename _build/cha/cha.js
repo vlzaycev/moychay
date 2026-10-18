@@ -11,24 +11,24 @@
   var SAFE_HOSTS = /^(teaphuket\.com|phuket\.moychay\.asia|wa\.me|t\.me|maps\.app\.goo\.gl|(www\.)?google\.com|(www\.)?instagram\.com)$/;
 
   var UI = {
-    en: { open: 'Chat with Cha, tea concierge at Moychay Phuket', close: 'Close chat', placeholder: 'Ask about tea or your visit…', send: 'Send',
-      human: 'Talk to our team',
+    en: { open: 'Chat with Cha', close: 'Close chat', placeholder: 'Ask about tea or your visit…', send: 'Send',
+      human: 'Talk to a person',
       waiting: 'Waiting for the team. You can close this window – the reply will stay here.', active: 'A Moychay Phuket team member is in the chat.', closed: 'This chat is closed.',
       typing: 'Cha is typing', team: 'Moychay Phuket team', newChat: 'Start a new chat', teaser: 'Hi! Questions about tea, ceremonies or your visit? Ask Cha.',
       leadPh: 'WhatsApp, Telegram or email', leadBtn: 'Send', err: "Couldn't send. Check your connection and try again.", retry: 'Retry',
       rate: 'Too many messages. Please wait a minute.', busy: 'Please wait for the answer.', captcha: 'Please complete the security check.',
       unavailable: 'The chat is unavailable right now. Please message us on WhatsApp or Telegram.', lang: 'Language', newMsg: 'New message',
       buttons: { ceremonies: 'Tea ceremonies', tea: 'Our teas', matcha: 'Matcha', events: 'Events', wholesale: 'For business', contact: 'Contact page',
-        shop: 'Online shop', directions: 'Get directions', whatsapp: 'WhatsApp', telegram: 'Telegram', human: 'Talk to our team' } },
-    ru: { open: 'Чат с Ча, чайным консультантом Moychay Phuket', close: 'Закрыть чат', placeholder: 'Спросите о чае или визите…', send: 'Отправить',
-      human: 'Позвать сотрудника',
+        shop: 'Online shop', directions: 'Get directions', whatsapp: 'WhatsApp', telegram: 'Telegram', human: 'Talk to a person' } },
+    ru: { open: 'Чат с Ча', close: 'Закрыть чат', placeholder: 'Спросите о чае или визите…', send: 'Отправить',
+      human: 'Связаться с человеком',
       waiting: 'Ждём ответа команды. Окно можно закрыть – ответ сохранится здесь.', active: 'В чате сотрудник Moychay Phuket.', closed: 'Чат завершён.',
       typing: 'Ча печатает', team: 'Сотрудник Moychay Phuket', newChat: 'Начать новый чат', teaser: 'Здравствуйте! Вопросы о чае, церемониях или визите? Спросите Ча.',
       leadPh: 'WhatsApp, Telegram или email', leadBtn: 'Отправить', err: 'Не удалось отправить. Проверьте соединение и попробуйте ещё раз.', retry: 'Повторить',
       rate: 'Слишком много сообщений. Подождите минуту.', busy: 'Дождитесь ответа.', captcha: 'Пройдите проверку безопасности.',
       unavailable: 'Чат сейчас недоступен. Напишите нам в Telegram или WhatsApp.', lang: 'Язык', newMsg: 'Новое сообщение',
       buttons: { ceremonies: 'Чайные церемонии', tea: 'Наш чай', matcha: 'Матча', events: 'Мероприятия', wholesale: 'Для бизнеса', contact: 'Контакты',
-        shop: 'Интернет-магазин', directions: 'Проложить маршрут', whatsapp: 'WhatsApp', telegram: 'Telegram', human: 'Позвать сотрудника' } }
+        shop: 'Интернет-магазин', directions: 'Проложить маршрут', whatsapp: 'WhatsApp', telegram: 'Telegram', human: 'Связаться с человеком' } }
   };
 
   var C, lang, el = {}, state = { token: '', status: 'ai_active', seq: 0, msgs: {} }, busy = false, pollT = 0, lastNew = Date.now();

@@ -5,61 +5,57 @@
     "ru": "Ча"
   },
   "title": {
-    "en": "Tea Concierge at Moychay Phuket",
-    "ru": "Чайный консультант Moychay Phuket"
+    "en": "Here to help",
+    "ru": "Помогу с чаем и визитом"
+  },
+  "ask": {
+    "en": "Ask Cha",
+    "ru": "Спросить Ча"
   },
   "greeting": {
-    "en": "Hi! I'm Cha, your virtual tea concierge at Moychay Phuket. I can help you explore our teas, discover tea ceremonies and plan your visit. How can I help?",
-    "ru": "Привет! Я Ча, виртуальный чайный консультант Moychay Phuket. Помогу выбрать чай, узнать о церемониях и спланировать визит. Чем могу помочь?"
+    "en": "Hi! I'm Cha, Moychay Phuket's virtual tea guide. Looking for tea, a ceremony, or directions? Just ask!",
+    "ru": "Привет! Я Ча, виртуальный консультант Moychay Phuket. Помогу выбрать чай, узнать о церемониях или найти нашу чайную. Что подсказать?"
   },
   "quick": {
     "en": [
+      [
+        "choose",
+        "Choose tea"
+      ],
       [
         "ceremonies",
         "Tea ceremonies"
       ],
       [
-        "choose",
-        "Help me choose tea"
-      ],
-      [
         "visit",
-        "Find our tea house"
-      ],
-      [
-        "shop",
-        "Order tea online"
+        "Find us"
       ]
     ],
     "ru": [
       [
-        "ceremonies",
-        "Чайные церемонии"
+        "choose",
+        "Выбрать чай"
       ],
       [
-        "choose",
-        "Помоги выбрать чай"
+        "ceremonies",
+        "Церемонии"
       ],
       [
         "visit",
         "Как нас найти"
-      ],
-      [
-        "shop",
-        "Заказать чай"
       ]
     ]
   },
   "quick_prompts": {
     "en": {
       "ceremonies": "Tell me about your tea ceremonies.",
-      "visit": "Where are you and when are you open?",
+      "visit": "Where are you and how do I get there?",
       "choose": "Help me choose a tea.",
       "shop": "How can I order tea online?"
     },
     "ru": {
       "ceremonies": "Расскажите о ваших чайных церемониях.",
-      "visit": "Где вы находитесь и когда открыты?",
+      "visit": "Где вы находитесь и как до вас добраться?",
       "choose": "Помогите выбрать чай.",
       "shop": "Как заказать чай онлайн?"
     }
