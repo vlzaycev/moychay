@@ -4,7 +4,7 @@
 index.html          EN-версия (https://teaphuket.com/)
 ru/index.html       RU-версия (https://teaphuket.com/ru/)
 img/                фото, логотип, og.jpg (превью для мессенджеров)
-favicon.ico, favicon.svg, apple-touch-icon.png   (генерирует _build/favicon/make.js)
+favicon.ico, favicon.svg, apple-touch-icon.png   (чайник с логотипа: _build/favicon/trace.js, иконки: make.js)
 CNAME               домен для GitHub Pages
 robots.txt, sitemap.xml
 _build/             шаблон и тексты (GitHub Pages эту папку не публикует)

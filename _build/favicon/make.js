@@ -1,5 +1,5 @@
 // Favicon generator: one SVG source → favicon.svg, favicon.ico (16/32/48), PNG sizes and the iOS icon.
-// The mark: dark-green circle (#375A3C) with the cream Moychay teapot silhouette, transparent corners.
+// The mark: dark-green circle (#375A3C) with the cream Moychay teapot from the logo, transparent corners.
 // Run from the repo root: node _build/favicon/make.js   (uses Playwright's Chromium from _qa/node_modules)
 const fs = require('fs');
 const path = require('path');
@@ -7,14 +7,19 @@ const ROOT = path.resolve(__dirname, '../..');
 const { chromium } = require(path.join(ROOT, '_qa/node_modules/playwright'));
 
 const GREEN = '#375A3C', CREAM = '#F3ECE1';
-// Moychay teapot (traced from the logo, simplified: no spiral, so it stays clean at 16 px)
-const TEAPOT = `<path fill-rule="evenodd" d="M67 218H101L138 274V206Q138 196 148 196H296L312 220H433Q446 220 444 234L425 350Q423 360 413 360H368V368Q368 378 358 378H152Q144 378 140 371ZM368 244H419L406 328H368Z"/><circle cx="268" cy="157" r="30"/>`;
-const mark = (scale) => `<g fill="${CREAM}" transform="translate(256 256) scale(${scale}) translate(-256 -252)">${TEAPOT}</g>`;
+// The official Moychay teapot, traced 1:1 from the logo by trace.js (logo-source.jpg → teapot.json)
+const TEAPOT = require('./teapot.json');
+// the teapot is centred in the 512 canvas at the given share of the width
+const mark = (share) => {
+  const k = (512 * share) / TEAPOT.w;
+  const x = (256 - (TEAPOT.w * k) / 2).toFixed(1), y = (256 - (TEAPOT.h * k) / 2).toFixed(1);
+  return `<path fill="${CREAM}" fill-rule="evenodd" transform="translate(${x} ${y}) scale(${k.toFixed(4)})" d="${TEAPOT.d}"/>`;
+};
 
 // browsers, Google, Android: round mark, transparent around the circle
-const ROUND = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><circle cx="256" cy="256" r="256" fill="${GREEN}"/>${mark(1.1)}</svg>\n`;
+const ROUND = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><circle cx="256" cy="256" r="256" fill="${GREEN}"/>${mark(0.8)}</svg>\n`;
 // iOS fills transparency with black and rounds the corners itself, so the home-screen icon is a full square
-const SQUARE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="${GREEN}"/>${mark(0.95)}</svg>\n`;
+const SQUARE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="${GREEN}"/>${mark(0.7)}</svg>\n`;
 
 const OUT = [
   ['img/favicon-32.png', ROUND, 32],
