@@ -5,7 +5,7 @@
   'use strict';
   var A = __ASSISTANT__;
   var CSS = __CSS__;
-  var STORE = 'cha_session', TEASER = 'cha_teaser';
+  var STORE = 'cha_session';
   var URLS = { shop: 'https://phuket.moychay.asia/', directions: 'https://maps.app.goo.gl/uuZkb3YwtNMGQhy18',
     whatsapp: 'https://wa.me/66817959110', telegram: 'https://t.me/moychay_phuket' };
   var SAFE_HOSTS = /^(teaphuket\.com|phuket\.moychay\.asia|wa\.me|t\.me|maps\.app\.goo\.gl|(www\.)?google\.com|(www\.)?instagram\.com)$/;
@@ -13,8 +13,9 @@
   var UI = {
     en: { open: 'Chat with Cha', close: 'Close chat', placeholder: 'Ask about tea or your visit…', send: 'Send',
       human: 'Talk to a person',
-      waiting: 'Waiting for the team. You can close this window – the reply will stay here.', active: 'A Moychay Phuket team member is in the chat.', closed: 'This chat is closed.',
-      typing: 'Cha is typing', team: 'Moychay Phuket team', newChat: 'Start a new chat', teaser: 'Hi! Questions about tea, ceremonies or your visit? Ask Cha.',
+      calling: 'Connecting you…', waiting: 'Waiting for our team', active: "You're chatting with our team", closed: 'Chat closed',
+      waitHint: "If it's easier, leave a contact or message us:", ask: 'Ask Cha', hideAsk: 'Hide',
+      typing: 'Cha is typing', team: 'Moychay Phuket team', newChat: 'Start a new chat',
       leadPh: 'WhatsApp, Telegram or email', leadBtn: 'Send', err: "Couldn't send. Check your connection and try again.", retry: 'Retry',
       rate: 'Too many messages. Please wait a minute.', busy: 'Please wait for the answer.', captcha: 'Please complete the security check.',
       unavailable: 'The chat is unavailable right now. Please message us on WhatsApp or Telegram.', lang: 'Language', newMsg: 'New message',
@@ -22,8 +23,9 @@
         shop: 'Online shop', directions: 'Get directions', whatsapp: 'WhatsApp', telegram: 'Telegram', human: 'Talk to a person' } },
     ru: { open: 'Чат с Ча', close: 'Закрыть чат', placeholder: 'Спросите о чае или визите…', send: 'Отправить',
       human: 'Связаться с человеком',
-      waiting: 'Ждём ответа команды. Окно можно закрыть – ответ сохранится здесь.', active: 'В чате сотрудник Moychay Phuket.', closed: 'Чат завершён.',
-      typing: 'Ча печатает', team: 'Сотрудник Moychay Phuket', newChat: 'Начать новый чат', teaser: 'Здравствуйте! Вопросы о чае, церемониях или визите? Спросите Ча.',
+      calling: 'Зовём сотрудника…', waiting: 'Ждём сотрудника', active: 'С вами сотрудник', closed: 'Разговор завершён',
+      waitHint: 'Если удобнее, оставьте контакт или напишите нам:', ask: 'Спросить Ча', hideAsk: 'Скрыть',
+      typing: 'Ча печатает', team: 'Сотрудник Moychay Phuket', newChat: 'Начать новый чат',
       leadPh: 'WhatsApp, Telegram или email', leadBtn: 'Отправить', err: 'Не удалось отправить. Проверьте соединение и попробуйте ещё раз.', retry: 'Повторить',
       rate: 'Слишком много сообщений. Подождите минуту.', busy: 'Дождитесь ответа.', captcha: 'Пройдите проверку безопасности.',
       unavailable: 'Чат сейчас недоступен. Напишите нам в Telegram или WhatsApp.', lang: 'Язык', newMsg: 'Новое сообщение',
@@ -32,7 +34,8 @@
   };
 
   var C, lang, el = {}, state = { token: '', status: 'ai_active', seq: 0, msgs: {} }, busy = false, pollT = 0, lastNew = Date.now();
-  var tsLoading = null, opened = false, retryFn = null, loadedAt = Date.now();
+  var tsLoading = null, opened = false, retryFn = null, loadedAt = Date.now(), calling = false, waitT = 0, handoffAt = 0, savedY = 0;
+  var WAIT_HINT_MS = 2 * 60 * 1000;   // no team reply after 2 minutes: offer a contact field and messengers
 
   function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
   function track(name, url) { try { if (window.track) window.track(name, 'chat', url); } catch (e) {} }
@@ -126,6 +129,10 @@
     state.msgs[m.seq] = 1;
     state.seq = Math.max(state.seq, m.seq);
     var cls = m.sender === 'visitor' ? 'v' : m.sender === 'operator' ? 'o' : m.sender === 'assistant' ? 'a' : 's';
+    if (m.event === 'handoff_requested') handoffAt = m.at || Date.now();
+    if (m.event === 'handoff_accepted' && m.at > loadedAt) track('chat_handoff_accepted');   // live only, not when history is reloaded
+    // "waiting" / "joined" live in the status line above the chat – no extra bubbles
+    if (cls === 's' && (m.event === 'handoff_requested' || m.event === 'handoff_accepted')) return;
     var box = h('div', 'cha-m ' + cls);
     if (cls === 'o') box.appendChild(h('span', 'cha-by', u().team));
     var body = h('span');
@@ -139,11 +146,10 @@
       el.log.appendChild(acts);
     }
     if (m.lead_form) leadForm();
-    if (m.event === 'handoff_accepted' && m.at > loadedAt) track('chat_handoff_accepted');   // live only, not when history is reloaded
     if (cls !== 'v') { lastNew = Date.now(); if (!opened) badge(true); }
   }
 
-  function leadForm() {
+  function leadForm(parent) {
     if (el.log.querySelector('.cha-lead')) return;
     var f = h('form', 'cha-lead'), i = h('input'), b = h('button', 'cha-chip', u().leadBtn);
     i.type = 'text'; i.maxLength = 120; i.placeholder = u().leadPh; i.setAttribute('aria-label', u().leadPh); i.autocomplete = 'off';
@@ -156,7 +162,7 @@
       api('contact', { body: { contact: v, client_id: id() } }).then(function (j) { f.remove(); merge(j); track('chat_lead_submitted'); })
         .catch(function (e) { b.disabled = false; error(e); });
     };
-    el.log.appendChild(f);
+    (parent || el.log).appendChild(f);
   }
 
   function greeting() {
@@ -199,8 +205,15 @@
       if (s === 'human_requested' && state.status === 'ai_active') track('chat_handoff_requested');
       state.status = s; save();
     }
-    var t = state.status === 'human_requested' ? u().waiting : state.status === 'human_active' ? u().active : state.status === 'closed' ? u().closed : '';
+    var t = calling ? u().calling : state.status === 'human_requested' ? u().waiting : state.status === 'human_active' ? u().active : '';
     el.state.textContent = t; el.state.hidden = !t;
+    el.state.classList.toggle('busy', calling || state.status === 'human_requested');
+    // still waiting after a while: one compact offer of a contact field and messengers (once)
+    clearTimeout(waitT);
+    var wait = el.log.querySelector('.cha-wait');
+    if (state.status === 'human_requested' && !wait) {
+      waitT = setTimeout(waitHint, Math.max(0, (handoffAt || Date.now()) + WAIT_HINT_MS - Date.now()));
+    } else if (state.status !== 'human_requested' && wait) wait.remove();
     el.human.hidden = state.status !== 'ai_active';
     var nc = el.log.querySelector('.cha-new');
     if (state.status === 'closed' && !nc) {
@@ -208,6 +221,18 @@
       var w = h('div', 'cha-acts c'); w.appendChild(b); el.log.appendChild(w);
     }
     schedule();
+  }
+
+  function waitHint() {
+    if (state.status !== 'human_requested' || el.log.querySelector('.cha-wait')) return;
+    var w = h('div', 'cha-wait');
+    w.appendChild(h('p', 'cha-m s', u().waitHint));
+    var acts = h('div', 'cha-acts c');
+    (lang === 'ru' ? ['telegram', 'whatsapp'] : ['whatsapp', 'telegram']).forEach(function (k) { acts.appendChild(buttonFor(k)); });
+    w.appendChild(acts);
+    el.log.appendChild(w);
+    leadForm(w);
+    scroll();
   }
 
   function merge(j) {
@@ -249,8 +274,10 @@
     if (busy) return;
     busy = true; el.err.textContent = '';
     var q = el.log.querySelector('.cha-quick'); if (q) q.remove();
+    calling = true; setStatus();
     ensureSession().then(function () { return api('human', { body: {} }); })
-      .then(merge).catch(error).then(function () { busy = false; });
+      .then(function (j) { calling = false; merge(j); }, function (e) { calling = false; setStatus(); error(e); })
+      .then(function () { busy = false; });
   }
 
   function poll() {
@@ -327,45 +354,64 @@
     if (keyboard) scroll();
   }
 
+  // iOS Safari ignores overflow:hidden on body: pin the page with position:fixed and give the scroll position back on close
+  function lockPage(on) {
+    var b = document.body, de = document.documentElement;
+    if (on && !de.classList.contains('cha-lock')) {
+      savedY = window.scrollY;
+      de.classList.add('cha-lock');
+      b.style.position = 'fixed'; b.style.top = -savedY + 'px'; b.style.left = '0'; b.style.right = '0'; b.style.width = '100%';
+    } else if (!on && de.classList.contains('cha-lock')) {
+      de.classList.remove('cha-lock');
+      b.style.position = b.style.top = b.style.left = b.style.right = b.style.width = '';
+      window.scrollTo({ top: savedY, left: 0, behavior: 'instant' });
+    }
+  }
+
   function badge(on) { el.launch.classList.toggle('has-new', on); if (on) el.launch.setAttribute('aria-label', u().open + '. ' + u().newMsg); }
 
   function open() {
     if (!el.box) build();
-    hideTeaser();
     opened = true; badge(false); paintChrome();
     el.box.hidden = false;
     requestAnimationFrame(function () { el.box.classList.add('on'); });
     el.launch.setAttribute('aria-expanded', 'true');
-    if (innerWidth < 600) document.documentElement.classList.add('cha-lock');
+    if (innerWidth < 600) lockPage(true);
     fitViewport();
     track('chat_open');
+    seenInvite();
     (state.token && state.seq === 0 ? poll() : Promise.resolve()).then(function () { scroll(); schedule(); });
-    setTimeout(function () { el.input.focus({ preventScroll: true }); }, 60);
+    // desktop: ready to type; phones: no keyboard until the visitor taps the field (like messengers)
+    if (matchMedia('(pointer:fine)').matches) setTimeout(function () { el.input.focus({ preventScroll: true }); }, 60);
   }
   function close() {
     if (!el.box) return;
     opened = false;
     el.box.classList.remove('on');
-    document.documentElement.classList.remove('cha-lock');
+    lockPage(false);
     setTimeout(function () { if (!opened) el.box.hidden = true; }, 200);
     el.launch.setAttribute('aria-expanded', 'false');
     el.launch.focus({ preventScroll: true });
     schedule();
   }
 
-  /* ── one-time greeting next to the launcher ── */
-  function teaser() {
-    if (ls(TEASER) || state.token) return;
+  /* ── "Ask Cha" invitation: home pages only, 5 s into the visit, once per browser session ── */
+  function ss(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { return '1'; } }
+  function seenInvite() { ss('cha_invite', '1'); hideInvite(); }
+  function invite() {
+    if (state.token || ss('cha_invite') || !/^\/(ru\/)?$/.test(location.pathname)) return;
+    var t0 = Number(ss('cha_t0')) || Math.round(Date.now() - performance.now());   // the timer does not restart on other pages
+    ss('cha_t0', String(t0));
     setTimeout(function () {
-      if (opened || ls(TEASER)) return;
-      ls(TEASER, '1');
-      var t = el.teaser = h('div', 'cha-teaser'); t.setAttribute('role', 'status');
-      var b = h('button', 'cha-teaser-t', u().teaser); b.type = 'button'; b.onclick = open;
-      var x = h('button', 'cha-teaser-x', '×'); x.type = 'button'; x.setAttribute('aria-label', u().close); x.onclick = hideTeaser;
-      t.appendChild(b); t.appendChild(x); document.body.appendChild(t);
-    }, 8000);
+      if (opened || ss('cha_invite')) return;
+      ss('cha_invite', '1');
+      el.launch.classList.add('invite');
+      var x = el.inviteX = h('button', 'cha-invite-x', '×'); x.type = 'button'; x.setAttribute('aria-label', u().hideAsk);
+      x.onclick = hideInvite;
+      document.body.appendChild(x);
+    }, Math.max(0, t0 + 5000 - Date.now()));
   }
-  function hideTeaser() { if (el.teaser) { el.teaser.remove(); el.teaser = null; } }
+  function hideInvite() { el.launch.classList.remove('invite'); if (el.inviteX) { el.inviteX.remove(); el.inviteX = null; } }
 
   window.Cha = {
     init: function (cfg) {
@@ -382,7 +428,7 @@
         // a conversation with the team continues in the background: new replies show a dot on the launcher
         if (state.status === 'human_requested' || state.status === 'human_active') { build(); poll().then(schedule); }
       }
-      teaser();
+      invite();
       if (window.visualViewport) { visualViewport.addEventListener('resize', fitViewport); visualViewport.addEventListener('scroll', fitViewport); }
       document.addEventListener('visibilitychange', schedule);
     },

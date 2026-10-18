@@ -111,7 +111,7 @@ window.SITE = {
   YM_ID:         "",    // Yandex Metrika counter, e.g. "98765432"
   PIXEL_ID:      "2041380899914040", // Meta (Facebook) Pixel, e.g. "123456789012345"
   EVENTS_SHEET:  "1zcA3xGzhUeQvWD2pFi1obgOf8mC2gi32D0l_q4tw_es", // Google Sheet with events
-  CHAT: { endpoint: "/api/chat", sitekey: "0x4AAAAAAFYnqNdF-cMkUD1N", src: "../../js/cha.js?v=a6e8a4ee88", lang: "ru" }  // Cha assistant; empty endpoint = off
+  CHAT: { endpoint: "/api/chat", sitekey: "0x4AAAAAAFYnqNdF-cMkUD1N", src: "../../js/cha.js?v=f0ab377640", lang: "ru" }  // Cha assistant; empty endpoint = off
 };
 (function (S) {
   // Google tag (GA4 + Google Ads)
@@ -705,17 +705,14 @@ figure{margin:0}
   display:flex;align-items:center;gap:10px;background:var(--mc-green-dark);color:#fff;box-shadow:0 6px 18px rgba(33,28,25,.3);transition:bottom .3s var(--ease),transform .2s}
 .cha-av{width:56px;height:56px;flex:none;display:grid;place-items:center;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(255,255,255,.16);font:500 15px/1 var(--head);letter-spacing:-.01em}
 .cha-ask{display:none;padding-right:20px;margin-left:-2px;font-size:15px;font-weight:500;white-space:nowrap}
-@media (min-width:600px){.cha-launch{padding-right:0}.cha-ask{display:block}}
-.cha-launch:hover{transform:translateY(-2px)}
-.cha-launch[hidden]{display:none}
-.cha-launch.has-new::after{content:"";position:absolute;top:1px;right:1px;width:13px;height:13px;border-radius:50%;background:var(--clay-soft);border:2px solid #fff}
-.cha-teaser{position:fixed;z-index:45;right:16px;bottom:calc(84px + var(--bar-h) + env(safe-area-inset-bottom,0px));max-width:min(280px,calc(100vw - 32px));
-  display:flex;align-items:flex-start;gap:2px;padding:10px 4px 10px 14px;background:var(--paper);color:var(--ink);border:1px solid var(--line-l);
-  border-radius:14px;box-shadow:0 10px 30px rgba(33,28,25,.22);font-size:14px;line-height:1.4}
-.cha-teaser-t{text-align:left}
-.cha-teaser-x{flex:none;width:32px;height:32px;margin-top:-6px;font-size:20px;line-height:1;color:var(--ink-2)}
-@media (min-width:900px){.cha-launch{right:24px;bottom:calc(24px + var(--bar-h))}.cha-teaser{right:24px;bottom:calc(92px + var(--bar-h))}}
-@media print{.cha-launch,.cha-teaser{display:none}}
+/* "Ask Cha" invitation (home pages, after 5 s, once per session): the label slides out of the round button */
+.cha-launch.invite .cha-ask{display:block;animation:cha-in .45s var(--ease) both}
+.cha-invite-x{position:fixed;z-index:46;right:10px;bottom:calc(60px + var(--bar-h) + env(safe-area-inset-bottom,0px));width:24px;height:24px;border-radius:50%;
+  display:grid;place-items:center;background:var(--paper);color:var(--ink);border:1px solid var(--line-l);font-size:15px;line-height:1;box-shadow:0 2px 6px rgba(33,28,25,.2)}
+@keyframes cha-in{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+@media (min-width:900px){.cha-launch{right:24px;bottom:calc(24px + var(--bar-h))}.cha-invite-x{right:18px;bottom:calc(68px + var(--bar-h))}}
+@media print{.cha-launch,.cha-invite-x{display:none}}
+@media (prefers-reduced-motion:reduce){.cha-launch.invite .cha-ask{animation:none}}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   .js .rv{opacity:1;transform:none;transition:none}
@@ -1296,9 +1293,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     loading.then(function () { if (open) window.Cha.open(); }, function () { loading = null; });
   }
   btn.addEventListener('click', function () { if (window.Cha && btn.getAttribute('aria-expanded') === 'true') window.Cha.close(); else load(true); });
-  // Returning visitors with a chat, and the one-time greeting: load after the page is idle
+  // Returning visitors with a chat, and the "Ask Cha" invitation on the home page: load after the page is idle
   var later = false;
-  try { later = !!localStorage.getItem('cha_session') || !localStorage.getItem('cha_teaser'); } catch (e) {}
+  try { later = !!localStorage.getItem('cha_session') || (/^\/(ru\/)?$/.test(location.pathname) && !sessionStorage.getItem('cha_invite')); } catch (e) {}
   if (later) window.addEventListener('load', function () {
     (window.requestIdleCallback || function (f) { setTimeout(f, 3000); })(function () { load(false); }, { timeout: 8000 });
   });

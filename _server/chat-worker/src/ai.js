@@ -34,6 +34,7 @@ export function parseAnswer(raw) {
   text = text.replace(/\[\[[^\]]*\]\]/g, '')                  // any other marker
     .replace(/<\/?[a-z][^>]*>/gi, '')                           // no HTML (the browser renders text anyway)
     .replace(/^#+\s*/gm, '').replace(/\*\*(.+?)\*\*/g, '$1')    // no Markdown headings / bold
+    .replace(/\u2014/g, '–')                                    // house style: en dash, never the long dash
     .replace(/\n{3,}/g, '\n\n').trim();
   return { text, buttons, handoff };
 }

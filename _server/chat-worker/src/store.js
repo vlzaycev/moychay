@@ -41,7 +41,7 @@ export const conversationById = (db, id) =>
 export async function setStatus(db, id, status, extra = {}) {
   const sets = ['status = ?', 'last_activity = ?'], vals = [status, now()];
   for (const [k, v] of Object.entries(extra)) {
-    if (!['operator_id', 'operator_name', 'tg_root_message_id', 'lang'].includes(k)) throw new Error('bad column');
+    if (!['operator_id', 'operator_name', 'tg_root_message_id', 'tg_thread_id', 'lang'].includes(k)) throw new Error('bad column');
     sets.push(`${k} = ?`); vals.push(v);
   }
   await db.prepare(`UPDATE conversations SET ${sets.join(', ')} WHERE id = ?`).bind(...vals, id).run();
@@ -117,6 +117,8 @@ export async function convByTelegram(db, chatId, messageId) {
   const r = await db.prepare('SELECT conv_id FROM tg_links WHERE chat_id = ? AND message_id = ?').bind(String(chatId), messageId).first();
   return r ? conversationById(db, r.conv_id) : null;
 }
+export const convByThread = (db, threadId) =>
+  Number.isInteger(threadId) ? db.prepare('SELECT * FROM conversations WHERE tg_thread_id = ?').bind(threadId).first() : null;
 /** true the first time an update_id is seen, false for a repeated delivery */
 export async function firstUpdate(db, updateId) {
   const r = await db.prepare('INSERT OR IGNORE INTO tg_updates (update_id, at) VALUES (?, ?)').bind(updateId, now()).run();

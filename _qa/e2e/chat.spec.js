@@ -4,18 +4,19 @@
 const { test, expect } = require('./test');
 const { mockEvents } = require('./helpers');
 
-const EP = 'http://127.0.0.1:8787/api/chat';
+// same origin as the site, like production: browsers send no Origin header on these GET requests
+const EP = '/api/chat';
 
 function fakeApi(page, { reply } = {}) {
   const s = { status: 'ai_active', seq: 0, msgs: [], calls: [] };
   const add = (m) => { m.seq = ++s.seq; m.at = Date.now(); s.msgs.push(m); return m; };
   s.add = add;
-  page.route(EP + '/**', async (route) => {
+  page.route('**/api/chat/**', async (route) => {
     const req = route.request();
     const u = new URL(req.url());
     const action = u.pathname.split('/').pop();
     const body = req.postData() ? JSON.parse(req.postData()) : {};
-    s.calls.push({ action, body, auth: req.headers().authorization || '' });
+    s.calls.push({ action, body, auth: req.headers().authorization || '', origin: req.headers().origin || '' });
     const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' };
     if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
     const out = (o) => route.fulfill({ status: 200, contentType: 'application/json', headers: cors, body: JSON.stringify({ ok: true, ...o }) });
@@ -40,17 +41,17 @@ function fakeApi(page, { reply } = {}) {
   return s;
 }
 
-async function enable(page, { teaserSeen = true } = {}) {
-  await page.addInitScript(([ep, seen]) => {
+async function enable(page, { invite = false } = {}) {
+  await page.addInitScript(([ep, inv]) => {
     localStorage.setItem('cha_endpoint', ep);
-    if (seen) localStorage.setItem('cha_teaser', '1');
+    if (!inv && !sessionStorage.getItem('cha_t0')) sessionStorage.setItem('cha_invite', '1');
     window.__track = [];
     const wrap = () => {
       if (window.track && !window.track.__w) { const o = window.track; window.track = function () { window.__track.push([...arguments]); return o.apply(this, arguments); }; window.track.__w = 1; }
       else if (!window.track) setTimeout(wrap, 20);
     };
     wrap();
-  }, [EP, teaserSeen]);
+  }, [EP, invite]);
 }
 
 test.beforeEach(async ({ page }) => { await mockEvents(page); });
@@ -108,8 +109,8 @@ for (const [path, name, sub, greet, human, quick, ask] of [
     fakeApi(page);
     await page.goto(path);
     await expect(page.locator('#cha-launch')).toHaveAttribute('aria-label', ask);
-    if (page.viewportSize().width >= 600) await expect(page.locator('#cha-launch .cha-ask')).toHaveText(ask);
-    else await expect(page.locator('#cha-launch .cha-ask')).toBeHidden();
+    await expect(page.locator('#cha-launch .cha-ask')).toHaveText(ask);
+    await expect(page.locator('#cha-launch .cha-ask')).toBeHidden();          // shown only by the invitation
     await page.locator('#cha-launch').click();
     const panel = page.locator('#cha-panel');
     await expect(panel).toHaveAttribute('role', 'dialog');
@@ -127,7 +128,10 @@ for (const [path, name, sub, greet, human, quick, ask] of [
     const text = await panel.innerText();
     expect(text).not.toMatch(/AI[- ]?(assistant|помощник|tea assistant)|Privacy|Конфиденциальн|ไทย|\bTH\b|concierge|консьерж/i);
     expect(await panel.locator('.cha-hd').innerText()).not.toMatch(/assistant|concierge|\bAI\b|\bbot\b|ассистент|бот/i);
-    await expect(panel.locator('.cha-in')).toBeFocused();
+    // with a mouse the field is ready to type; on touch screens the keyboard opens only when the visitor taps it
+    if (await page.evaluate(() => matchMedia('(pointer:fine)').matches)) await expect(panel.locator('.cha-in')).toBeFocused();
+    else await expect(panel.locator('.cha-in')).not.toBeFocused();
+    await panel.locator('.cha-in').focus();
     await page.keyboard.press('Escape');
     await expect(panel).toBeHidden();
     await expect(page.locator('#cha-launch')).toBeFocused();
@@ -187,19 +191,24 @@ test('handoff: waiting state, team reply appears without reload, conversation re
   await page.goto('/ceremonies/');
   await page.locator('#cha-launch').click();
   await page.locator('.cha-human').click();          // "Talk to a person"
-  await expect(page.locator('.cha-state')).toContainText('Waiting for the team');
+  await expect(page.locator('.cha-state')).toHaveText('Waiting for our team');
   await expect(page.locator('.cha-human')).toBeHidden();
-  await expect(page.locator('.cha-lead input')).toBeVisible();
+  await expect(page.locator('.cha-m.s')).toHaveCount(0);                       // no status bubbles in the conversation
+  await expect(page.locator('.cha-lead')).toHaveCount(0);                      // contact field only after a long wait
   api.status = 'human_active';
-  api.add({ sender: 'system', text: 'A Moychay Phuket team member has joined the chat.', event: 'handoff_accepted' });
+  api.add({ sender: 'system', text: "You're chatting with our team", event: 'handoff_accepted' });
   api.add({ sender: 'operator', text: 'Hi! Igor here, how can I help?' });
   await expect(page.locator('.cha-m.o')).toContainText('Igor here', { timeout: 8000 });
-  await expect(page.locator('.cha-state')).toContainText('A Moychay Phuket team member is in the chat');
+  await expect(page.locator('.cha-state')).toHaveText("You're chatting with our team");
+  await expect(page.locator('.cha-m.s')).toHaveCount(0);
   await page.reload();
   await page.locator('#cha-launch').click();
   await expect(page.locator('.cha-m.o')).toContainText('Igor here');
   expect(api.calls.filter((c) => c.action === 'start').length).toBe(1);
-  expect(api.calls.filter((c) => c.action === 'poll').every((c) => c.auth === 'Bearer cs_' + 'a'.repeat(43))).toBe(true);
+  const polls = api.calls.filter((c) => c.action === 'poll');
+  expect(polls.length).toBeGreaterThan(0);
+  expect(polls.every((c) => c.auth === 'Bearer cs_' + 'a'.repeat(43))).toBe(true);
+  expect(polls.every((c) => c.origin === '')).toBe(true);                       // what production sees: no Origin on same-origin GET
 });
 
 test('fits the screen: no horizontal scroll, input and send button visible', async ({ page }) => {
@@ -215,4 +224,80 @@ test('fits the screen: no horizontal scroll, input and send button visible', asy
   await expect(page.locator('.cha-in')).toBeInViewport();
   await expect(page.locator('.cha-send')).toBeInViewport();
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+});
+
+
+test('waiting long for the team: one compact offer of messengers and a contact field', async ({ page }) => {
+  await page.clock.install();
+  await enable(page);
+  fakeApi(page);
+  await page.goto('/ru/');
+  await page.locator('#cha-launch').click();
+  await page.locator('.cha-human').click();
+  await expect(page.locator('.cha-state')).toHaveText('Ждём сотрудника');
+  await page.clock.fastForward(125000);
+  await expect(page.locator('.cha-wait')).toHaveCount(1);
+  await expect(page.locator('.cha-wait .cha-lead input')).toBeVisible();
+  await expect(page.locator('.cha-wait .cha-acts a').first()).toHaveText('Telegram');
+});
+
+for (const [path, ask] of [['/', 'Ask Cha'], ['/ru/', 'Спросить Ча']]) {
+  test(`invitation on ${path}: "${ask}" after 5 s, once per session, opens the chat`, async ({ page }) => {
+    await page.clock.install();
+    await enable(page, { invite: true });
+    fakeApi(page);
+    await page.goto(path);
+    await page.clock.fastForward(3000);
+    await expect(page.locator('#cha-launch.invite')).toHaveCount(0);
+    await page.clock.fastForward(4000);
+    await expect(page.locator('#cha-launch.invite .cha-ask')).toBeVisible();
+    await expect(page.locator('#cha-launch .cha-ask')).toHaveText(ask);
+    await expect(page.locator('.cha-invite-x')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+    await page.locator('#cha-launch').click();
+    await expect(page.locator('.cha.on')).toBeVisible();
+    await expect(page.locator('#cha-launch.invite')).toHaveCount(0);
+    // same session, back on the home page: not shown again
+    await page.reload();
+    await page.clock.fastForward(8000);
+    await expect(page.locator('#cha-launch.invite')).toHaveCount(0);
+  });
+}
+
+test('invitation: not on inner pages, and it can be dismissed', async ({ page }) => {
+  await page.clock.install();
+  await enable(page, { invite: true });
+  fakeApi(page);
+  await page.goto('/tea/');
+  await page.clock.fastForward(8000);
+  await expect(page.locator('#cha-launch.invite')).toHaveCount(0);
+  await page.goto('/');
+  await page.clock.fastForward(8000);
+  await expect(page.locator('#cha-launch.invite')).toHaveCount(1);
+  await page.locator('.cha-invite-x').click();
+  await expect(page.locator('#cha-launch.invite')).toHaveCount(0);
+  await expect(page.locator('#cha-launch')).toBeVisible();
+});
+
+test('phones: the page behind the open chat does not scroll and comes back to the same place', async ({ page }) => {
+  test.skip(page.viewportSize().width >= 600, 'phone layout only');
+  await enable(page);
+  fakeApi(page);
+  await page.goto('/');
+  await page.evaluate(() => window.scrollTo({ top: 1200, behavior: 'instant' }));
+  await page.waitForTimeout(300);
+  const y = await page.evaluate(() => scrollY);
+  await page.locator('#cha-launch').click();
+  await expect(page.locator('.cha.on')).toBeVisible();
+  expect(await page.evaluate(() => getComputedStyle(document.body).position)).toBe('fixed');
+  await page.locator('.cha-in').focus();
+  // the keyboard: the visible area shrinks – the input must stay above it
+  await page.setViewportSize({ width: page.viewportSize().width, height: 420 });
+  await page.waitForTimeout(400);
+  await expect(page.locator('.cha-in')).toBeInViewport();
+  const box = await page.locator('#cha-panel').boundingBox();
+  expect(box.y + box.height).toBeLessThanOrEqual(421);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#cha-panel')).toBeHidden();
+  expect(Math.abs(await page.evaluate(() => scrollY) - y)).toBeLessThan(2);
 });

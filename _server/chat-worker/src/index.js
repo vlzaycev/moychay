@@ -76,7 +76,11 @@ async function handle(request, env, ctx) {
     return new Response(null, { status: 204, headers: okOrigin ? { 'Access-Control-Allow-Origin': okOrigin, 'Access-Control-Allow-Methods': 'GET, POST',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization', 'Access-Control-Max-Age': '86400', Vary: 'Origin' } : {} });
   }
-  if (!okOrigin) return json(403, { ok: false, error: 'origin' });
+  // Browsers send no Origin on same-origin GET requests (fetch spec), so reading new messages (poll)
+  // is allowed without it: it needs the visitor's token, and CORS keeps other sites from reading the answer.
+  // Everything that writes (POST) still requires our Origin.
+  const sameOriginGet = request.method === 'GET' && !origin && action === 'poll';
+  if (!okOrigin && !sameOriginGet) return json(403, { ok: false, error: 'origin' });
   if (missingConfig(env).length) { log('not_configured'); return json(503, { ok: false, error: 'unavailable' }, okOrigin); }
   const ip = await ipHash(env, request);
   const day = dayKey();

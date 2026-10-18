@@ -25,6 +25,8 @@
 
 .cha-state{padding:7px 16px;font-size:13px;line-height:1.35;background:#E3EBDD;color:#2C4A31;border-bottom:1px solid rgba(55,90,60,.18)}
 .cha-state[hidden]{display:none}
+.cha-state.busy::after{content:"";display:inline-block;width:6px;height:6px;margin-left:8px;border-radius:50%;background:currentColor;vertical-align:middle;animation:cha-dot 1.4s infinite}
+.cha-wait{display:flex;flex-direction:column;gap:6px;align-self:stretch}
 
 .cha-log{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:12px 12px 6px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch}
 .cha-m{max-width:84%;padding:7px 12px;border-radius:15px;font-size:14.5px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal}

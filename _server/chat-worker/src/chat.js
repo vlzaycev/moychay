@@ -70,12 +70,39 @@ async function budgetAlert(env, calls, limit, day, fetchImpl) {
 
 /* ── handoff ───────────────────────────────────────────────────────────── */
 
+// Two ways to talk to visitors from the staff group:
+//  • TELEGRAM_TOPICS=1 – the group is a forum: each conversation gets its own topic, and any message
+//    an operator writes in that topic goes to the visitor (the bot must be an admin to see them);
+//  • otherwise – Reply to any bot message about the conversation (privacy mode lets the bot see replies only).
+const topics = (env) => env.TELEGRAM_TOPICS === '1';
+
+/** Sends a message about a conversation to the staff group (its topic, or as a reply in the thread) and links it. */
+async function staffSend(env, conv, payload, fetchImpl) {
+  const where = topics(env) && conv.tg_thread_id ? { message_thread_id: conv.tg_thread_id }
+    : conv.tg_root_message_id && !payload.reply_markup ? { reply_parameters: { message_id: conv.tg_root_message_id, allow_sending_without_reply: true } } : {};
+  const sent = await tg(env, 'sendMessage', { chat_id: env.TELEGRAM_STAFF_CHAT_ID, disable_web_page_preview: true, ...where, ...payload }, fetchImpl);
+  if (sent) await S.linkTelegram(env.DB, env.TELEGRAM_STAFF_CHAT_ID, sent.message_id, conv.id);   // a reply to any of them routes back
+  return sent;
+}
+
+async function ensureTopic(env, conv, fetchImpl) {
+  if (!topics(env)) return conv;
+  if (conv.tg_thread_id) {
+    await tg(env, 'reopenForumTopic', { chat_id: env.TELEGRAM_STAFF_CHAT_ID, message_thread_id: conv.tg_thread_id }, fetchImpl);
+    return conv;
+  }
+  const t = await tg(env, 'createForumTopic', { chat_id: env.TELEGRAM_STAFF_CHAT_ID, name: `${conv.code} – ${conv.lang.toUpperCase()}` }, fetchImpl);
+  if (!t || !t.message_thread_id) { log('topic_failed'); return conv; }       // falls back to replies in the main chat
+  await S.setStatus(env.DB, conv.id, conv.status, { tg_thread_id: t.message_thread_id });
+  return { ...conv, tg_thread_id: t.message_thread_id };
+}
+
 export async function requestHuman(env, conv, { fetchImpl = fetch } = {}) {
   conv = await S.conversationById(env.DB, conv.id);
   if (conv.status === 'human_requested' || conv.status === 'human_active') return [];
   if (!telegramReady(env)) {
     log('handoff_no_telegram');
-    return [await S.addMessage(env.DB, conv.id, { sender: 'system', text: t('handoff_failed', conv.lang), meta: { buttons: CONTACT_BUTTONS(conv.lang) } })];
+    return [await S.addMessage(env.DB, conv.id, { sender: 'system', text: t('handoff_failed', conv.lang), meta: { buttons: CONTACT_BUTTONS(conv.lang), event: 'handoff_failed' } })];
   }
   const rows = await S.lastMessages(env.DB, conv.id, 8);
   const lastQ = [...rows].reverse().find((m) => m.sender === 'visitor');
@@ -88,34 +115,30 @@ export async function requestHuman(env, conv, { fetchImpl = fetch } = {}) {
     if (tr && tr.text) text += `\n\nПеревод:\n${clip(tr.text, 1000)}`;
   }
   if (transcript) text += `\n\nRecent messages:\n${clip(transcript, 1500)}`;
-  text += '\n\nReply to this message to answer the visitor on the website.';
+  conv = await ensureTopic(env, conv, fetchImpl);
+  text += topics(env) && conv.tg_thread_id ? '\n\nWrite in this topic to answer the visitor on the website.'
+    : '\n\nAnswer with Reply (swipe left on this message) – the reply goes to the visitor on the website.';
 
-  const sent = await tg(env, 'sendMessage', { chat_id: env.TELEGRAM_STAFF_CHAT_ID, text, disable_web_page_preview: true,
-    reply_markup: keyboard(conv.id, 'human_requested') }, fetchImpl);
+  const sent = await staffSend(env, conv, { text, reply_markup: keyboard(conv.id, 'human_requested') }, fetchImpl);
   if (!sent) {
     log('handoff_telegram_failed');
-    return [await S.addMessage(env.DB, conv.id, { sender: 'system', text: t('handoff_failed', conv.lang), meta: { buttons: CONTACT_BUTTONS(conv.lang) } })];
+    return [await S.addMessage(env.DB, conv.id, { sender: 'system', text: t('handoff_failed', conv.lang), meta: { buttons: CONTACT_BUTTONS(conv.lang), event: 'handoff_failed' } })];
   }
-  await S.linkTelegram(env.DB, env.TELEGRAM_STAFF_CHAT_ID, sent.message_id, conv.id);
   await S.setStatus(env.DB, conv.id, 'human_requested', { tg_root_message_id: sent.message_id });
   await S.openHandoff(env.DB, conv.id);
   await S.addUsage(env.DB, dayKey(), { handoffs: 1 });
   log('handoff');
-  return [await S.addMessage(env.DB, conv.id, { sender: 'system', text: t('handoff_requested', conv.lang),
-    meta: { buttons: CONTACT_BUTTONS(conv.lang), lead_form: true, event: 'handoff_requested' } })];
+  return [await S.addMessage(env.DB, conv.id, { sender: 'system', text: t('handoff_requested', conv.lang), meta: { event: 'handoff_requested' } })];
 }
 
-/** A visitor message while a person is requested/active goes to the staff chat, threaded under the request. */
+/** A visitor message while a person is requested/active goes to the staff group (its topic or the reply thread). */
 export async function forwardToStaff(env, conv, text, { fetchImpl = fetch, label = 'Visitor' } = {}) {
-  let body = `${conv.code} (${conv.lang.toUpperCase()}), ${label.toLowerCase()}:\n${clip(text, 3000)}`;
+  let body = topics(env) && conv.tg_thread_id ? `${label}:\n${clip(text, 3000)}` : `${conv.code} (${conv.lang.toUpperCase()}), ${label.toLowerCase()}:\n${clip(text, 3000)}`;
   if (env.TRANSLATE === '1' && !/[а-яё]/i.test(text)) {
     const tr = await translate(env, text, 'Russian', fetchImpl).catch(() => null);
     if (tr && tr.text) body += `\n\nПеревод:\n${clip(tr.text, 1000)}`;
   }
-  const sent = await tg(env, 'sendMessage', { chat_id: env.TELEGRAM_STAFF_CHAT_ID, text: body, disable_web_page_preview: true,
-    ...(conv.tg_root_message_id ? { reply_parameters: { message_id: conv.tg_root_message_id, allow_sending_without_reply: true } } : {}) }, fetchImpl);
-  if (sent) await S.linkTelegram(env.DB, env.TELEGRAM_STAFF_CHAT_ID, sent.message_id, conv.id);
-  return Boolean(sent);
+  return Boolean(await staffSend(env, conv, { text: body }, fetchImpl));
 }
 
 /* ── Telegram webhook ──────────────────────────────────────────────────── */
@@ -125,6 +148,8 @@ async function operatorJoins(env, conv, from) {
   await S.acceptHandoff(env.DB, conv.id, from.id);
   await S.addMessage(env.DB, conv.id, { sender: 'system', text: t('operator_joined', conv.lang), meta: { event: 'handoff_accepted' } });
 }
+
+const MEDIA = ['photo', 'video', 'document', 'voice', 'audio', 'sticker', 'animation', 'video_note', 'location', 'contact'];
 
 export async function handleUpdate(env, u, { fetchImpl = fetch } = {}) {
   if (!Number.isInteger(u.update_id) || !(await S.firstUpdate(env.DB, u.update_id))) return 'duplicate';
@@ -139,24 +164,24 @@ export async function handleUpdate(env, u, { fetchImpl = fetch } = {}) {
     const [act, id] = String(q.data || '').split(':');
     const conv = await S.conversationById(env.DB, id);
     if (!conv) { await answer('This chat has expired'); return 'unknown'; }
+    const who = clip(String(q.from.first_name || 'operator'), 40);
     if (act === 't') {
       if (conv.status === 'human_active') { await answer(`Already taken by ${conv.operator_name || 'a colleague'}`); return 'taken'; }
       await operatorJoins(env, conv, q.from);
       await tg(env, 'editMessageReplyMarkup', { chat_id: q.message.chat.id, message_id: q.message.message_id, reply_markup: keyboard(conv.id, 'human_active') }, fetchImpl);
-      await answer('You are in. Reply to the request to answer.');
-      await tg(env, 'sendMessage', { chat_id: env.TELEGRAM_STAFF_CHAT_ID, text: `${conv.code}: taken by ${clip(String(q.from.first_name || 'operator'), 40)}`,
-        reply_parameters: { message_id: q.message.message_id, allow_sending_without_reply: true } }, fetchImpl);
+      await answer(topics(env) && conv.tg_thread_id ? 'You are in. Write in this topic.' : 'You are in. Reply to the bot messages to answer.');
+      await staffSend(env, conv, { text: `${conv.code}: taken by ${who}` }, fetchImpl);
       return 'taken';
     }
     if (act === 'c' || act === 'a') {
       const closing = act === 'c';
       await S.setStatus(env.DB, conv.id, closing ? 'closed' : 'ai_active');
       await S.closeHandoff(env.DB, conv.id, closing ? 'closed' : 'returned_to_ai');
-      await S.addMessage(env.DB, conv.id, { sender: 'system', text: t(closing ? 'closed' : 'returned_to_ai', conv.lang) });
+      await S.addMessage(env.DB, conv.id, { sender: 'system', text: t(closing ? 'closed' : 'returned_to_ai', conv.lang), meta: { event: closing ? 'closed' : 'returned_to_ai' } });
       await tg(env, 'editMessageReplyMarkup', { chat_id: q.message.chat.id, message_id: q.message.message_id, reply_markup: { inline_keyboard: [] } }, fetchImpl);
       await answer(closing ? 'Closed' : 'Returned to the AI');
-      await tg(env, 'sendMessage', { chat_id: env.TELEGRAM_STAFF_CHAT_ID,
-        text: `${conv.code}: ${closing ? 'closed' : 'returned to the AI'} by ${clip(String(q.from.first_name || 'operator'), 40)}` }, fetchImpl);
+      await staffSend(env, conv, { text: `${conv.code}: ${closing ? 'closed' : 'returned to the AI'} by ${who}` }, fetchImpl);
+      if (closing && topics(env) && conv.tg_thread_id) await tg(env, 'closeForumTopic', { chat_id: env.TELEGRAM_STAFF_CHAT_ID, message_thread_id: conv.tg_thread_id }, fetchImpl);
       return closing ? 'closed' : 'returned';
     }
     await answer('Unknown action');
@@ -164,22 +189,36 @@ export async function handleUpdate(env, u, { fetchImpl = fetch } = {}) {
   }
 
   const m = u.message;
-  if (!m || !isStaffChat(env, m.chat && m.chat.id)) return 'ignored';                 // only the staff chat
-  if (!m.reply_to_message) return 'ignored';                                           // normal group talk
-  const conv = await S.convByTelegram(env.DB, m.chat.id, m.reply_to_message.message_id);
-  if (!conv) return 'ignored';                                                         // reply to something else
+  if (!m || !m.chat) return 'ignored';
+  // Setup helper: an operator writes /chatid in a group – the bot answers with that group's id (needed for TELEGRAM_STAFF_CHAT_ID)
+  if (typeof m.text === 'string' && /^\/chatid(@\w+)?$/.test(m.text.trim()) && isOperator(env, m.from && m.from.id)) {
+    await tg(env, 'sendMessage', { chat_id: m.chat.id, text: `chat id: ${m.chat.id}${m.chat.is_forum ? ' (topics on)' : ''}`,
+      ...(m.message_thread_id ? { message_thread_id: m.message_thread_id } : {}) }, fetchImpl);
+    return 'chatid';
+  }
+  if (!isStaffChat(env, m.chat.id)) return 'ignored';                                   // only the staff group
+  // Which conversation? Its topic (forum mode), or the bot message this one replies to
+  let conv = null;
+  if (topics(env) && m.is_topic_message && Number.isInteger(m.message_thread_id)) conv = await S.convByThread(env.DB, m.message_thread_id);
+  if (!conv && m.reply_to_message && !(m.reply_to_message.forum_topic_created)) conv = await S.convByTelegram(env.DB, m.chat.id, m.reply_to_message.message_id);
+  if (!conv) return 'ignored';                                                          // normal group talk
   if (!isOperator(env, m.from && m.from.id)) {
+    if (m.from && m.from.is_bot) return 'ignored';
     await tg(env, 'sendMessage', { chat_id: m.chat.id, text: 'Only authorised team members can answer website visitors.',
+      ...(m.message_thread_id ? { message_thread_id: m.message_thread_id } : {}),
       reply_parameters: { message_id: m.message_id, allow_sending_without_reply: true } }, fetchImpl);
     return 'forbidden';
   }
   const text = typeof m.text === 'string' ? m.text.trim() : '';
   if (!text) {
+    if (!MEDIA.some((k) => m[k])) return 'ignored';                                      // service messages (topic created, pinned…)
     await tg(env, 'sendMessage', { chat_id: m.chat.id, text: 'Only text messages can be sent to the website chat.',
+      ...(m.message_thread_id ? { message_thread_id: m.message_thread_id } : {}),
       reply_parameters: { message_id: m.message_id, allow_sending_without_reply: true } }, fetchImpl);
     return 'not_text';
   }
-  // Replying is enough to take the conversation over (no separate "Take over" click needed)
+  if (text.startsWith('/')) return 'ignored';                                          // bot commands are not for visitors
+  // Writing is enough to take the conversation over (no separate "Take over" click needed)
   if (conv.status !== 'human_active') await operatorJoins(env, conv, m.from);
 
   let shown = clip(text, 3000), meta = null;
@@ -190,6 +229,7 @@ export async function handleUpdate(env, u, { fetchImpl = fetch } = {}) {
       shown = clip(tr.text, 3000);
       meta = { translated: t('translated', conv.lang) };
       await tg(env, 'sendMessage', { chat_id: m.chat.id, text: `Sent to the visitor (${conv.lang.toUpperCase()}, automatic translation):\n${shown}`,
+        ...(m.message_thread_id ? { message_thread_id: m.message_thread_id } : {}),
         reply_parameters: { message_id: m.message_id, allow_sending_without_reply: true } }, fetchImpl);
     }
   }

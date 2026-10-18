@@ -15,7 +15,8 @@ import { purge } from '../../_server/chat-worker/src/store.js';
 import { readDocs, toSQL } from '../../_server/chat-worker/scripts/kb-build.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const MIGRATION = fs.readFileSync(path.join(ROOT, '_server/chat-worker/migrations/0001_init.sql'), 'utf8');
+const MIG_DIR = path.join(ROOT, '_server/chat-worker/migrations');
+const MIGRATION = fs.readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort().map((f) => fs.readFileSync(path.join(MIG_DIR, f), 'utf8')).join('\n');
 const ORIGIN = 'https://teaphuket.com';
 const STAFF = '-5304623826', OPERATOR = 362008939, STRANGER = 777;
 const SECRETS = ['AI-KEY-SECRET', 'BOT-TOKEN-SECRET', 'WEBHOOK-SECRET-0123456789', 'TS-SECRET', 'salt-secret'];
@@ -250,7 +251,7 @@ test('handoff: staff chat gets the request with Take over / Close, the AI stops 
   const env = makeEnv();
   const { token, r, req } = await handoff(env);
   assert.equal(r.status, 'human_requested');
-  assert.ok(r.messages.some((m) => m.sender === 'system' && m.lead_form));
+  assert.ok(r.messages.some((m) => m.sender === 'system' && m.event === 'handoff_requested' && m.text === 'Waiting for our team'));
   assert.equal(String(req.body.chat_id), STAFF);
   assert.match(req.body.text, /Session: CH-[A-Z2-9]{4}\nLanguage: EN\nCurrent page: \/ceremonies\//);
   assert.match(req.body.text, /Question:\nWhat tea is good after dinner\?/);
@@ -286,7 +287,7 @@ test('webhook: secret header, staff chat and operator ids are checked; duplicate
   await hook(env, press(`t:${id}`, rootId));
   p = await (await call(env, '/api/chat/poll?after=0', { method: 'GET', token })).json();
   assert.equal(p.status, 'human_active');
-  assert.ok(p.messages.some((m) => m.sender === 'system' && m.text === 'A Moychay Phuket team member has joined the chat.'));
+  assert.ok(p.messages.some((m) => m.sender === 'system' && m.event === 'handoff_accepted' && m.text === "You're chatting with our team"));
   // operator reply reaches the visitor; the same update delivered twice is processed once
   const u = reply(rootId, 'Hello! Shu pu-erh is great after a heavy meal.');
   await hook(env, u); await hook(env, u);
@@ -419,4 +420,99 @@ test('Telegram not connected yet: "talk to our team" says so honestly, no fake "
   assert.match(sys.text, /не удалось передать вопрос команде/);
   assert.ok(sys.buttons.includes('telegram'));
   assert.ok(!r.messages.some((m) => /подключился/.test(m.text)));
+});
+
+
+/* ── fixes from the first live test (18.10.2026) ───────────────────────── */
+
+test('poll works without an Origin header (browsers omit it on same-origin GET); writes still need our Origin', async () => {
+  const env = makeEnv();
+  const token = await start(env);
+  await send(env, token, 'hello');
+  const r = await call(env, '/api/chat/poll?after=0', { method: 'GET', token, origin: '' });
+  assert.equal(r.status, 200);
+  assert.ok((await r.json()).messages.length >= 2);
+  assert.equal((await call(env, '/api/chat/poll?after=0', { method: 'GET', origin: '' })).status, 401, 'still needs the token');
+  assert.equal((await call(env, '/api/chat/poll?after=0', { method: 'GET', token, origin: 'https://evil.example' })).status, 403);
+  assert.equal((await call(env, '/api/chat/send', { token, origin: '', body: { text: 'x', client_id: 'no-origin-1' } })).status, 403);
+  assert.equal((await call(env, '/api/chat/human', { token, origin: '', body: {} })).status, 403);
+});
+
+test('reply mode: a Reply to ANY bot message about the conversation reaches the visitor (also "taken by")', async () => {
+  const env = makeEnv();
+  const { token, rootId } = await handoff(env);
+  const id = env.DB.raw.prepare('SELECT id FROM conversations').get().id;
+  await hook(env, press(`t:${id}`, rootId));
+  const takenMsg = net.tg.filter((x) => x.method === 'sendMessage').length - 1 + 1000;
+  assert.match(net.tg.filter((x) => x.method === 'sendMessage').at(-1).body.text, /taken by Igor/);
+  await hook(env, reply(takenMsg, 'reply to the "taken by" note'));
+  const p = await (await call(env, '/api/chat/poll?after=0', { method: 'GET', token, origin: '' })).json();
+  assert.deepEqual(p.messages.filter((m) => m.sender === 'operator').map((m) => m.text), ['reply to the "taken by" note']);
+  // a plain message without Reply is not routed in reply mode (privacy mode: Telegram does not even deliver it)
+  await hook(env, { update_id: uid++, message: { message_id: 7777, chat: { id: Number(STAFF) }, from: { id: OPERATOR }, text: 'plain' } });
+  const p2 = await (await call(env, '/api/chat/poll?after=0', { method: 'GET', token, origin: '' })).json();
+  assert.equal(p2.messages.filter((m) => m.sender === 'operator').length, 1);
+});
+
+function topicNet() {
+  mockNet();
+  const prev = globalThis.fetch;
+  let thread = 500;
+  globalThis.fetch = async (url, opts) => {
+    if (String(url).endsWith('/createForumTopic')) { net.tg.push({ method: 'createForumTopic', body: JSON.parse(opts.body) }); return Response.json({ ok: true, result: { message_thread_id: ++thread, name: 'x' } }); }
+    return prev(url, opts);
+  };
+}
+const topicMsg = (thread, text, from = OPERATOR) => ({ update_id: uid++, message: { message_id: 8000 + uid, message_thread_id: thread, is_topic_message: true, chat: { id: Number(STAFF), is_forum: true }, from: { id: from, first_name: 'Igor' }, text } });
+
+test('topics mode: one topic per conversation, plain messages in the topic reach only that visitor', async () => {
+  topicNet();
+  const env = makeEnv({ TELEGRAM_TOPICS: '1' });
+  const A = await start(env); await send(env, A, 'question A');
+  await call(env, '/api/chat/human', { token: A, body: {} });
+  const B = await start(env); await send(env, B, 'question B');
+  await call(env, '/api/chat/human', { token: B, body: {} });
+  const topicsCreated = net.tg.filter((x) => x.method === 'createForumTopic');
+  assert.equal(topicsCreated.length, 2);
+  assert.match(topicsCreated[0].body.name, /^CH-[A-Z2-9]{4} – EN$/);
+  const req = net.tg.filter((x) => x.method === 'sendMessage' && /New support request/.test(x.body.text));
+  assert.deepEqual(req.map((x) => x.body.message_thread_id), [501, 502]);
+  assert.match(req[0].body.text, /Write in this topic/);
+  // operator writes in topic 501 without Reply → visitor A only; a service message is ignored silently
+  await hook(env, topicMsg(501, 'Hello A, Igor here'));
+  await hook(env, { update_id: uid++, message: { message_id: 1, message_thread_id: 502, is_topic_message: true, chat: { id: Number(STAFF) }, from: { id: OPERATOR }, forum_topic_created: { name: 'x' } } });
+  await hook(env, topicMsg(502, 'stranger in topic B', STRANGER));
+  const pa = await (await call(env, '/api/chat/poll?after=0', { method: 'GET', token: A, origin: '' })).json();
+  const pb = await (await call(env, '/api/chat/poll?after=0', { method: 'GET', token: B, origin: '' })).json();
+  assert.deepEqual(pa.messages.filter((m) => m.sender === 'operator').map((m) => m.text), ['Hello A, Igor here']);
+  assert.equal(pa.status, 'human_active');
+  assert.equal(pb.messages.filter((m) => m.sender === 'operator').length, 0);
+  assert.equal(pb.status, 'human_requested');
+  // the visitor's next message goes into the same topic; duplicates of an update are ignored
+  await send(env, A, 'thanks');
+  assert.equal(net.tg.filter((x) => x.method === 'sendMessage').at(-1).body.message_thread_id, 501);
+  const u = topicMsg(501, 'once'); await hook(env, u); await hook(env, u);
+  const pa2 = await (await call(env, '/api/chat/poll?after=0', { method: 'GET', token: A, origin: '' })).json();
+  assert.equal(pa2.messages.filter((m) => m.text === 'once').length, 1);
+});
+
+test('/chatid tells an operator the group id (setup helper); strangers get nothing', async () => {
+  const env = makeEnv();
+  await hook(env, { update_id: uid++, message: { message_id: 1, chat: { id: -100123, is_forum: true }, from: { id: OPERATOR }, text: '/chatid' } });
+  assert.match(net.tg.at(-1).body.text, /chat id: -100123 \(topics on\)/);
+  const n = net.tg.length;
+  await hook(env, { update_id: uid++, message: { message_id: 2, chat: { id: -100123 }, from: { id: STRANGER }, text: '/chatid' } });
+  assert.equal(net.tg.length, n);
+});
+
+test('house style: the long dash in AI answers becomes the short one', async () => {
+  mockNet({ ai: 'Tea — a calm break — at Moychay.' });
+  const env = makeEnv();
+  const token = await start(env);
+  const r = await send(env, token, 'hi');
+  assert.equal(r.messages.find((m) => m.sender === 'assistant').text, 'Tea – a calm break – at Moychay.');
+  const prompt = rules();
+  assert.match(prompt, /never the long dash/);
+  assert.match(prompt, /1-3 short sentences/);
+  assert.match(prompt, /Igor/);
 });
