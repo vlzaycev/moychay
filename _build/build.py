@@ -168,6 +168,36 @@ COMMON = dict(maps=MAPS, phone=PHONE, phone_txt=PHONE_TXT, email=EMAIL,
                                clink(f"mailto:{EMAIL}", EMAIL, "i-mail", "email_click", "find", ext=False, stroke=True)), head_font="Geologica", font_families=["Geologica", "Inter"])
 
 # ── EN ───────────────────────────────────────────────────────────
+def sbp_note():
+    """RU only: payment in roubles via SBP at the tea house and for tea ordered in Telegram (not the online shop).
+    The official SBP mark (_build/assets/sbp.svg) is inlined unchanged – colours and proportions as published."""
+    svg = open(os.path.join(HERE, "assets", "sbp.svg"), encoding="utf-8").read()
+    svg = svg[svg.index("<svg"):].strip().replace(
+        '<svg width="97" height="120" viewBox="0 0 97 120" fill="none" xmlns="http://www.w3.org/2000/svg">',
+        '<svg class="pay-logo" viewBox="0 0 97 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="СБП – Система быстрых платежей">', 1)
+    svg = "".join(line.strip() for line in svg.splitlines())
+    return (f'<div class="pay"><span class="pay-mark">{svg}</span><p><b>Принимаем оплату по СБП</b>'
+            f'<span>В нашей чайной и при заказе чая через Telegram можно оплатить покупку в рублях через Систему быстрых платежей.</span></p></div>')
+
+
+# styles of the SBP note – only on pages that show it (RU), so the EN pages stay byte-for-byte unchanged
+PAY_CSS = """
+/* Payment via SBP (RU pages): the official mark on a small light plate, so it stays legible on dark sections too */
+.pay{display:flex;align-items:flex-start;gap:14px;max-width:62ch}
+.find .pay-row .pay{gap:12px}
+.find .pay-row .pay p{font-size:14px;line-height:1.45}
+.find .pay-row .pay-mark{width:38px;height:46px}
+.find .pay-row .pay-logo{width:22px}
+.pay-mark{flex:none;display:grid;place-items:center;width:44px;height:52px;border-radius:10px;background:#FBF8F2;border:1px solid var(--line-l)}
+.pay-logo{width:26px;height:auto;display:block}
+.pay p{margin:0;font-size:15px;line-height:1.5}
+.pay b{display:block;margin-bottom:2px;font-weight:600;color:var(--ink)}
+.pay span{display:block}
+.dark .pay b{color:var(--on-dark)}
+.find .pay p{color:var(--on-dark-2)}
+.dark .pay-mark{border-color:transparent}"""
+
+
 EN = dict(
     COMMON,
     lang="en", root="", root_href="./", lang_label="Language",
@@ -254,6 +284,7 @@ EN = dict(
                      clink("https://www.instagram.com/moychay.phuket", "Instagram", "i-ig", "instagram", "find")),
     ev_more="All events", 
     find_park="On site at Boat Avenue",
+    pay_row="",
     faq_h2="Common questions",
     faq_items=faq([
         ("Do I need to book ahead?", "Not for a walk-in tasting – just come by. The gong fu cha ceremony and group events need booking, since space is limited."),
@@ -382,6 +413,9 @@ RU = dict(
                      clink("https://www.instagram.com/moychay.phuket", "Instagram", "i-ig", "instagram", "find")),
     ev_more="Все мероприятия", 
     find_park="На месте, на Boat Avenue",
+    pay_l="Оплата",
+    pay=sbp_note(),
+    pay_row=f'\n      <div class="pay-row"><dt>Оплата</dt><dd>{sbp_note()}</dd></div>',
     faq_h2="Частые вопросы",
     faq_items=faq([
         ("Нужно ли записываться заранее?", "На дегустацию – нет, просто приходите. Для церемонии гунфу ча и групповых мероприятий нужна запись: мест немного."),
@@ -540,6 +574,7 @@ def render(data, out="404.html"):
     values = {**CONFIG, **data, "year": str(datetime.date.today().year), "og_image": f"{SITE_URL}/img/og.jpg"}
     values["font_faces"], values["font_preload"] = fonts(data["font_families"], data["font_preload_files"], data["root"])
     values.update(cha_values(data))
+    values.setdefault("pay_row", "")
     values["js_i18n"] = json.dumps({**data["js"], "root": data["root"]}, ensure_ascii=False)
     px = CONFIG["cfg_pixel"]
     values["ym_noscript"] = (f'<noscript><div><img src="https://mc.yandex.ru/watch/{CONFIG["cfg_ym"]}" style="position:absolute; left:-9999px;" alt=""></div></noscript>'
@@ -550,6 +585,8 @@ def render(data, out="404.html"):
         values["hreflang"] = hreflang(values.get("url_en"), values.get("url_ru"))
     values.setdefault("ftr_blog_link", footer_blog(data))
     html = html.replace("{{main}}", values.pop("main", ""))
+    # SBP note styles only where the note is on the page (RU home and contacts)
+    html = html.replace("{{pay_css}}", PAY_CSS if 'class="pay"' in html or ('{{pay_row}}' in html and values["pay_row"]) else "")
     for _ in range(2):   # second pass: placeholders inside inserted values ({{lp}}, {{root}}…)
         for k, v in values.items():
             if isinstance(v, str):

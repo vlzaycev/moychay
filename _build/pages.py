@@ -346,6 +346,8 @@ def contact(L, P, cfg):
     rows = [(L["find_addr_l"], "Moychay Phuket<br>" + L["addr_full"]), (L["find_hours_l"], L["hours"]),
             (L["find_park_l"], L["find_park"]), (L["find_msg_l"], L["find_msgs"]),
             (L["find_call_l"], L["find_call"].replace('data-place="find"', 'data-place="contact"')), (P["social_l"], P["social"])]
+    if L.get("pay_l"):                      # RU only: payment via SBP, next to the practical details
+        rows.insert(3, (L["pay_l"], L["pay"]))
     visit = f'''<section class="sec" id="find-us">
   <div class="wrap split">
     <div>

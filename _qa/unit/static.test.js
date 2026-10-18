@@ -249,3 +249,24 @@ test('Yandex Metrica: official counter on every page, skipped for bots; Webvisor
   assert.match(read('privacy/index.html'), /What you type into the chat and the forms is excluded/);
   assert.match(read('ru/privacy/index.html'), /Текст, который вы вводите в чат и формы, в эти записи не попадает/);
 });
+
+test('SBP payment note: RU home and contacts only, official mark unchanged, no claims about the online shop', () => {
+  const logo = read('_build/assets/sbp.svg');
+  const colours = ['#5B57A2', '#D90751', '#FAB718', '#ED6F26', '#63B22F', '#1487C9', '#017F36', '#984995'];
+  for (const c of colours) assert.ok(logo.includes(c), `logo colour ${c}`);
+  for (const f of ['ru/index.html', 'ru/contact/index.html']) {
+    const h = read(f);
+    const block = h.slice(h.indexOf('<div class="pay">'), h.indexOf('</div>', h.indexOf('<div class="pay">')) + 6);
+    assert.equal((h.match(/<div class="pay">/g) || []).length, 1, f);
+    assert.match(block, /<b>Принимаем оплату по СБП<\/b>/);
+    assert.match(block, /В нашей чайной и при заказе чая через Telegram можно оплатить покупку в рублях через Систему быстрых платежей\./);
+    assert.match(block, /viewBox="0 0 97 120"/);
+    assert.match(block, /aria-label="СБП – Система быстрых платежей"/);
+    for (const c of colours) assert.ok(block.includes(c), `${f}: ${c}`);
+    assert.doesNotMatch(block, /магазин|shop|moychay\.asia|комисси|курс/i, `${f}: only the tea house and Telegram orders`);
+    assert.match(h, /\.pay-logo\{/, `${f}: styles`);
+  }
+  // nowhere else: EN pages and other RU pages are untouched
+  const others = [...Object.values(PAGES), '404.html', 'privacy/index.html', 'ru/privacy/index.html'].filter((f) => !['ru/index.html', 'ru/contact/index.html'].includes(f));
+  for (const f of others) assert.doesNotMatch(read(f), /СБП|Систем[аы] быстрых платежей|\bSBP\b|class="pay/, f);
+});

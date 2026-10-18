@@ -141,7 +141,9 @@ for (const p of PAGES) {
       await expect(c.locator('a[data-track="directions"]')).toHaveAttribute('href', MAPS);
       expect(await c.locator('dd a[data-track]').count()).toBeGreaterThanOrEqual(2);
       const h = await c.evaluate(e => e.getBoundingClientRect().height);
-      expect(h).toBeLessThan(page.viewportSize().width < 600 ? 1100 : 700);
+      // phones stack the rows; tablets (600–899) show the heading above two columns (+ the RU payment note)
+      const w = page.viewportSize().width;
+      expect(h).toBeLessThan(w < 600 ? 1100 : w < 900 ? 760 : 700);
     });
 
     test('tracked clicks are pushed to the GTM data layer (gtmDataLayer)', async ({ page }) => {
