@@ -47,6 +47,19 @@ export async function setStatus(db, id, status, extra = {}) {
   await db.prepare(`UPDATE conversations SET ${sets.join(', ')} WHERE id = ?`).bind(...vals, id).run();
 }
 
+/** Changes the status only if it is still `from` – of two parallel requests exactly one wins. */
+export async function setStatusIf(db, id, from, to) {
+  const r = await db.prepare('UPDATE conversations SET status = ?, last_activity = ? WHERE id = ? AND status = ?').bind(to, now(), id, from).run();
+  return (r.meta && r.meta.changes) === 1;
+}
+
+/** Last sign of the team in a conversation: a staff message, the request to the team or its acceptance. */
+export async function lastStaffActivity(db, convId) {
+  const r = await db.prepare(`SELECT MAX(created_at) AS at FROM messages WHERE conv_id = ? AND (sender = 'operator'
+    OR json_extract(meta, '$.event') IN ('handoff_requested', 'handoff_accepted'))`).bind(convId).first();
+  return r && r.at ? r.at : 0;
+}
+
 export const setLang = (db, id, lang) =>
   db.prepare('UPDATE conversations SET lang = ?, last_activity = ? WHERE id = ?').bind(lang, now(), id).run();
 

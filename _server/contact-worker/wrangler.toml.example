@@ -12,9 +12,14 @@ compatibility_date = "2026-10-01"
 # Same origin as the site: no CORS needed in the browser
 routes = [{ pattern = "teaphuket.com/api/contact", zone_name = "teaphuket.com" }]
 
-# No request logs with personal data (the Worker itself logs only codes)
+# Workers Logs (F-01): only the code's own console lines – event codes, never message text, contacts, IPs or tokens.
+# invocation_logs = false: request metadata (headers with the visitor's session token or the webhook secret) is not logged.
 [observability]
-enabled = false
+enabled = true
+head_sampling_rate = 1
+
+[observability.logs]
+invocation_logs = false
 
 # Rate limits counted by Cloudflare (free; period must be 10 or 60 seconds)
 [[ratelimits]]

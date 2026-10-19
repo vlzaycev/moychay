@@ -337,7 +337,9 @@
     }).then(function (j) {
       if (live) live.remove();
       pend.remove(); merge(j);
-      if (toTeam && (state.status === 'human_requested' || state.status === 'human_active')) staffWait(true);
+      // no "waiting" dots if the team did not get the message (the server says so with event forward_failed)
+      var lost = (j.messages || []).some(function (m) { return m.event === 'forward_failed'; });
+      if (toTeam && !lost && (state.status === 'human_requested' || state.status === 'human_active')) staffWait(true);
     }).catch(function (e) {
       if (live) live.remove();
       // the message reached the server but the connection broke: the answer is being stored, fetch it

@@ -15,9 +15,14 @@ routes = [{ pattern = "teaphuket.com/api/chat/*", zone_name = "teaphuket.com" }]
 # must never block Telegram's servers.
 workers_dev = true
 
-# No request logs with personal data (the Worker logs only event codes)
+# Workers Logs (F-01): only the code's own console lines – event codes, never message text, contacts, IPs or tokens.
+# invocation_logs = false: request metadata (headers with the visitor's session token or the webhook secret) is not logged.
 [observability]
-enabled = false
+enabled = true
+head_sampling_rate = 1
+
+[observability.logs]
+invocation_logs = false
 
 [vars]
 AI_PROVIDER = "anthropic"            # anthropic | openai (OpenAI-compatible, set AI_BASE_URL) – mock works only locally

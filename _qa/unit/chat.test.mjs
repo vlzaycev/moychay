@@ -850,3 +850,108 @@ test('webhook: a temporary failure is retried by Telegram and the team message a
   for (let i = 0; i < 4; i++) codes.push((await hook(env, bad)).status);
   assert.deepEqual(codes, [500, 500, 200, 200]);
 });
+
+/* ── audit remediation (F-01, F-03, F-10, F-19) ─────────────────────────── */
+
+const ago = (env, convToken, hours) => {
+  // move every message of the visitor's conversation back in time (no real waiting in tests)
+  const id = env.DB.raw.prepare("SELECT conv_id FROM messages ORDER BY rowid DESC LIMIT 1").get().conv_id;
+  env.DB.raw.prepare('UPDATE messages SET created_at = created_at - ? WHERE conv_id = ?').run(hours * 3600000, id);
+  return id;
+};
+
+test('F-03: a handoff with no team activity for 12 h goes back to Cha; the team is told; 11 h is not enough', async () => {
+  mockNet();
+  const env = makeEnv();
+  const token = await start(env);
+  await send(env, token, 'question');
+  await call(env, '/api/chat/human', { token, body: {} });
+  ago(env, token, 11);
+  assert.equal((await pollJ(env, token)).status, 'human_requested', '11 h: still waiting for the team');
+  ago(env, token, 2);
+  const n = net.tg.length;
+  const p = await pollJ(env, token);
+  assert.equal(p.status, 'ai_active');
+  assert.equal(p.messages.filter((m) => m.event === 'returned_to_ai').length, 1);
+  assert.match(net.tg.slice(n).find((x) => x.method === 'sendMessage').body.text, /no reply from the team for 12 h/);
+  const before = net.ai.length;
+  const r = await send(env, token, 'and now?');
+  assert.ok(r.messages.some((m) => m.sender === 'assistant'), 'Cha answers again');
+  assert.equal(net.ai.length, before + 1);
+  assert.equal((await pollJ(env, token)).messages.filter((m) => m.event === 'returned_to_ai').length, 1, 'only once');
+  // a later reply from the team takes the chat over again
+  const req = net.tg.filter((x) => x.method === 'sendMessage' && /New support request/.test(x.body.text)).at(-1);
+  await hook(env, reply(1000 + net.tg.filter((x) => x.method === 'sendMessage').indexOf(req), 'sorry for the wait'));
+  assert.equal((await pollJ(env, token)).status, 'human_active');
+});
+
+test('F-03: an active team chat (recent staff message) is not expired; HUMAN_IDLE_HOURS is configurable', async () => {
+  mockNet();
+  const env = makeEnv({ HUMAN_IDLE_HOURS: '2' });
+  const token = await start(env);
+  await call(env, '/api/chat/human', { token, body: {} });
+  ago(env, token, 1);
+  assert.equal((await pollJ(env, token)).status, 'human_requested');
+  ago(env, token, 1.5);
+  assert.equal((await pollJ(env, token)).status, 'ai_active');
+});
+
+test('F-19: if Telegram does not take the visitor\'s message, one retry, then an honest notice with messengers', async () => {
+  mockNet();
+  const env = makeEnv();
+  const token = await start(env, 'ru');
+  await call(env, '/api/chat/human', { token, body: {} });
+  const prev = globalThis.fetch;
+  let tries = 0;
+  globalThis.fetch = async (url, opts) => (String(url).endsWith('/sendMessage') ? (tries++, Response.json({ ok: false, description: 'Bad Request' }, { status: 400 })) : prev(url, opts));
+  const r = await send(env, token, 'Вы тут?', { lang: 'ru' });
+  assert.equal(tries, 2, 'one retry');
+  const notice = r.messages.find((m) => m.event === 'forward_failed');
+  assert.ok(notice, 'the visitor is told');
+  assert.match(notice.text, /Не удалось передать сообщение сотруднику/);
+  assert.deepEqual(notice.buttons, ['telegram', 'whatsapp', 'contact']);
+  // the contact form in the chat: no "we passed your contact" if it did not reach the team
+  const c = await (await call(env, '/api/chat/contact', { token, body: { contact: '+66 81 000 0000', client_id: 'client-lead-f19' } })).json();
+  assert.ok(!c.messages.some((m) => /передали ваш контакт/.test(m.text)));
+  assert.ok(c.messages.some((m) => m.event === 'forward_failed'));
+  globalThis.fetch = prev;
+  // Telegram back: a single momentary error is absorbed by the retry, no notice
+  let once = true;
+  globalThis.fetch = async (url, opts) => (String(url).endsWith('/sendMessage') && once ? (once = false, Response.json({ ok: false }, { status: 502 })) : prev(url, opts));
+  const r2 = await send(env, token, 'ещё раз', { lang: 'ru' });
+  assert.ok(!r2.messages.some((m) => m.event === 'forward_failed'));
+});
+
+test('F-10: delivery time is measured only for team messages that arrive during a long poll, not for history', async () => {
+  topicNet();
+  const env = makeEnv({ TELEGRAM_TOPICS: '1' });
+  const { A } = await twoInTopics(env);
+  await hook(env, topicMsg(501, 'old reply'));
+  const rows = () => env.DB.raw.prepare("SELECT COUNT(*) AS n FROM perf WHERE kind = 'deliver'").get().n;
+  const calls = [];
+  const bg = (path) => worker.fetch(new Request('https://teaphuket.com' + path, { headers: { Authorization: `Bearer ${A}` } }), env, { waitUntil: (p) => calls.push(p) });
+  await bg('/api/chat/poll?after=0'); await bg('/api/chat/poll?after=0&wait=1');
+  await Promise.all(calls);
+  assert.equal(rows(), 0, 'history reloads are not deliveries');
+  const seq = (await pollJ(env, A)).messages.at(-1).seq;
+  setTimeout(() => hook(env, topicMsg(501, 'fresh')), 200);
+  await bg(`/api/chat/poll?after=${seq}&wait=5`);
+  await Promise.all(calls);
+  assert.equal(rows(), 1);
+  assert.ok(env.DB.raw.prepare("SELECT total FROM perf WHERE kind = 'deliver'").get().total < 3000);
+});
+
+test('F-01: Workers Logs are on for both Workers, request metadata (tokens, secrets) is not logged', () => {
+  for (const f of ['_server/chat-worker/wrangler.toml.example', '_server/contact-worker/wrangler.toml.example']) {
+    const s = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    assert.match(s, /\[observability\]\nenabled = true/, f);
+    assert.match(s, /\[observability\.logs\]\ninvocation_logs = false/, f);
+  }
+  // the code logs event codes only: no template literals with message text, contacts or headers
+  for (const f of ['_server/chat-worker/src/index.js', '_server/chat-worker/src/chat.js', '_server/contact-worker/src/index.js']) {
+    const s = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    const calls = [...s.matchAll(/\blog\('([a-z_]+)'(?:,\s*([^)]*))?\)/g)];
+    assert.ok(calls.length > 3, f);
+    for (const m of calls) if (m[2]) assert.doesNotMatch(m[2], /text|contact|body|email|\bd\.name|header|token|\bip\b/i, `${f}: log('${m[1]}', ${m[2]})`);
+  }
+});

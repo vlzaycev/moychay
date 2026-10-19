@@ -17,6 +17,7 @@ export const DEFAULTS = {
   AI_TIMEOUT_MS: 20000,
   AI_LOCK_MS: 30000,           // one AI request at a time per conversation
   AI_PER_CONVERSATION: 30,     // AI answers per conversation
+  HUMAN_IDLE_HOURS: 12,        // no team activity for this long: the visitor is back with Cha (F-03)
   AI_DAILY_LIMIT: 1000,        // AI calls per day for the whole site (hard stop)
   AI_DAILY_WARN: 0.8,          // Telegram alert to staff at 80 % of the daily limit
   STARTS_PER_IP_DAY: 10,       // new conversations per visitor IP per day

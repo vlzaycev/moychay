@@ -12,7 +12,7 @@
 import * as S from './store.js';
 import { ALLOWED_ORIGINS, LANGS, num, dayKey, devMode } from './config.js';
 import { t } from './i18n.js';
-import { answerWithAI, requestHuman, forwardToStaff, handleUpdate, wantsHuman } from './chat.js';
+import { answerWithAI, requestHuman, forwardToStaff, handleUpdate, wantsHuman, expireHandoff, CONTACT_BUTTONS } from './chat.js';
 import { validSecret, telegramReady } from './telegram.js';
 import { verifyTurnstile } from '../../contact-worker/src/turnstile.js';
 
@@ -128,8 +128,9 @@ async function handle(request, env, ctx) {
 
   // everything else needs the visitor's token
   const auth = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
-  const conv = await S.conversationByToken(env.DB, auth);
+  let conv = await S.conversationByToken(env.DB, auth);
   if (!conv) return json(401, { ok: false, error: 'session' }, okOrigin);
+  conv = await expireHandoff(env, conv, { waitUntil });       // a forgotten handoff goes back to Cha (F-03)
 
   if (action === 'poll') {
     if (request.method !== 'GET') return json(405, { ok: false }, okOrigin);
@@ -137,7 +138,8 @@ async function handle(request, env, ctx) {
     const after = Math.max(0, Math.min(1e9, parseInt(url.searchParams.get('after') || '0', 10) || 0));
     const wait = Math.max(0, Math.min(LONG_POLL_MAX_S, parseInt(url.searchParams.get('wait') || '0', 10) || 0));
     // Long polling: nothing new yet → check every 0.75 s (a single-row read) until a message or a status change arrives
-    if (wait && conv.seq <= after) {
+    const waited = Boolean(wait && conv.seq <= after);
+    if (waited) {
       const end = t0 + wait * 1000;
       while (Date.now() < end && !(request.signal && request.signal.aborted)) {
         await sleep(Math.min(LONG_POLL_TICK_MS, end - Date.now()));
@@ -146,7 +148,8 @@ async function handle(request, env, ctx) {
       }
     }
     const st = await S.stateAfter(env.DB, conv.id, after);
-    const op = st.messages.find((m) => m.sender === 'operator' && m.at);
+    // delivery time only for a team message that arrived while this request waited (not for history: F-10)
+    const op = waited ? st.messages.find((m) => m.sender === 'operator') : null;
     if (op && waitUntil) waitUntil(S.addPerf(env.DB, 'deliver', { total: Math.max(0, Date.now() - op.at) }).catch(() => {}));
     return json(200, { ok: true, status: st.status, lang: st.lang, messages: st.messages }, okOrigin);
   }
@@ -176,8 +179,8 @@ async function handle(request, env, ctx) {
     if (conv.status !== 'human_requested' && conv.status !== 'human_active') return json(409, { ok: false, error: 'state' }, okOrigin);
     const before = conv.seq;
     await S.addMessage(env.DB, conv.id, { sender: 'visitor', text: contact, meta: { lead: true }, clientId: body.client_id });
-    await forwardToStaff(env, conv, `Contact left by the visitor: ${contact}`, { label: 'Contact' });
-    await S.addMessage(env.DB, conv.id, { sender: 'system', text: t('contact_saved', conv.lang) });
+    const delivered = await forwardTwice(env, conv, `Contact left by the visitor: ${contact}`, { label: 'Contact' });
+    await S.addMessage(env.DB, conv.id, delivered ? { sender: 'system', text: t('contact_saved', conv.lang) } : failedNotice(conv));
     log('lead');
     return json(200, { ok: true, ...(await state(env, conv.id, before)) }, okOrigin);
   }
@@ -204,8 +207,8 @@ async function handle(request, env, ctx) {
       return json(200, { ok: true, duplicate: true, ...(await state(env, conv.id, before)) }, okOrigin);   // unique client_id race
     }
     if (human) {
-      const sent = await forwardToStaff(env, conv, text);
-      if (!sent) log('forward_failed');
+      // the visitor must know if the team did not get it (F-19): one retry, then an honest notice with messengers
+      if (!(await forwardTwice(env, conv, text))) await S.addMessage(env.DB, conv.id, failedNotice(conv));
       return json(200, { ok: true, ...(await state(env, conv.id, before)) }, okOrigin);
     }
     if (conv.status === 'closed') { await S.setStatus(env.DB, conv.id, 'ai_active'); conv.status = 'ai_active'; }   // writing again reopens the chat
@@ -226,6 +229,14 @@ async function handle(request, env, ctx) {
 
   return json(404, { ok: false, error: 'not_found' }, okOrigin);
 }
+
+async function forwardTwice(env, conv, text, opts) {
+  if (await forwardToStaff(env, conv, text, opts)) return true;
+  if (await forwardToStaff(env, conv, text, opts)) return true;       // most Telegram errors are momentary
+  log('forward_failed');
+  return false;
+}
+const failedNotice = (conv) => ({ sender: 'system', text: t('forward_failed', conv.lang), meta: { buttons: CONTACT_BUTTONS(conv.lang), event: 'forward_failed' } });
 
 async function state(env, convId, after) {
   const st = await S.stateAfter(env.DB, convId, after);

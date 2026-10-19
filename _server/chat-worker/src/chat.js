@@ -11,7 +11,7 @@ import { tg, tgCall, telegramReady, isOperator, isStaffChat, keyboard, clip } fr
 import { leak, REFUSAL } from './guard.js';
 
 const log = (e, x = '') => console.log(`chat:${e}${x ? ' ' + x : ''}`);   // codes only, never message text
-const CONTACT_BUTTONS = (lang) => (lang === 'ru' ? ['telegram', 'whatsapp', 'contact'] : ['whatsapp', 'telegram', 'contact']);
+export const CONTACT_BUTTONS = (lang) => (lang === 'ru' ? ['telegram', 'whatsapp', 'contact'] : ['whatsapp', 'telegram', 'contact']);
 
 // Explicit requests for a person. Deliberately narrow: "600฿ per person" must not call the team.
 const WANTS_HUMAN = [
@@ -190,6 +190,26 @@ export async function forwardToStaff(env, conv, text, { fetchImpl = fetch, label
     if (tr && tr.text) body += `\n\nПеревод:\n${clip(tr.text, 1000)}`;
   }
   return Boolean(await staffSend(env, conv, { text: body }, fetchImpl));
+}
+
+/**
+ * F-03: a conversation handed to the team does not stay there forever. If the team has shown no sign
+ * (message, request, acceptance) for HUMAN_IDLE_HOURS, the visitor is back with Cha on the next request,
+ * and the staff group is told – a reply in the thread takes the conversation over again.
+ */
+export async function expireHandoff(env, conv, { fetchImpl = fetch, waitUntil, now = Date.now() } = {}) {
+  if (conv.status !== 'human_requested' && conv.status !== 'human_active') return conv;
+  const hours = num(env, 'HUMAN_IDLE_HOURS');
+  const last = await S.lastStaffActivity(env.DB, conv.id);
+  if (!last || now - last < hours * 3600000) return conv;
+  if (!(await S.setStatusIf(env.DB, conv.id, conv.status, 'ai_active'))) return (await S.conversationById(env.DB, conv.id)) || conv;
+  await S.closeHandoff(env.DB, conv.id, 'timeout');
+  await S.addMessage(env.DB, conv.id, { sender: 'system', text: t('returned_to_ai', conv.lang), meta: { event: 'returned_to_ai' } });
+  log('handoff_timeout');
+  if (telegramReady(env)) {
+    await after(waitUntil, staffSend(env, conv, { text: `${conv.code}: no reply from the team for ${hours} h – the visitor is back with Cha. Reply here to take the chat over again.` }, fetchImpl));
+  }
+  return { ...conv, status: 'ai_active' };
 }
 
 /* ── Telegram webhook ──────────────────────────────────────────────────── */

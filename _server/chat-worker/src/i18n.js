@@ -45,6 +45,11 @@ const T = {
     ru: 'В этом разговоре достигнут лимит сообщений. Продолжим в Telegram или WhatsApp – там ответит команда.',
     th: 'การสนทนานี้ถึงขีดจำกัดแล้วค่ะ กรุณาติดต่อทีมงานทาง WhatsApp หรือ Telegram',
   },
+  forward_failed: {
+    en: "Sorry, your message didn't reach our team just now. Please message us on WhatsApp or Telegram – we'll reply there.",
+    ru: 'Не удалось передать сообщение сотруднику. Напишите нам в Telegram или WhatsApp – ответим там.',
+    th: 'ขออภัยค่ะ ส่งข้อความถึงทีมงานไม่สำเร็จ กรุณาติดต่อเราทาง WhatsApp หรือ Telegram ค่ะ',
+  },
   contact_saved: {
     en: "Thank you! We've passed your contact to the team.",
     ru: 'Спасибо! Мы передали ваш контакт команде.',
