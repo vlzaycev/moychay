@@ -29,6 +29,7 @@ ROOT = os.path.dirname(HERE)
 CONFIG = {
     "cfg_gtm": "GTM-WJQBWNL9",  # Google Tag Manager container (GA4, Ads, Pixel etc. are configured inside GTM)
     "cfg_gsc": "deblMaE7xgGLp7axGkXzbo1mVhtVkWtaBX_rFTN8G8g",  # Google Search Console verification
+    "cfg_yandex_verify": "6194af2a94adca62",  # Yandex Webmaster verification (meta tag)
     "cfg_ga4": "G-1MD6RQFX5R",  # Google Analytics 4 (loaded directly; do not add GA4 again inside GTM)
     "cfg_ads": "",              # "AW-XXXXXXXXX"
     "cfg_ads_directions": "",   # conversion label for "Get directions"
