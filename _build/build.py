@@ -127,6 +127,9 @@ def faq(items):
     return "\n".join(out)
 
 
+TIKTOK = "https://www.tiktok.com/@moychay.phuket"
+
+
 def footer(items):
     return "\n".join(
         f'        <li><a href="{u}" target="_blank" rel="noopener" aria-label="{name}" title="{name}" data-track="{t}" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#{icon}"/></svg></a></li>'
@@ -299,6 +302,7 @@ EN = dict(
         ("WhatsApp", WA, "whatsapp", "i-wa"),
         ("Instagram", "https://www.instagram.com/moychay.phuket", "instagram", "i-ig"),
         ("Facebook", "https://www.facebook.com/moychay.phuket/", "facebook", "i-fb"),
+        ("TikTok", TIKTOK, "tiktok", "i-tt"),
     ]),
     ftr_about="Tea house and tea ceremonies in Bangtao, Phuket. Part of Moychay, an international tea culture company.",
     ftr_h_explore="Explore", ftr_h_partners="Partnerships", ftr_h_visit="Visit us",
@@ -430,6 +434,7 @@ RU = dict(
         ("Чайный клуб в Telegram", TG_CLUB, "telegram_club", "i-tg"),
         ("Instagram", "https://www.instagram.com/moychay.phuket", "instagram", "i-ig"),
         ("Facebook", "https://www.facebook.com/moychay.phuket/", "facebook", "i-fb"),
+        ("TikTok", TIKTOK, "tiktok", "i-tt"),
     ]),
     ftr_about="Чайная и чайные церемонии в Бангтао, Пхукет. Часть Moychay, международной компании чайной культуры.",
     ftr_h_explore="Разделы", ftr_h_partners="Сотрудничество", ftr_h_visit="Как нас найти",
@@ -489,7 +494,7 @@ def business(data):
             "opens": "11:00", "closes": "22:00"}],
         "amenityFeature": [{"@type": "LocationFeatureSpecification", "name": "Parking", "value": True},
                            {"@type": "LocationFeatureSpecification", "name": "Board games", "value": True}],
-        "sameAs": ["https://www.instagram.com/moychay.phuket", "https://www.facebook.com/moychay.phuket/",
+        "sameAs": ["https://www.instagram.com/moychay.phuket", "https://www.facebook.com/moychay.phuket/", TIKTOK,
                    TG, TG_CLUB, "https://phuket.moychay.asia/"],
     }
 
