@@ -8,7 +8,7 @@ More than 200 teas to taste at our tea house on Boat Avenue – from delicate wh
 Get directions Shop tea online
 
 ## Where our tea comes from
-Moychay Phuket is part of Moychay – an international tea culture company founded in 2009 and based in Amsterdam, with tea clubs in Barcelona, Yerevan, Tbilisi, Phuket and Atlanta. Moychay works directly with more than 700 suppliers, tea farmers and artisan workshops in China, Japan, Vietnam, Thailand and Georgia, and sells only natural loose-leaf tea – no artificially flavoured teas.
+Moychay Phuket is part of Moychay – an international tea culture company founded in 2009 and based in Amsterdam, with tea clubs in Barcelona, Yerevan, Tbilisi, Phuket, Atlanta and Utrecht. Moychay works directly with more than 700 suppliers, tea farmers and artisan workshops in China, Japan, Vietnam, Thailand and Georgia, and sells only natural loose-leaf tea – no artificially flavoured teas.
 Moychay's founder Sergey Moychay has spent more than 20 years travelling China's tea regions and working directly with farmers and tea masters. He is the author of the book Geography of Chinese Tea.
 No need to know any of this before you come. Point at a jar, and the tea master will brew it for you.
 
@@ -63,7 +63,6 @@ The tea master will help you choose a teapot for the tea you like.
 
 ## Buy tea online
 Explore Chinese tea, teaware and accessories at the official Moychay Phuket online store.
-- Delivery across Thailand – free on orders from ฿2,000
-- –10% 10% off your first order with code MOYCHAY
-Worldwide shipping with DHL
+Delivery across Thailand is free on orders from ฿2,000. International orders are shipped via DHL.
+Get 10% off your first order with code MOYCHAY.
 Shop tea online

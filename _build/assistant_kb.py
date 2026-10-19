@@ -98,8 +98,6 @@ def _clean(s):
 
 
 def extract(html):
-    # the promo code is a copy button on the page; for the assistant it is just the code
-    html = re.sub(r'<button class="promo-code"[^>]*>([A-Z0-9]+)<svg.*?</button>', r"\1", html, flags=re.S)
     p = _Main()
     p.feed(html)
     p.flush()

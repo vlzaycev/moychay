@@ -312,7 +312,6 @@ figure{margin:0}
 .atm{padding:var(--sec-y) 0 0}
 .atm-text{display:grid;gap:4px 64px}
 .atm-text .copy p{max-width:56ch}
-.facts{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:4px;font-size:15px;color:var(--muted-l)}
 @media (min-width:900px){.atm-text{grid-template-columns:5fr 7fr;align-items:start}.atm-text h2{max-width:11ch}}
 .gallery{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:var(--max);margin:40px auto 0;padding:0 var(--gut)}
 .gallery .g1{grid-column:1/-1;aspect-ratio:4/5;margin:0 calc(var(--gut) * -1)}
@@ -373,10 +372,11 @@ figure{margin:0}
 .phero{background:var(--dark);color:var(--on-dark);padding:100px 0 clamp(48px,7vw,88px);overflow:hidden}
 .phero .wrap{display:grid;gap:36px}
 .crumbs{display:flex;flex-wrap:wrap;gap:4px 8px;list-style:none;margin:0 0 18px;padding:0;font-size:14px;color:var(--muted-d)}
+.crumbs li{min-width:0}
 .crumbs li+li::before{content:"/";margin-right:8px;opacity:.6}
 .crumbs a{display:inline-block;padding:10px 0;margin:-10px 0;transition:color .2s}.crumbs a:hover{color:var(--clay-soft)}
 .phero h1{font-size:clamp(40px,6.2vw,80px);line-height:1;letter-spacing:-.03em;margin-bottom:22px;max-width:13ch}
-.phero h1.long{font-size:clamp(34px,4.6vw,60px);line-height:1.04;max-width:18ch}
+.phero h1.long{font-size:clamp(30px,4.6vw,60px);line-height:1.04;max-width:18ch;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}
 .about.plain{background:var(--paper)}
 .phero .lead{color:var(--on-dark-2);max-width:44ch;margin-bottom:32px}
 .phero-ph{aspect-ratio:4/3;margin:0 calc(var(--gut) * -1)}
@@ -439,7 +439,7 @@ figure{margin:0}
 .phero-text h1{max-width:20ch}
 .art-meta{margin:-12px 0 0;font-size:15px;color:var(--muted-d)}
 .art{padding-top:clamp(48px,6vw,80px)}
-.prose{max-width:68ch;margin:0 auto;font-size:18px;line-height:1.7}
+.prose{max-width:68ch;margin:0 auto;font-size:var(--fs-body);line-height:1.6}
 .prose h2{font-size:clamp(26px,3vw,34px);line-height:1.15;margin:48px 0 16px}
 .prose h3{font-size:21px;margin:32px 0 10px}
 .prose p,.prose ul,.prose ol{margin:0 0 1.1em}
@@ -488,20 +488,12 @@ figure{margin:0}
 .find dd .clinks a:hover{color:var(--clay-soft)}
 .info dd .clinks a:hover{color:var(--clay-text)}
 .master-role span{display:block;font-weight:400}
-/* Payment via SBP (RU pages): the official mark at the size of the contact icons, no plate, colours unchanged */
-.pay{max-width:62ch}
-.pay p{margin:0;font-size:15px;line-height:1.5}
-.pay b{display:inline-flex;align-items:center;gap:10px;font-weight:600;color:var(--ink)}
-.pay-logo{width:15px;height:18px;flex:none;display:block}
-.pay span{display:block;margin-top:2px;padding-left:25px}
-.dark .pay b{color:var(--on-dark)}
-.find .pay p{font-size:14px;line-height:1.45;color:var(--on-dark-2)}
-.sbp{display:flex;align-items:center;gap:10px;margin:18px 0 0;font-size:15px;line-height:1.45;color:var(--muted-l)}
-.sbp .pay-logo{width:15px;height:18px}
+/* "Принимаем рубли по СБП" (RU pages): the official mark at the size of the contact icons + one short line */
+.sbp{display:flex;align-items:center;gap:10px;margin:18px 0 0;color:var(--muted-l)}
+.sbp .pay-logo{width:15px;height:18px;flex:none;display:block}
 .dark .sbp,.wood .sbp{color:var(--muted-d)}
-.sbp small{display:block;font-size:13px;color:var(--muted-d)}
-.ftr .sbp{margin:12px 0 0;color:var(--on-dark-2);font-size:inherit}
-.ftr .sbp span{display:block}
+.sbp.sbp-dd{margin:0;color:inherit}
+.ftr .sbp{margin:12px 0 0;color:var(--on-dark-2)}
 .master-role{padding-bottom:16px;border-bottom:1px solid var(--line-gold)}
 .posts .art-cat{display:flex;flex-wrap:wrap;gap:4px 14px}
 
@@ -568,22 +560,10 @@ figure{margin:0}
 .shop-ph img{object-position:50% 72%}
 .shop-copy h2{max-width:12ch}
 .shop-copy .lead{color:var(--muted-l);max-width:42ch}
-.perks{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:14px;max-width:48ch}
-.perks li{display:flex;align-items:center;gap:12px;font-size:17px;line-height:1.4;color:var(--ink)}
-.perk-ic{flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:rgba(55,90,60,.1);color:var(--mc-green-dark)}
-.perk-ic .ico{width:18px;height:18px}
-.promo-badge{flex:none;min-width:34px;height:34px;padding:0 8px;display:grid;place-items:center;border-radius:999px;background:var(--mc-green-dark);color:#fff;font:600 14px/1 var(--head),sans-serif;letter-spacing:-.01em}
-.promo-code{display:inline-flex;align-items:center;gap:6px;margin:2px 2px;padding:3px 10px;border:1px dashed var(--mc-green-dark);border-radius:8px;background:rgba(255,255,255,.45);
-  color:var(--mc-green-dark);font:600 15px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.04em;cursor:pointer;vertical-align:baseline}
-.promo-code .ico{width:14px;height:14px}
-.promo-code:hover{background:#fff}
-.promo-code:focus-visible{outline:2px solid var(--mc-green-dark);outline-offset:2px}
-.promo-ok{font-size:14px;color:var(--mc-green-dark);white-space:nowrap}
-.promo-ok:empty{display:none}
+.shop-terms{margin:14px 0 0;max-width:46ch;color:var(--ink)}
+.shop-terms b{font-weight:600}
 .shop-act{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin-top:32px}
 .shop-act .btn .ico{width:16px;height:16px;margin-left:2px}
-.shop-note{display:flex;align-items:center;gap:10px;margin:18px 0 0;font-size:var(--fs-small);color:var(--muted-l)}
-.shop-note::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--mc-green)}
 @media (max-width:599px){.shop-act .btn{width:100%}}
 @media (min-width:900px){
   .shop .wrap{grid-template-columns:5fr 7fr;gap:72px;align-items:center}
@@ -675,7 +655,7 @@ figure{margin:0}
 .acc-p{display:grid;grid-template-rows:0fr;transition:grid-template-rows .25s var(--ease)}
 .open>.acc-p{grid-template-rows:1fr}
 .acc-p>div{overflow:hidden}
-.faq-list .acc-p p{padding:0 40px 24px 0;color:var(--ink-2);font-size:16.5px;max-width:60ch}
+.faq-list .acc-p p{padding:0 40px 24px 0;color:var(--ink-2);font-size:var(--fs-body);max-width:60ch}
 @media (min-width:900px){.faq .wrap{grid-template-columns:5fr 7fr;gap:72px}}
 
 /* Footer */
@@ -700,7 +680,9 @@ figure{margin:0}
 .ftr-contact .ico,.ftr-contact .bi{width:18px;height:18px;color:var(--clay-soft)}
 .ftr-bottom{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 32px;padding-top:20px;border-top:1px solid var(--line-gold-d);font-size:14px;color:var(--on-dark-3)}
 .ftr-bottom p{margin:0}
-.ftr-legal{display:inline-block;margin-left:16px;padding:10px 0;color:var(--on-dark-2);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line-gold-d)}
+/* © and the privacy link: a gap instead of a margin, so a wrapped link starts at the same left edge */
+.ftr-copy{display:flex;flex-wrap:wrap;align-items:center;gap:0 16px}
+.ftr-legal{display:inline-block;padding:10px 0;color:var(--on-dark-2);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line-gold-d)}
 .ftr-legal:hover{color:var(--clay-soft)}
 .phero-text{padding-bottom:clamp(32px,5vw,56px)}
 .credit{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-height:44px;color:var(--on-dark-3);transition:color .2s}
@@ -766,8 +748,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
-  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></symbol>
-  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
   <!-- Feather icons (MIT) -->
   <symbol id="i-cart" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></symbol>
   <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
@@ -824,7 +804,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <section class="stats" aria-label="Часть сети Moychay">
   <div class="wrap">
-    <ul class="stats-list"><li><b>2009</b><span>год основания Moychay в Амстердаме</span></li><li><b>700+</b><span>поставщиков, чайных фермеров и производственных партнёров</span></li><li><b>6</b><span>городов с чайными клубами Moychay: Амстердам, Барселона, Ереван, Тбилиси, Пхукет и Атланта</span></li></ul>
+    <ul class="stats-list"><li><b>2009</b><span>год основания Moychay в Амстердаме</span></li><li><b>700+</b><span>поставщиков, чайных фермеров и производственных партнёров</span></li><li><b>7</b><span>городов с чайными клубами Moychay: Амстердам, Барселона, Ереван, Тбилиси, Пхукет, Атланта и Утрехт</span></li></ul>
   </div>
 </section>
 
@@ -912,7 +892,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div>
       <h2 class="rv">Обсудить сотрудничество</h2>
       <p class="muted">Расскажите о бизнесе и о том, что вам нужно. Ответим на email и предложим следующие шаги.</p>
-      <div class="muted more"><p>Удобнее позвонить или написать на почту? Для официальных запросов:</p><ul class="clinks"><li><a href="tel:+66817959110" data-track="phone_call" data-place="wholesale"><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg>+66 81 795 9110</a></li><li><a href="mailto:info@phuket.moychay.asia" data-track="email_click" data-place="wholesale"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg>info@phuket.moychay.asia</a></li></ul></div><p class="sbp"><svg class="pay-logo" viewBox="0 0 97 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0 26.12l14.532 25.975v15.844L.017 93.863 0 26.12z" fill="#5B57A2"/><path d="M55.797 42.643l13.617-8.346 27.868-.026-41.485 25.414V42.643z" fill="#D90751"/><path d="M55.72 25.967l.077 34.39-14.566-8.95V0l14.49 25.967z" fill="#FAB718"/><path d="M97.282 34.271l-27.869.026-13.693-8.33L41.231 0l56.05 34.271z" fill="#ED6F26"/><path d="M55.797 94.007V77.322l-14.566-8.78.008 51.458 14.558-25.993z" fill="#63B22F"/><path d="M69.38 85.737L14.531 52.095 0 26.12l97.223 59.583-27.844.034z" fill="#1487C9"/><path d="M41.24 120l14.556-25.993 13.583-8.27 27.843-.034L41.24 120z" fill="#017F36"/><path d="M.017 93.863l41.333-25.32-13.896-8.526-12.922 7.922L.017 93.863z" fill="#984995"/></svg><span>В нашей чайной доступна оплата в рублях через СБП</span></p>
+      <div class="muted more"><p>Удобнее позвонить или написать на почту? Для официальных запросов:</p><ul class="clinks"><li><a href="tel:+66817959110" data-track="phone_call" data-place="wholesale"><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg>+66 81 795 9110</a></li><li><a href="mailto:info@phuket.moychay.asia" data-track="email_click" data-place="wholesale"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg>info@phuket.moychay.asia</a></li></ul></div><p class="sbp"><svg class="pay-logo" viewBox="0 0 97 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0 26.12l14.532 25.975v15.844L.017 93.863 0 26.12z" fill="#5B57A2"/><path d="M55.797 42.643l13.617-8.346 27.868-.026-41.485 25.414V42.643z" fill="#D90751"/><path d="M55.72 25.967l.077 34.39-14.566-8.95V0l14.49 25.967z" fill="#FAB718"/><path d="M97.282 34.271l-27.869.026-13.693-8.33L41.231 0l56.05 34.271z" fill="#ED6F26"/><path d="M55.797 94.007V77.322l-14.566-8.78.008 51.458 14.558-25.993z" fill="#63B22F"/><path d="M69.38 85.737L14.531 52.095 0 26.12l97.223 59.583-27.844.034z" fill="#1487C9"/><path d="M41.24 120l14.556-25.993 13.583-8.27 27.843-.034L41.24 120z" fill="#017F36"/><path d="M.017 93.863l41.333-25.32-13.896-8.526-12.922 7.922L.017 93.863z" fill="#984995"/></svg><span>Принимаем рубли по СБП</span></p>
     </div>
   <form class="form ym-hide-content" id="wholesale-form" data-form="wholesale" data-endpoint="/api/contact" data-sitekey="0x4AAAAAAFYnqNdF-cMkUD1N" novalidate>
     <fieldset>
@@ -965,14 +945,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="ftr-col ftr-contact">
         <p class="ftr-h">Как нас найти</p>
         <p>2 этаж, Boat Avenue, Бангтао, Пхукет</p>
-        <p>Ежедневно 11:00-22:00</p><p class="sbp sbp-ftr"><svg class="pay-logo" viewBox="0 0 97 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0 26.12l14.532 25.975v15.844L.017 93.863 0 26.12z" fill="#5B57A2"/><path d="M55.797 42.643l13.617-8.346 27.868-.026-41.485 25.414V42.643z" fill="#D90751"/><path d="M55.72 25.967l.077 34.39-14.566-8.95V0l14.49 25.967z" fill="#FAB718"/><path d="M97.282 34.271l-27.869.026-13.693-8.33L41.231 0l56.05 34.271z" fill="#ED6F26"/><path d="M55.797 94.007V77.322l-14.566-8.78.008 51.458 14.558-25.993z" fill="#63B22F"/><path d="M69.38 85.737L14.531 52.095 0 26.12l97.223 59.583-27.844.034z" fill="#1487C9"/><path d="M41.24 120l14.556-25.993 13.583-8.27 27.843-.034L41.24 120z" fill="#017F36"/><path d="M.017 93.863l41.333-25.32-13.896-8.526-12.922 7.922L.017 93.863z" fill="#984995"/></svg><span>Принимаем рубли по СБП<small>Оплата в чайной</small></span></p>
+        <p>Ежедневно 11:00-22:00</p><p class="sbp sbp-ftr"><svg class="pay-logo" viewBox="0 0 97 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0 26.12l14.532 25.975v15.844L.017 93.863 0 26.12z" fill="#5B57A2"/><path d="M55.797 42.643l13.617-8.346 27.868-.026-41.485 25.414V42.643z" fill="#D90751"/><path d="M55.72 25.967l.077 34.39-14.566-8.95V0l14.49 25.967z" fill="#FAB718"/><path d="M97.282 34.271l-27.869.026-13.693-8.33L41.231 0l56.05 34.271z" fill="#ED6F26"/><path d="M55.797 94.007V77.322l-14.566-8.78.008 51.458 14.558-25.993z" fill="#63B22F"/><path d="M69.38 85.737L14.531 52.095 0 26.12l97.223 59.583-27.844.034z" fill="#1487C9"/><path d="M41.24 120l14.556-25.993 13.583-8.27 27.843-.034L41.24 120z" fill="#017F36"/><path d="M.017 93.863l41.333-25.32-13.896-8.526-12.922 7.922L.017 93.863z" fill="#984995"/></svg><span>Принимаем рубли по СБП</span></p>
         <a href="tel:+66817959110" data-track="phone_call" data-place="footer"><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg>+66 81 795 9110</a>
         <a href="mailto:info@phuket.moychay.asia" data-track="email_click" data-place="footer"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg>info@phuket.moychay.asia</a>
         <a href="https://maps.app.goo.gl/uuZkb3YwtNMGQhy18" target="_blank" rel="noopener" data-track="directions" data-place="footer"><svg class="bi" aria-hidden="true"><use href="#i-gm"/></svg>Проложить маршрут</a>
       </div>
     </div>
     <div class="ftr-bottom">
-      <p>© 2024–2026 Moychay Thai Co. LTD <a class="ftr-legal" href="/ru/privacy/">Политика конфиденциальности</a></p>
+      <p class="ftr-copy"><span>© 2024–2026 Moychay Thai Co. LTD</span><a class="ftr-legal" href="/ru/privacy/">Политика конфиденциальности</a></p>
       <a class="credit" href="https://vlad.marketing/?utm_source=teaphuket.com&amp;utm_medium=referral&amp;utm_campaign=website_credit" target="_blank" rel="noopener noreferrer" aria-label="Сайт и маркетинг – vlad.marketing (откроется в новой вкладке)">
         <span class="credit-by">Сайт и маркетинг –</span>
         <span class="credit-brand"><img src="../../img/vlad-marketing.svg" width="120" height="120" loading="lazy" alt="">vlad.marketing<span class="credit-arr" aria-hidden="true">↗</span></span>
@@ -1017,15 +997,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if (a && window.track) window.track(a.getAttribute('data-track'), a.getAttribute('data-place'), a.href);
   });
 
-  /* Promo code: one tap copies it (no analytics event – the shop click stays the conversion) */
-  document.addEventListener('click', function (e) {
-    var b = e.target.closest('[data-copy]');
-    if (!b) return;
-    var code = b.getAttribute('data-copy'), ok = b.parentNode.querySelector('.promo-ok');
-    var done = function () { if (ok) { ok.textContent = b.getAttribute('data-done'); setTimeout(function () { ok.textContent = ''; }, 2500); } };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done, function () {});
-    else { var t = document.createElement('textarea'); t.value = code; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (x) {} t.remove(); }
-  });
 
   /* Header + sticky bar */
   var hdr = $('#hdr'), bar = $('#bar'), barLinks = $$('a', bar), hero = $('#home'), find = $('.ftr');

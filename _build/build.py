@@ -17,6 +17,7 @@ import shutil
 
 import blog as B
 import commerce as CM
+import network as NET
 import pages as PG
 from pages import BUILDERS, PAGES, SLUGS
 from urllib.parse import quote
@@ -100,10 +101,6 @@ def paras(items):
     return "\n".join(f"      <p>{p}</p>" for p in items)
 
 
-def facts(items):
-    return "\n".join(f"        <li>{t}</li>" for t in items)
-
-
 def menu(items):
     out = []
     for m in items:
@@ -185,37 +182,24 @@ def sbp_svg():
     return _SBP_SVG
 
 
-def sbp_note():
-    """RU contacts (home, /ru/contact/): payment in roubles via SBP at the tea house and for tea ordered in Telegram."""
-    tg = " и при заказе чая через Telegram" if CM.SBP_TELEGRAM_ORDERS else ""
-    return (f'<div class="pay"><p><b>{sbp_svg()}Принимаем оплату по СБП</b>'
-            f'<span>В нашей чайной{tg} можно оплатить покупку в рублях через Систему быстрых платежей.</span></p></div>')
+SBP_TEXT = "Принимаем рубли по СБП"      # the one wording for SBP on the whole RU site
 
 
-def sbp_line(text, sub="", cls=""):
-    """One compact line with the mark – under a price list, in the footer, on the wholesale page. RU only."""
+def sbp_line(cls=""):
+    """The official SBP mark + "Принимаем рубли по СБП" – the same line everywhere on RU (prices, contacts, wholesale, footer)."""
     if not CM.SBP_IN_STORE:
         return ""
-    sub = f"<small>{sub}</small>" if sub else ""
-    return f'<p class="sbp{" " + cls if cls else ""}">{sbp_svg()}<span>{text}{sub}</span></p>'
+    return f'<p class="sbp{" " + cls if cls else ""}">{sbp_svg()}<span>{SBP_TEXT}</span></p>'
 
 
 # styles of the SBP note – only on pages that show it (RU), so the EN pages stay byte-for-byte unchanged
 PAY_CSS = """
-/* Payment via SBP (RU pages): the official mark at the size of the contact icons, no plate, colours unchanged */
-.pay{max-width:62ch}
-.pay p{margin:0;font-size:15px;line-height:1.5}
-.pay b{display:inline-flex;align-items:center;gap:10px;font-weight:600;color:var(--ink)}
-.pay-logo{width:15px;height:18px;flex:none;display:block}
-.pay span{display:block;margin-top:2px;padding-left:25px}
-.dark .pay b{color:var(--on-dark)}
-.find .pay p{font-size:14px;line-height:1.45;color:var(--on-dark-2)}
-.sbp{display:flex;align-items:center;gap:10px;margin:18px 0 0;font-size:15px;line-height:1.45;color:var(--muted-l)}
-.sbp .pay-logo{width:15px;height:18px}
+/* "Принимаем рубли по СБП" (RU pages): the official mark at the size of the contact icons + one short line */
+.sbp{display:flex;align-items:center;gap:10px;margin:18px 0 0;color:var(--muted-l)}
+.sbp .pay-logo{width:15px;height:18px;flex:none;display:block}
 .dark .sbp,.wood .sbp{color:var(--muted-d)}
-.sbp small{display:block;font-size:13px;color:var(--muted-d)}
-.ftr .sbp{margin:12px 0 0;color:var(--on-dark-2);font-size:inherit}
-.ftr .sbp span{display:block}"""
+.sbp.sbp-dd{margin:0;color:inherit}
+.ftr .sbp{margin:12px 0 0;color:var(--on-dark-2)}"""
 
 
 EN = dict(
@@ -242,15 +226,9 @@ EN = dict(
     why_h2="Your quiet place in Phuket",
     why_body=paras([
         "You don't need to know anything about tea to come in. Guests book a ceremony, work over a matcha latte, or just want a quiet corner away from the beach.",
-        "Concrete walls, calligraphy, a rattan peacock chair and shelves of teapots – most of them for sale. The tea master will help you choose.",
+        "Inside: concrete walls, calligraphy, a rattan peacock chair and shelves of teapots.",
     ]),
-    facts_label="About the tea house",
-    facts=facts([
-        "200+ teas to taste",
-        "Antique teaware – for sale, not decor",
-        "Board games and a reading corner",
-        "We speak Thai, English and Russian",
-    ]),
+    why_more="We have more than 200 teas, a collection of antique teaware, board games and a cosy reading corner. Some of the teaware is for sale – the tea master will help you choose. We speak English, Russian and Thai.",
     gallery_label="Inside the tea house",
     alt_1shop="Round tea table by the arched window, shelves of teaware behind it",
     alt_6shop="Rattan peacock chair and calligraphy scrolls on a concrete wall",
@@ -282,9 +260,9 @@ EN = dict(
     tea_items=tea(TEA_EN), tea_list=TEA_EN,
     shop_h2="Your favorite tea, delivered",
     shop_lead="Explore Chinese tea, teaware and accessories at the official Moychay Phuket online store.",
-    shop_ship="Delivery across Thailand – free on orders from {thb}",
-    shop_promo_on="{p}% off your first order with code {code}", shop_promo_off="A discount with code {code}",
-    shop_world="Worldwide shipping with DHL", shop_copy_l="Copy the promo code", shop_copied="Copied",
+    shop_ship="Delivery across Thailand is free on orders from {thb}.",
+    shop_promo_on="Get {p}% off your first order with code {code}.", shop_promo_off="A discount with code {code}.",
+    shop_world="International orders are shipped via DHL.",
     shop_cta="Shop tea online",
     sbp_prices="", sbp_footer="", sbp_wholesale="",
     deliv_cta="Order on WhatsApp",
@@ -295,9 +273,9 @@ EN = dict(
     about_h2="In Phuket since 2024",
     hero_brand="Part of Moychay, an international tea culture company",
     nums_label="Moychay in numbers",
-    about_nums=NUMS([("2009", "Moychay founded in Amsterdam"), ("700+", "suppliers, tea farmers and workshops"), ("6", "cities: Amsterdam, Barcelona, Yerevan, Tbilisi, Phuket and Atlanta")]),
+    about_nums=NUMS([("2009", "Moychay founded in Amsterdam"), ("700+", "suppliers, tea farmers and workshops"), (str(NET.COUNT), "cities: " + NET.city_list("en"))]),
     about_body=paras([
-        "Moychay Phuket is part of Moychay – an international tea culture company founded in 2009 and based in Amsterdam, with tea clubs in Barcelona, Yerevan, Tbilisi, Phuket and Atlanta. Moychay works directly with more than 700 suppliers, tea farmers and artisan workshops in China, Japan, Vietnam, Thailand and Georgia, and sells only natural loose-leaf tea – no artificially flavoured teas.",
+        "Moychay Phuket is part of Moychay – an international tea culture company founded in 2009 and based in Amsterdam, with tea clubs in " + NET.clubs_outside_hq("en") + ". Moychay works directly with more than 700 suppliers, tea farmers and artisan workshops in China, Japan, Vietnam, Thailand and Georgia, and sells only natural loose-leaf tea – no artificially flavoured teas.",
         "The room is small: locals and travellers share one table, and the tea master is here to explain, not to upsell.",
     ]),
     find_h2="Contacts",
@@ -374,15 +352,9 @@ RU = dict(
     why_h2="Ваше тихое место на Пхукете",
     why_body=paras([
         "Разбираться в чае не обязательно. К нам приходят на церемонию, поработать за матча-латте или просто посидеть в тишине подальше от пляжа.",
-        "Бетонные стены, каллиграфия, ротанговое кресло-павлин и полки с чайниками – большинство из них можно купить. Чайный мастер поможет выбрать.",
+        "Внутри – бетонные стены, каллиграфия, ротанговое кресло-павлин и полки с чайниками.",
     ]),
-    facts_label="О чайной",
-    facts=facts([
-        "Больше 200 сортов чая",
-        "Антикварная посуда – её можно купить",
-        "Настольные игры и уголок для чтения (Библиотека Пхукет)",
-        "Говорим на тайском, английском и русском",
-    ]),
+    why_more="У нас больше 200 сортов чая, коллекция антикварной посуды, настольные игры и уютный уголок для чтения. Часть посуды можно приобрести – чайный мастер поможет выбрать. Мы говорим на русском, английском и тайском.",
     gallery_label="Чайная изнутри",
     alt_1shop="Круглый чайный стол у арочного окна, за ним полки с посудой",
     alt_6shop="Ротанговое кресло-павлин и свитки с каллиграфией на бетонной стене",
@@ -414,13 +386,13 @@ RU = dict(
     tea_items=tea(TEA_RU), tea_list=TEA_RU,
     shop_h2="Любимый чай – с доставкой",
     shop_lead="Китайский чай, посуда и аксессуары в официальном интернет-магазине Moychay Phuket.",
-    shop_ship="Доставка по всему Таиланду – бесплатно от {thb}",
-    shop_promo_on="Скидка {p}% на первый заказ по промокоду {code}", shop_promo_off="Скидка по промокоду {code}",
-    shop_world="По всему миру – доставка DHL", shop_copy_l="Скопировать промокод", shop_copied="Скопировано",
+    shop_ship="Доставка по Таиланду\u00a0– бесплатно от {thb}.",
+    shop_promo_on="Скидка {p}% на первый заказ по промокоду {code}.", shop_promo_off="Скидка по промокоду {code}.",
+    shop_world="Международные заказы отправляем через DHL.",
     shop_cta="Купить чай онлайн",
-    sbp_prices=sbp_line("При оплате в чайной принимаем рубли через СБП"),
-    sbp_footer=sbp_line("Принимаем рубли по СБП", "Оплата в чайной", "sbp-ftr"),
-    sbp_wholesale=sbp_line("В нашей чайной доступна оплата в рублях через СБП"),
+    sbp_prices=sbp_line(),
+    sbp_footer=sbp_line("sbp-ftr"),
+    sbp_wholesale=sbp_line(),
     deliv_cta="Заказать в Telegram",
     ev_h2="Ближайшие мероприятия",
     ev_intro="Каждую неделю – дегустации, церемонии и вечера в чайной. Приходить может любой, опыт не нужен.",
@@ -429,9 +401,9 @@ RU = dict(
     about_h2="На Пхукете с 2024 года",
     hero_brand="Часть Moychay – международной компании чайной культуры",
     nums_label="Moychay в цифрах",
-    about_nums=NUMS([("2009", "год основания Moychay в Амстердаме"), ("700+", "поставщиков, чайных фермеров и мастерских"), ("6", "городов: Амстердам, Барселона, Ереван, Тбилиси, Пхукет и Атланта")]),
+    about_nums=NUMS([("2009", "год основания Moychay в Амстердаме"), ("700+", "поставщиков, чайных фермеров и мастерских"), (str(NET.COUNT), "городов: " + NET.city_list("ru"))]),
     about_body=paras([
-        "Moychay Phuket – часть Moychay, международной компании чайной культуры. Она основана в 2009 году, штаб-квартира – в Амстердаме, чайные клубы – в Барселоне, Ереване, Тбилиси, на Пхукете и в Атланте. Moychay работает напрямую с более чем 700 поставщиками, чайными фермерами и мастерскими в Китае, Японии, Вьетнаме, Таиланде и Грузии и продаёт только натуральный листовой чай – без ароматизаторов.",
+        "Moychay Phuket – часть Moychay, международной компании чайной культуры. Она основана в 2009 году, штаб-квартира – в Амстердаме, чайные клубы – " + NET.clubs_outside_hq("ru") + ". Moychay работает напрямую с более чем 700 поставщиками, чайными фермерами и мастерскими в Китае, Японии, Вьетнаме, Таиланде и Грузии и продаёт только натуральный листовой чай – без ароматизаторов.",
         "Сама чайная небольшая: местные, экспаты и путешественники садятся за один стол, а чайный мастер рядом, чтобы рассказать о чае, а не продать.",
     ]),
     find_h2="Контакты",
@@ -442,8 +414,8 @@ RU = dict(
     ev_more="Все мероприятия", 
     find_park="На месте, на Boat Avenue",
     pay_l="Оплата",
-    pay=sbp_note(),
-    pay_row=f'\n      <div class="pay-row"><dt>Оплата</dt><dd>{sbp_note()}</dd></div>',
+    pay=sbp_line("sbp-dd"),
+    pay_row=f'\n      <div class="pay-row"><dt>Оплата</dt><dd>{sbp_line("sbp-dd")}</dd></div>',
     faq_h2="Частые вопросы",
     faq_items=faq([
         ("Нужно ли записываться заранее?", "На дегустацию – нет, просто приходите. Для церемонии гунфу ча и групповых мероприятий нужна запись: мест немного."),
@@ -616,7 +588,7 @@ def render(data, out="404.html"):
     values.setdefault("ftr_blog_link", footer_blog(data))
     html = html.replace("{{main}}", values.pop("main", ""))
     # SBP styles only on pages that show SBP (RU): EN pages carry none of it
-    html = html.replace("{{pay_css}}", PAY_CSS if re.search(r'class="(pay|sbp)\b', html) or ('{{pay_row}}' in html and values["pay_row"]) or ('{{sbp_' in html and values.get("sbp_footer")) else "")
+    html = html.replace("{{pay_css}}", PAY_CSS if re.search(r'class="sbp\b', html) or ('{{pay_row}}' in html and values["pay_row"]) or ('{{sbp_' in html and values.get("sbp_footer")) else "")
     for _ in range(2):   # second pass: placeholders inside inserted values ({{lp}}, {{root}}…)
         for k, v in values.items():
             if isinstance(v, str):

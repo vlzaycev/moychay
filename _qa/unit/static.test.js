@@ -250,65 +250,83 @@ test('Yandex Metrica: official counter on every page, skipped for bots; Webvisor
   assert.match(read('ru/privacy/index.html'), /Текст, который вы вводите в чат и формы, в эти записи не попадает/);
 });
 
-test('SBP payment note: RU home and contacts only, official mark unchanged, no claims about the online shop', () => {
+test('SBP: one wording "Принимаем рубли по СБП" with the official mark, RU only, never about the online shop', () => {
   const logo = read('_build/assets/sbp.svg');
   const colours = ['#5B57A2', '#D90751', '#FAB718', '#ED6F26', '#63B22F', '#1487C9', '#017F36', '#984995'];
   for (const c of colours) assert.ok(logo.includes(c), `logo colour ${c}`);
-  for (const f of ['ru/index.html', 'ru/contact/index.html']) {
-    const h = read(f);
-    const block = h.slice(h.indexOf('<div class="pay">'), h.indexOf('</div>', h.indexOf('<div class="pay">')) + 6);
-    assert.equal((h.match(/<div class="pay">/g) || []).length, 1, f);
-    assert.match(block, /<\/svg>Принимаем оплату по СБП<\/b>/);
-    assert.match(block, /В нашей чайной и при заказе чая через Telegram можно оплатить покупку в рублях через Систему быстрых платежей\./);
-    assert.match(block, /viewBox="0 0 97 120"/);
-    assert.match(block, /<b><svg class="pay-logo"[^>]*aria-hidden="true">/, `${f}: small mark before the title, decorative (the title names SBP)`);
-    assert.doesNotMatch(block + h.slice(h.indexOf('.pay{'), h.indexOf('.pay{') + 900), /pay-mark|background/, `${f}: no plate behind the mark`);
-    assert.match(h, /\.pay-logo\{width:15px;height:18px/, `${f}: the size of the contact icons`);
-    for (const c of colours) assert.ok(block.includes(c), `${f}: ${c}`);
-    assert.doesNotMatch(block, /магазин|shop|moychay\.asia|комисси|курс/i, `${f}: only the tea house and Telegram orders`);
-    assert.match(h, /\.pay-logo\{/, `${f}: styles`);
-  }
-  // EN never mentions SBP; on RU it sits once by each price list and once in the footer – not by every price
+  // EN never mentions SBP
   for (const f of Object.values(PAGES).filter((f) => !f.startsWith('ru/')).concat('privacy/index.html'))
-    assert.doesNotMatch(read(f), /СБП|Систем[аы] быстрых платежей|\bSBP\b|class="(pay|sbp)/, f);
-  const lines = (f) => (read(f).match(/<p class="sbp[ "]/g) || []).length;
-  const expect = { 'ru/index.html': 2, 'ru/ceremonies/index.html': 2, 'ru/events/index.html': 2, 'ru/matcha/index.html': 2,
-    'ru/wholesale/index.html': 2, 'ru/contact/index.html': 1, 'ru/tea/index.html': 1, 'ru/privacy/index.html': 1 };
-  for (const [f, n] of Object.entries(expect)) assert.equal(lines(f), n, `${f}: SBP lines (price list + footer)`);
-  for (const f of Object.keys(expect)) {
+    assert.doesNotMatch(read(f), /СБП|Систем[аы] быстрых платежей|\bSBP\b|class="sbp/, f);
+  // RU: once by each price list / contacts / wholesale and once in the footer – not by every price
+  const expect = { 'ru/index.html': 3, 'ru/ceremonies/index.html': 2, 'ru/events/index.html': 2, 'ru/matcha/index.html': 2,
+    'ru/wholesale/index.html': 2, 'ru/contact/index.html': 2, 'ru/tea/index.html': 1, 'ru/privacy/index.html': 1 };
+  for (const [f, n] of Object.entries(expect)) {
     const h = read(f);
-    assert.match(h, /<div class="ftr-col ftr-contact">[\s\S]*?<p class="sbp sbp-ftr">.*?Принимаем рубли по СБП<small>Оплата в чайной<\/small>/, `${f}: footer`);
-    for (const m of h.match(/<p class="sbp[^"]*">[\s\S]*?<\/p>/g)) assert.doesNotMatch(m, /магазин|shop|онлайн|курс|комисси|₽|руб\.\s*\d/i, `${f}: in-store only`);
+    const lines = h.match(/<p class="sbp[^"]*">[\s\S]*?<\/p>/g) || [];
+    assert.equal(lines.length, n, `${f}: SBP lines`);
+    for (const m of lines) {
+      assert.match(m, /^<p class="sbp[^"]*"><svg class="pay-logo" viewBox="0 0 97 120"[^>]*aria-hidden="true">[\s\S]*<\/svg><span>Принимаем рубли по СБП<\/span><\/p>$/, `${f}: the one wording`);
+      for (const c of colours) assert.ok(m.includes(c), `${f}: logo colour ${c}`);
+    }
+    assert.match(h, /<div class="ftr-col ftr-contact">[\s\S]*?<p class="sbp sbp-ftr">/, `${f}: footer`);
+    assert.doesNotMatch(h, /При оплате в чайной|доступна оплата|Оплата в чайной|Принимаем оплату по СБП|class="pay"/, `${f}: no old wordings`);
+    assert.match(h, /\.sbp \.pay-logo\{width:15px;height:18px/, `${f}: the size of the contact icons`);
   }
-  assert.match(read('ru/wholesale/index.html'), /<p class="sbp">.*В нашей чайной доступна оплата в рублях через СБП/);
-  assert.match(read('ru/ceremonies/index.html'), /<\/ul><p class="sbp">.*При оплате в чайной принимаем рубли через СБП/, 'once under the list of formats');
-  // the mark is stored once (build) and only inlined – no copies of the asset in the site
-  assert.ok(!fs.existsSync(path.join(ROOT, 'img/brand/sbp.svg')));
-  // prices stay in baht
-  assert.doesNotMatch(read('ru/ceremonies/index.html'), /\d\s?(₽|руб)/);
+  assert.match(read('ru/ceremonies/index.html'), /<\/ul><p class="sbp">/, 'once under the list of formats');
+  assert.ok(!fs.existsSync(path.join(ROOT, 'img/brand/sbp.svg')), 'the mark lives in _build/assets only');
+  assert.doesNotMatch(read('ru/ceremonies/index.html'), /\d\s?(₽|руб)/, 'prices stay in baht');
 });
 
-test('online shop block: short, terms from commerce.py, copyable promo code, no unconfirmed percentage', () => {
+test('online shop block: plain sentences from commerce.py, code as bold text, no badges or widgets', () => {
   const cm = fs.readFileSync(path.join(ROOT, '_build/commerce.py'), 'utf8');
   const enabled = /^PROMO_ENABLED = True/m.test(cm);
-  for (const [f, h2, cta, ship] of [['index.html', 'Your favorite tea, delivered', 'Shop tea online', 'free on orders from ฿2,000'],
-    ['ru/index.html', 'Любимый чай\u00a0– с доставкой', 'Купить чай онлайн', 'бесплатно от 2\u00a0000\u00a0฿'],
-    ['tea/index.html', null, 'Shop tea online', 'free on orders from ฿2,000'], ['ru/tea/index.html', null, 'Купить чай онлайн', 'бесплатно от 2\u00a0000\u00a0฿']]) {
+  for (const [f, h2, cta, ship, promo] of [
+    ['index.html', 'Your favorite tea, delivered', 'Shop tea online', 'Delivery across Thailand is free on orders from ฿2,000. International orders are shipped via DHL.', 'Get 10% off your first order with code <b>MOYCHAY</b>.'],
+    ['ru/index.html', 'Любимый чай – с доставкой', 'Купить чай онлайн', 'Доставка по Таиланду – бесплатно от 2 000 ฿. Международные заказы отправляем через DHL.', 'Скидка 10% на первый заказ по промокоду <b>MOYCHAY</b>.'],
+    ['tea/index.html', null, 'Shop tea online', 'Delivery across Thailand is free on orders from ฿2,000.', 'with code <b>MOYCHAY</b>'],
+    ['ru/tea/index.html', null, 'Купить чай онлайн', 'бесплатно от 2 000 ฿.', 'по промокоду <b>MOYCHAY</b>']]) {
     const h = read(f);
     const blk = h.slice(h.indexOf('<div class="shop-copy'), h.indexOf('</section>', h.indexOf('<div class="shop-copy')));
     if (h2) assert.ok(blk.includes(`<h2 id="shop-h">${h2}</h2>`), `${f}: h2`);
-    assert.ok(blk.includes(ship), `${f}: shipping`);
-    assert.match(blk, /<button class="promo-code" type="button" data-copy="MOYCHAY"/, `${f}: copy button`);
+    assert.ok(blk.includes(ship), `${f}: delivery`);
+    if (enabled) assert.ok(blk.includes(promo), `${f}: promo sentence`);
+    else assert.doesNotMatch(blk.replace(/<[^>]+>/g, ' '), /\d+\s?%/, `${f}: no percentage until confirmed`);
+    assert.doesNotMatch(blk, /<button|<ul|<li|promo-|perk|data-copy|shop-note|–10%|i-truck|i-copy/, `${f}: no badges, lists or copy widgets`);
     assert.match(blk, /href="https:\/\/phuket\.moychay\.asia\/" target="_blank" rel="noopener" data-track="online_shop_click"/, `${f}: CTA keeps the conversion`);
     assert.ok(blk.includes(cta), `${f}: CTA text`);
-    assert.equal((blk.match(/<li/g) || []).length, 2, `${f}: two benefits`);
-    assert.doesNotMatch(blk, /200|более 200|more than 200/, `${f}: no long list of shop facts`);
-    if (!enabled) assert.doesNotMatch(blk.replace(/<[^>]+>/g, " "), /\d+\s?%/, `${f}: no percentage until the discount is confirmed`);
-    else assert.match(blk, /–10%/);
+    assert.doesNotMatch(blk, /more than 200|более 200/, `${f}: no long list of shop facts`);
   }
-  // Cha gets the same terms from the same source
   const kb = read('_content/assistant/site/payment-and-offers.md');
   assert.match(kb, /SBP is NOT available in the online shop/);
   assert.match(kb, /2000 THB/);
-  assert.ok(enabled ? /10% off/.test(kb) : /never state a percentage/.test(kb));
+  assert.ok(enabled ? /10% off the first order/.test(kb) : /never state a percentage/.test(kb));
+});
+
+test('Moychay network: 7 cities incl. Utrecht, the same on every page and for Cha (one source: network.py)', () => {
+  const en = 'Amsterdam, Barcelona, Yerevan, Tbilisi, Phuket, Atlanta and Utrecht';
+  const ru = 'Амстердам, Барселона, Ереван, Тбилиси, Пхукет, Атланта и Утрехт';
+  for (const [f, list] of [['index.html', en], ['wholesale/index.html', en], ['ru/index.html', ru], ['ru/wholesale/index.html', ru]]) {
+    const h = read(f);
+    assert.match(h, new RegExp(`<b>7</b><span>[^<]*${list}</span>`), `${f}: 7 cities`);
+    assert.doesNotMatch(h, /<b>6<\/b>|6 cities|6 городов/, f);
+  }
+  for (const f of ['index.html', 'tea/index.html']) assert.ok(read(f).includes('tea clubs in Barcelona, Yerevan, Tbilisi, Phuket, Atlanta and Utrecht.'), f);
+  for (const f of ['ru/index.html', 'ru/tea/index.html']) assert.ok(read(f).includes('чайные клубы – в Барселоне, Ереване, Тбилиси, на Пхукете, в Атланте и Утрехте.'), f);
+  for (const f of ['home.md', 'tea.md', 'wholesale.md']) {
+    const kb = read('_content/assistant/site/' + f);
+    assert.match(kb, /Utrecht/, f);
+    assert.doesNotMatch(kb, /6 cities|and Atlanta\b/, f);
+  }
+});
+
+test('"Your quiet place" ends with one editorial paragraph, not a list', () => {
+  for (const [f, text] of [['index.html', 'We have more than 200 teas, a collection of antique teaware, board games and a cosy reading corner. Some of the teaware is for sale – the tea master will help you choose. We speak English, Russian and Thai.'],
+    ['ru/index.html', 'У нас больше 200 сортов чая, коллекция антикварной посуды, настольные игры и уютный уголок для чтения. Часть посуды можно приобрести – чайный мастер поможет выбрать. Мы говорим на русском, английском и тайском.']]) {
+    const h = read(f);
+    const blk = h.slice(h.indexOf('id="why-visit"'), h.indexOf('id="gallery"'));
+    assert.ok(blk.includes(`<p id="highlights">${text}</p>`), f);
+    assert.doesNotMatch(blk, /<ul|<li|class="facts"/, `${f}: no list`);
+    assert.equal((blk.match(/можно купить|можно приобрести|for sale/g) || []).length, 1, `${f}: "for sale" is said once`);
+  }
+  assert.doesNotMatch(read('index.html'), /\.facts\{/, 'no leftover list styles');
 });

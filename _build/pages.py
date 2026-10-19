@@ -9,6 +9,7 @@ the block is simply not rendered until it is filled in below.
 from html import escape
 
 import commerce as CM
+import network as NET
 
 ARROW = '<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg>'
 SHOP = CM.SHOP_URL
@@ -98,27 +99,18 @@ def tlink(href, label, ext=False, track=""):
 
 
 def shop_copy(L, place, h2=None, order=True):
-    """The online-shop block (home, /tea/): headline, one line about the shop, two benefits, the promo code
-    (copy button), DHL as a quiet extra line, CTA. All terms come from commerce.py."""
+    """The online-shop block (home, /tea/): headline, one line about the shop, delivery and the promo code as plain
+    sentences, CTA. All terms come from commerce.py; the code is just bold text (no widgets)."""
     lang = L["lang"]
-    code = (f'<button class="promo-code" type="button" data-copy="{CM.PROMO_CODE}" data-done="{L["shop_copied"]}" '
-            f'aria-label="{L["shop_copy_l"]}: {CM.PROMO_CODE}">{CM.PROMO_CODE}<svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg></button>')
-    if CM.PROMO_ENABLED:
-        badge = f'<span class="promo-badge">–{CM.PROMO_PERCENT}%</span>'
-        promo = L["shop_promo_on"].format(p=CM.PROMO_PERCENT, code=code)
-    else:   # the size of the discount is not confirmed yet: no percentage anywhere
-        badge = '<span class="promo-badge" aria-hidden="true">%</span>'
-        promo = L["shop_promo_off"].format(code=code)
-    ship = L["shop_ship"].format(thb=CM.thb(CM.FREE_SHIPPING_THB, lang))
-    world = f'\n      <p class="shop-note">{L["shop_world"]}</p>' if CM.WORLDWIDE_DHL else ""
+    ship = L["shop_ship"].format(thb=CM.thb(CM.FREE_SHIPPING_THB, lang)) + (" " + L["shop_world"] if CM.WORLDWIDE_DHL else "")
+    code = f"<b>{CM.PROMO_CODE}</b>"
+    promo = (L["shop_promo_on"].format(p=CM.PROMO_PERCENT, code=code) if CM.PROMO_ENABLED else L["shop_promo_off"].format(code=code))
     order_link = (f'\n        <a class="tlink" href="{L["msg_order_url"]}" target="_blank" rel="noopener" data-track="{L["msg_event"]}" data-place="delivery">'
                   f'<svg class="bi" aria-hidden="true"><use href="#{L["msg_icon"]}"/></svg>{L["deliv_cta"]}</a>') if order else ""
     return f'''<h2 id="shop-h">{h2 or L["shop_h2"]}</h2>
       <p class="lead">{L["shop_lead"]}</p>
-      <ul class="perks">
-        <li><span class="perk-ic"><svg class="ico" aria-hidden="true"><use href="#i-truck"/></svg></span><span>{ship}</span></li>
-        <li class="perk-promo">{badge}<span>{promo} <span class="promo-ok" role="status" aria-live="polite"></span></span></li>
-      </ul>{world}
+      <p class="shop-terms">{ship}</p>
+      <p class="shop-terms">{promo}</p>
       <div class="shop-act">
         <a class="btn btn-shop" href="{SHOP}" target="_blank" rel="noopener" data-track="online_shop_click" data-place="{place}">{L["shop_cta"]}{ARROW}</a>{order_link}
       </div>'''
@@ -615,7 +607,7 @@ PAGES = dict(
             alt_hero="Pu-erh tea cakes on dark shelves at Moychay Phuket",
             origin_h2="Where our tea comes from",
             origin=[
-                "Moychay Phuket is part of Moychay – an international tea culture company founded in 2009 and based in Amsterdam, with tea clubs in Barcelona, Yerevan, Tbilisi, Phuket and Atlanta. Moychay works directly with more than 700 suppliers, tea farmers and artisan workshops in China, Japan, Vietnam, Thailand and Georgia, and sells only natural loose-leaf tea – no artificially flavoured teas.",
+                "Moychay Phuket is part of Moychay – an international tea culture company founded in 2009 and based in Amsterdam, with tea clubs in " + NET.clubs_outside_hq("en") + ". Moychay works directly with more than 700 suppliers, tea farmers and artisan workshops in China, Japan, Vietnam, Thailand and Georgia, and sells only natural loose-leaf tea – no artificially flavoured teas.",
                 "Moychay's founder Sergey Moychay has spent more than 20 years travelling China's tea regions and working directly with farmers and tea masters. He is the author of the book Geography of Chinese Tea.",
                 "No need to know any of this before you come. Point at a jar, and the tea master will brew it for you.",
             ],
@@ -649,7 +641,7 @@ PAGES = dict(
             alt_hero="Блины пуэра на тёмных полках в Moychay Phuket",
             origin_h2="Откуда наш чай",
             origin=[
-                "Moychay Phuket – часть Moychay, международной компании чайной культуры. Она основана в 2009 году, штаб-квартира – в Амстердаме, чайные клубы – в Барселоне, Ереване, Тбилиси, на Пхукете и в Атланте. Moychay работает напрямую с более чем 700 поставщиками, чайными фермерами и мастерскими в Китае, Японии, Вьетнаме, Таиланде и Грузии и продаёт только натуральный листовой чай – без ароматизаторов.",
+                "Moychay Phuket – часть Moychay, международной компании чайной культуры. Она основана в 2009 году, штаб-квартира – в Амстердаме, чайные клубы – " + NET.clubs_outside_hq("ru") + ". Moychay работает напрямую с более чем 700 поставщиками, чайными фермерами и мастерскими в Китае, Японии, Вьетнаме, Таиланде и Грузии и продаёт только натуральный листовой чай – без ароматизаторов.",
                 "Основатель Moychay Сергей Мойчай больше 20 лет путешествует по чайным регионам Китая и работает напрямую с фермерами и чайными мастерами. Он автор книги «География китайского чая».",
                 "Заранее разбираться не нужно. Покажите на банку – и чайный мастер заварит.",
             ],
@@ -816,7 +808,7 @@ PAGES = dict(
             net_h2="Part of the Moychay network",
             net=["Moychay Phuket is part of Moychay, an international tea culture company founded in 2009 in Amsterdam. Moychay works directly with tea farmers, tea factories and artisan workshops, places a strong emphasis on quality control and sells only natural loose-leaf tea.",
                  "For your business this means a range built on direct sourcing, and a local team on Boat Avenue that brews, serves and talks about tea every day."],
-            net_nums=[("2009", "Moychay was founded in Amsterdam"), ("700+", "suppliers, tea farmers and production partners"), ("6", "cities with Moychay tea clubs: Amsterdam, Barcelona, Yerevan, Tbilisi, Phuket and Atlanta")],
+            net_nums=[("2009", "Moychay was founded in Amsterdam"), ("700+", "suppliers, tea farmers and production partners"), (str(NET.COUNT), "cities with Moychay tea clubs: " + NET.city_list("en"))],
             who_h2="Who we work with",
             who_note="Directions we can discuss with your team. Every proposal is built around your venue and your guests.",
             segments=[
@@ -879,7 +871,7 @@ PAGES = dict(
             net_h2="Часть сети Moychay",
             net=["Moychay Phuket – часть Moychay, международной компании чайной культуры, основанной в 2009 году в Амстердаме. Moychay работает напрямую с чайными фермерами, фабриками и мастерскими, уделяет большое внимание контролю качества и продаёт только натуральный листовой чай.",
                  "Для вашего бизнеса это ассортимент, основанный на прямых поставках, и местная команда на Boat Avenue, которая каждый день заваривает, подаёт и рассказывает о чае."],
-            net_nums=[("2009", "год основания Moychay в Амстердаме"), ("700+", "поставщиков, чайных фермеров и производственных партнёров"), ("6", "городов с чайными клубами Moychay: Амстердам, Барселона, Ереван, Тбилиси, Пхукет и Атланта")],
+            net_nums=[("2009", "год основания Moychay в Амстердаме"), ("700+", "поставщиков, чайных фермеров и производственных партнёров"), (str(NET.COUNT), "городов с чайными клубами Moychay: " + NET.city_list("ru"))],
             who_h2="Для каких заведений",
             who_note="Направления, которые можно обсудить с вашей командой. Каждое предложение строим под заведение и ваших гостей.",
             segments=[

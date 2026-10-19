@@ -12,7 +12,7 @@ Moychay Phuket is part of Moychay, an international tea culture company founded 
 For your business this means a range built on direct sourcing, and a local team on Boat Avenue that brews, serves and talks about tea every day.
 - 2009 Moychay was founded in Amsterdam
 - 700+ suppliers, tea farmers and production partners
-- 6 cities with Moychay tea clubs: Amsterdam, Barcelona, Yerevan, Tbilisi, Phuket and Atlanta
+- 7 cities with Moychay tea clubs: Amsterdam, Barcelona, Yerevan, Tbilisi, Phuket, Atlanta and Utrecht
 
 ## Who we work with
 Directions we can discuss with your team. Every proposal is built around your venue and your guests.

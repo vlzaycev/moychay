@@ -9,11 +9,8 @@ Part of Moychay, an international tea culture company
 
 ## Your quiet place in Phuket
 You don't need to know anything about tea to come in. Guests book a ceremony, work over a matcha latte, or just want a quiet corner away from the beach.
-Concrete walls, calligraphy, a rattan peacock chair and shelves of teapots – most of them for sale. The tea master will help you choose.
-- 200+ teas to taste
-- Antique teaware – for sale, not decor
-- Board games and a reading corner
-- We speak Thai, English and Russian
+Inside: concrete walls, calligraphy, a rattan peacock chair and shelves of teapots.
+We have more than 200 teas, a collection of antique teaware, board games and a cosy reading corner. Some of the teaware is for sale – the tea master will help you choose. We speak English, Russian and Thai.
 
 ## Tea ceremonies
 
@@ -71,9 +68,8 @@ More about our teas
 
 ## Your favorite tea, delivered
 Explore Chinese tea, teaware and accessories at the official Moychay Phuket online store.
-- Delivery across Thailand – free on orders from ฿2,000
-- –10% 10% off your first order with code MOYCHAY
-Worldwide shipping with DHL
+Delivery across Thailand is free on orders from ฿2,000. International orders are shipped via DHL.
+Get 10% off your first order with code MOYCHAY.
 Shop tea online Order on WhatsApp
 
 ## Upcoming events
@@ -81,11 +77,11 @@ Tastings, ceremonies and evenings at the tea house every week. Open to everyone,
 Events on Instagram
 
 ## In Phuket since 2024
-Moychay Phuket is part of Moychay – an international tea culture company founded in 2009 and based in Amsterdam, with tea clubs in Barcelona, Yerevan, Tbilisi, Phuket and Atlanta. Moychay works directly with more than 700 suppliers, tea farmers and artisan workshops in China, Japan, Vietnam, Thailand and Georgia, and sells only natural loose-leaf tea – no artificially flavoured teas.
+Moychay Phuket is part of Moychay – an international tea culture company founded in 2009 and based in Amsterdam, with tea clubs in Barcelona, Yerevan, Tbilisi, Phuket, Atlanta and Utrecht. Moychay works directly with more than 700 suppliers, tea farmers and artisan workshops in China, Japan, Vietnam, Thailand and Georgia, and sells only natural loose-leaf tea – no artificially flavoured teas.
 The room is small: locals and travellers share one table, and the tea master is here to explain, not to upsell.
 - 2009 Moychay founded in Amsterdam
 - 700+ suppliers, tea farmers and workshops
-- 6 cities: Amsterdam, Barcelona, Yerevan, Tbilisi, Phuket and Atlanta
+- 7 cities: Amsterdam, Barcelona, Yerevan, Tbilisi, Phuket, Atlanta and Utrecht
 
 ## Contacts
 Address
