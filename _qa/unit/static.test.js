@@ -268,7 +268,47 @@ test('SBP payment note: RU home and contacts only, official mark unchanged, no c
     assert.doesNotMatch(block, /магазин|shop|moychay\.asia|комисси|курс/i, `${f}: only the tea house and Telegram orders`);
     assert.match(h, /\.pay-logo\{/, `${f}: styles`);
   }
-  // nowhere else: EN pages and other RU pages are untouched
-  const others = [...Object.values(PAGES), '404.html', 'privacy/index.html', 'ru/privacy/index.html'].filter((f) => !['ru/index.html', 'ru/contact/index.html'].includes(f));
-  for (const f of others) assert.doesNotMatch(read(f), /СБП|Систем[аы] быстрых платежей|\bSBP\b|class="pay/, f);
+  // EN never mentions SBP; on RU it sits once by each price list and once in the footer – not by every price
+  for (const f of Object.values(PAGES).filter((f) => !f.startsWith('ru/')).concat('privacy/index.html'))
+    assert.doesNotMatch(read(f), /СБП|Систем[аы] быстрых платежей|\bSBP\b|class="(pay|sbp)/, f);
+  const lines = (f) => (read(f).match(/<p class="sbp[ "]/g) || []).length;
+  const expect = { 'ru/index.html': 2, 'ru/ceremonies/index.html': 2, 'ru/events/index.html': 2, 'ru/matcha/index.html': 2,
+    'ru/wholesale/index.html': 2, 'ru/contact/index.html': 1, 'ru/tea/index.html': 1, 'ru/privacy/index.html': 1 };
+  for (const [f, n] of Object.entries(expect)) assert.equal(lines(f), n, `${f}: SBP lines (price list + footer)`);
+  for (const f of Object.keys(expect)) {
+    const h = read(f);
+    assert.match(h, /<div class="ftr-col ftr-contact">[\s\S]*?<p class="sbp sbp-ftr">.*?Принимаем рубли по СБП<small>Оплата в чайной<\/small>/, `${f}: footer`);
+    for (const m of h.match(/<p class="sbp[^"]*">[\s\S]*?<\/p>/g)) assert.doesNotMatch(m, /магазин|shop|онлайн|курс|комисси|₽|руб\.\s*\d/i, `${f}: in-store only`);
+  }
+  assert.match(read('ru/wholesale/index.html'), /<p class="sbp">.*В нашей чайной доступна оплата в рублях через СБП/);
+  assert.match(read('ru/ceremonies/index.html'), /<\/ul><p class="sbp">.*При оплате в чайной принимаем рубли через СБП/, 'once under the list of formats');
+  // the mark is stored once (build) and only inlined – no copies of the asset in the site
+  assert.ok(!fs.existsSync(path.join(ROOT, 'img/brand/sbp.svg')));
+  // prices stay in baht
+  assert.doesNotMatch(read('ru/ceremonies/index.html'), /\d\s?(₽|руб)/);
+});
+
+test('online shop block: short, terms from commerce.py, copyable promo code, no unconfirmed percentage', () => {
+  const cm = fs.readFileSync(path.join(ROOT, '_build/commerce.py'), 'utf8');
+  const enabled = /^PROMO_ENABLED = True/m.test(cm);
+  for (const [f, h2, cta, ship] of [['index.html', 'Your favorite tea, delivered', 'Shop tea online', 'free on orders from ฿2,000'],
+    ['ru/index.html', 'Любимый чай\u00a0– с доставкой', 'Купить чай онлайн', 'бесплатно от 2\u00a0000\u00a0฿'],
+    ['tea/index.html', null, 'Shop tea online', 'free on orders from ฿2,000'], ['ru/tea/index.html', null, 'Купить чай онлайн', 'бесплатно от 2\u00a0000\u00a0฿']]) {
+    const h = read(f);
+    const blk = h.slice(h.indexOf('<div class="shop-copy'), h.indexOf('</section>', h.indexOf('<div class="shop-copy')));
+    if (h2) assert.ok(blk.includes(`<h2 id="shop-h">${h2}</h2>`), `${f}: h2`);
+    assert.ok(blk.includes(ship), `${f}: shipping`);
+    assert.match(blk, /<button class="promo-code" type="button" data-copy="MOYCHAY"/, `${f}: copy button`);
+    assert.match(blk, /href="https:\/\/phuket\.moychay\.asia\/" target="_blank" rel="noopener" data-track="online_shop_click"/, `${f}: CTA keeps the conversion`);
+    assert.ok(blk.includes(cta), `${f}: CTA text`);
+    assert.equal((blk.match(/<li/g) || []).length, 2, `${f}: two benefits`);
+    assert.doesNotMatch(blk, /200|более 200|more than 200/, `${f}: no long list of shop facts`);
+    if (!enabled) assert.doesNotMatch(blk.replace(/<[^>]+>/g, " "), /\d+\s?%/, `${f}: no percentage until the discount is confirmed`);
+    else assert.match(blk, /–10%/);
+  }
+  // Cha gets the same terms from the same source
+  const kb = read('_content/assistant/site/payment-and-offers.md');
+  assert.match(kb, /SBP is NOT available in the online shop/);
+  assert.match(kb, /2000 THB/);
+  assert.ok(enabled ? /10% off/.test(kb) : /never state a percentage/.test(kb));
 });

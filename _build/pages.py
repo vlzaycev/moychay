@@ -8,8 +8,10 @@ the block is simply not rendered until it is filled in below.
 """
 from html import escape
 
+import commerce as CM
+
 ARROW = '<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg>'
-SHOP = "https://phuket.moychay.asia/"
+SHOP = CM.SHOP_URL
 
 # ── Tea master: fill in to show the block on /ceremonies/ (and /ru/ceremonies/) ──
 # Leave as None until the real name, photo and biography are provided.
@@ -93,6 +95,33 @@ def tlink(href, label, ext=False, track=""):
     if track:
         attrs += f' data-track="{track[0]}" data-place="{track[1]}"'
     return f'<a class="tlink" href="{href}"{attrs}>{label}{ARROW}</a>'
+
+
+def shop_copy(L, place, h2=None, order=True):
+    """The online-shop block (home, /tea/): headline, one line about the shop, two benefits, the promo code
+    (copy button), DHL as a quiet extra line, CTA. All terms come from commerce.py."""
+    lang = L["lang"]
+    code = (f'<button class="promo-code" type="button" data-copy="{CM.PROMO_CODE}" data-done="{L["shop_copied"]}" '
+            f'aria-label="{L["shop_copy_l"]}: {CM.PROMO_CODE}">{CM.PROMO_CODE}<svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg></button>')
+    if CM.PROMO_ENABLED:
+        badge = f'<span class="promo-badge">–{CM.PROMO_PERCENT}%</span>'
+        promo = L["shop_promo_on"].format(p=CM.PROMO_PERCENT, code=code)
+    else:   # the size of the discount is not confirmed yet: no percentage anywhere
+        badge = '<span class="promo-badge" aria-hidden="true">%</span>'
+        promo = L["shop_promo_off"].format(code=code)
+    ship = L["shop_ship"].format(thb=CM.thb(CM.FREE_SHIPPING_THB, lang))
+    world = f'\n      <p class="shop-note">{L["shop_world"]}</p>' if CM.WORLDWIDE_DHL else ""
+    order_link = (f'\n        <a class="tlink" href="{L["msg_order_url"]}" target="_blank" rel="noopener" data-track="{L["msg_event"]}" data-place="delivery">'
+                  f'<svg class="bi" aria-hidden="true"><use href="#{L["msg_icon"]}"/></svg>{L["deliv_cta"]}</a>') if order else ""
+    return f'''<h2 id="shop-h">{h2 or L["shop_h2"]}</h2>
+      <p class="lead">{L["shop_lead"]}</p>
+      <ul class="perks">
+        <li><span class="perk-ic"><svg class="ico" aria-hidden="true"><use href="#i-truck"/></svg></span><span>{ship}</span></li>
+        <li class="perk-promo">{badge}<span>{promo} <span class="promo-ok" role="status" aria-live="polite"></span></span></li>
+      </ul>{world}
+      <div class="shop-act">
+        <a class="btn btn-shop" href="{SHOP}" target="_blank" rel="noopener" data-track="online_shop_click" data-place="{place}">{L["shop_cta"]}{ARROW}</a>{order_link}
+      </div>'''
 
 
 def table_rows(head, rows):
@@ -208,7 +237,7 @@ def ceremonies(L, P, cfg):
       <h2 class="rv">{P["formats_h2"]}</h2>
       <ul class="menu">
 {chr(10).join(fm)}
-      </ul>
+      </ul>{L["sbp_prices"]}
       <div class="cer-foot">
         <p>{P["formats_note"]}</p>
 {btn_msg(L, "ceremonies_formats", L["msg_book_url"], P["cta"])}
@@ -273,12 +302,7 @@ def tea(L, P, cfg):
   <div class="wrap">
     {img("interior/4_shop", L["alt_4shop"], "(min-width:900px) 56vw, 100vw", "shop-ph", w=834, h=1280)}
     <div class="shop-copy rv">
-      <h2 id="shop-h">{P["shop_h2"]}</h2>
-      <p class="lead">{P["shop_text"]}</p>
-      <p class="shop-note">{L["shop_note"]}</p>
-      <div class="shop-act">
-        <a class="btn btn-shop" href="{SHOP}" target="_blank" rel="noopener" data-track="online_shop_click" data-place="tea_page">{P["shop_cta"]}{ARROW}</a>
-      </div>
+      {shop_copy(L, "tea_page", h2=P["shop_h2"], order=False)}
     </div>
   </div>
 </section>'''
@@ -294,7 +318,7 @@ def matcha(L, P, cfg):
         lis = "\n".join(f'''        <li class="menu-i"><h3>{m[L["lang"]][0]}</h3><p class="menu-p">{m.get("price", "")}</p>
           <p class="menu-d">{m[L["lang"]][1]}</p></li>''' for m in MATCHA_MENU)
         menu = f'\n      <ul class="menu">\n{lis}\n      </ul>'
-    drinks = split(P["drinks_h2"], "      " + info(rows) + menu, sid="drinks")
+    drinks = split(P["drinks_h2"], "      " + info(rows) + menu + L["sbp_prices"], sid="drinks")
     what = split(P["what_h2"], paras(P["what"]) + read_more(L, ["matcha-vs-green-tea"])
                  + f'\n      <p class="muted more">{P["biz"]} <a class="inl" href="{L["lp"]}wholesale/#supply">{P["biz_link"]}</a></p>', "sec", "about-matcha")
     stay = f'''<section class="about" id="stay">
@@ -328,7 +352,7 @@ def events(L, P, cfg):
     </div>
     <div class="ev-list" id="evRow" data-limit="40" data-ld aria-live="polite">
       <div class="evc evc-skel"></div><div class="evc evc-skel"></div><div class="evc evc-skel"></div>
-    </div>
+    </div>{L["sbp_prices"]}
   </div>
 </section>'''
     join = split(P["join_h2"], "      " + info(P["join"]) + "\n      <div class=\"actions more\">\n"
@@ -439,7 +463,7 @@ def wholesale(L, P, cfg):
     <div>
       <h2 class="rv">{P["form_h2"]}</h2>
       <p class="muted">{P["form_lead"]}</p>
-      <div class="muted more"><p>{P["direct"]}</p>{L["find_call"].replace('data-place="find"', 'data-place="wholesale"')}</div>
+      <div class="muted more"><p>{P["direct"]}</p>{L["find_call"].replace('data-place="find"', 'data-place="wholesale"')}</div>{L["sbp_wholesale"]}
     </div>
   {form(L, "wholesale", cfg["cfg_form_endpoint"], cfg["cfg_turnstile_sitekey"])}
   </div>

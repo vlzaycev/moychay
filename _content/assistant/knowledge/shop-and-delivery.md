@@ -14,7 +14,7 @@ title: Online shop and delivery (checked against phuket.moychay.asia on 17.10.20
 - Below 2000 THB, the delivery cost is shown at checkout. (The shop's policy page currently has contradictory numbers, so do not quote a fee.)
 - International shipping is available ("we ship internationally with Track and Trace"). The owner states that worldwide shipping goes with DHL.
 - Delivery times are not confirmed here: the shop shows them at checkout; orders are usually processed within 1-3 working days (shop shipping policy). Do not promise a delivery date.
-- Discount: promo code MOYCHAY gives a discount in the online shop (owner). The size of the discount is not published – do not state a percentage.
+- Discount and payment terms: see the document payment-and-offers (generated from the site's settings) – it is the only source for the promo code and SBP.
 - Orders can also be placed by message: WhatsApp https://wa.me/66817959110 (English pages) or Telegram https://t.me/moychay_phuket.
 
 # Teaware at the tea house

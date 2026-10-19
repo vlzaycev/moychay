@@ -70,9 +70,11 @@ Caffeine-free infusions of herbs, flowers and fruit – calming or energizing.
 More about our teas
 
 ## Your favorite tea, delivered
-Explore our selection of tea and teaware. Free delivery across Thailand on online orders over 2000฿, worldwide shipping with DHL – and a discount with the promo code MOYCHAY.
-phuket.moychay.asia is the official online shop of Moychay Phuket: more than 200 teas, teaware and accessories.
-Visit online shop Order on WhatsApp
+Explore Chinese tea, teaware and accessories at the official Moychay Phuket online store.
+- Delivery across Thailand – free on orders from ฿2,000
+- A discount with code MOYCHAY
+Worldwide shipping with DHL
+Shop tea online Order on WhatsApp
 
 ## Upcoming events
 Tastings, ceremonies and evenings at the tea house every week. Open to everyone, no tea background needed.

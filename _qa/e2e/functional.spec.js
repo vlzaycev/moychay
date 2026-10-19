@@ -75,7 +75,7 @@ for (const p of PAGES) {
       expect(order.indexOf('events')).toBe(order.indexOf('delivery') + 1);
       const sec = page.locator('#delivery');
       await expect(sec.locator('h2')).toHaveText(p.lang === 'en' ? 'Your favorite tea, delivered' : 'Любимый чай\u00a0– с доставкой');
-      await expect(sec).toContainText('2000฿');
+      await expect(sec).toContainText(p.lang === 'en' ? '฿2,000' : '2\u00a0000\u00a0฿');
       await expect(sec.locator('a.btn')).toHaveCount(1);
       const links = page.locator('a[data-track="online_shop_click"]');
       const places = await links.evaluateAll(as => as.map(a => a.dataset.place).sort());
@@ -224,3 +224,19 @@ for (const p of PAGES) {
     });
   });
 }
+
+test('promo code: one tap copies MOYCHAY and says so; keyboard reachable', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'clipboard permissions are a Chromium feature in Playwright');
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+  for (const [lp, done] of [['/', 'Copied'], ['/ru/', 'Скопировано']]) {
+    await page.goto(lp);
+    const b = page.locator('#delivery .promo-code');
+    await b.scrollIntoViewIfNeeded();
+    await b.click();
+    await expect(page.locator('#delivery .promo-ok')).toHaveText(done);
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('MOYCHAY');
+    await expect(b).toHaveAttribute('type', 'button');
+    const box = await b.boundingBox();
+    expect(box.height).toBeGreaterThanOrEqual(24);
+  }
+});

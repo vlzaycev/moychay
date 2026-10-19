@@ -614,9 +614,21 @@ figure{margin:0}
 .shop-ph img{object-position:50% 72%}
 .shop-copy h2{max-width:12ch}
 .shop-copy .lead{color:var(--muted-l);max-width:42ch}
+.perks{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:14px;max-width:48ch}
+.perks li{display:flex;align-items:center;gap:12px;font-size:17px;line-height:1.4;color:var(--ink)}
+.perk-ic{flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:rgba(55,90,60,.1);color:var(--mc-green-dark)}
+.perk-ic .ico{width:18px;height:18px}
+.promo-badge{flex:none;min-width:34px;height:34px;padding:0 8px;display:grid;place-items:center;border-radius:999px;background:var(--mc-green-dark);color:#fff;font:600 14px/1 var(--head),sans-serif;letter-spacing:-.01em}
+.promo-code{display:inline-flex;align-items:center;gap:6px;margin:2px 2px;padding:3px 10px;border:1px dashed var(--mc-green-dark);border-radius:8px;background:rgba(255,255,255,.45);
+  color:var(--mc-green-dark);font:600 15px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.04em;cursor:pointer;vertical-align:baseline}
+.promo-code .ico{width:14px;height:14px}
+.promo-code:hover{background:#fff}
+.promo-code:focus-visible{outline:2px solid var(--mc-green-dark);outline-offset:2px}
+.promo-ok{font-size:14px;color:var(--mc-green-dark);white-space:nowrap}
+.promo-ok:empty{display:none}
 .shop-act{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin-top:32px}
 .shop-act .btn .ico{width:16px;height:16px;margin-left:2px}
-.shop-note{display:flex;align-items:center;gap:10px;margin:22px 0 0;font-size:var(--fs-small);color:var(--muted-l)}
+.shop-note{display:flex;align-items:center;gap:10px;margin:18px 0 0;font-size:var(--fs-small);color:var(--muted-l)}
 .shop-note::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--mc-green)}
 @media (max-width:599px){.shop-act .btn{width:100%}}
 @media (min-width:900px){
@@ -800,6 +812,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
   <!-- Feather icons (MIT) -->
   <symbol id="i-cart" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></symbol>
   <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
@@ -936,10 +950,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <figure class="ph shop-ph"><img src="img/interior/4_shop-1000.webp" srcset="img/interior/4_shop-700.webp 700w, img/interior/4_shop-1000.webp 1000w, img/interior/4_shop-1400.webp 1400w" sizes="(min-width:900px) 56vw, 100vw" loading="lazy" decoding="async" width="834" height="1280" alt="Round tea table set with teaware and books"></figure>
     <div class="shop-copy rv">
       <h2 id="shop-h">Your favorite tea, delivered</h2>
-      <p class="lead">Explore our selection of tea and teaware. Free delivery across Thailand on online orders over 2000฿, worldwide shipping with DHL – and a discount with the promo code MOYCHAY.</p>
-      <p class="shop-note">phuket.moychay.asia is the official online shop of Moychay Phuket: more than 200 teas, teaware and accessories.</p>
+      <p class="lead">Explore Chinese tea, teaware and accessories at the official Moychay Phuket online store.</p>
+      <ul class="perks">
+        <li><span class="perk-ic"><svg class="ico" aria-hidden="true"><use href="#i-truck"/></svg></span><span>Delivery across Thailand – free on orders from ฿2,000</span></li>
+        <li class="perk-promo"><span class="promo-badge" aria-hidden="true">%</span><span>A discount with code <button class="promo-code" type="button" data-copy="MOYCHAY" data-done="Copied" aria-label="Copy the promo code: MOYCHAY">MOYCHAY<svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg></button> <span class="promo-ok" role="status" aria-live="polite"></span></span></li>
+      </ul>
+      <p class="shop-note">Worldwide shipping with DHL</p>
       <div class="shop-act">
-        <a class="btn btn-shop" href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="shop_section">Visit online shop<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a class="btn btn-shop" href="https://phuket.moychay.asia/" target="_blank" rel="noopener" data-track="online_shop_click" data-place="shop_section">Shop tea online<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
         <a class="tlink" href="https://wa.me/66817959110?text=Hi%21%20I%27d%20like%20to%20order%20tea%20with%20delivery" target="_blank" rel="noopener" data-track="whatsapp" data-place="delivery"><svg class="bi" aria-hidden="true"><use href="#i-wa"/></svg>Order on WhatsApp</a>
       </div>
     </div>
@@ -1108,6 +1126,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.addEventListener('click', function (e) {
     var a = e.target.closest('[data-track]');
     if (a && window.track) window.track(a.getAttribute('data-track'), a.getAttribute('data-place'), a.href);
+  });
+
+  /* Promo code: one tap copies it (no analytics event – the shop click stays the conversion) */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-copy]');
+    if (!b) return;
+    var code = b.getAttribute('data-copy'), ok = b.parentNode.querySelector('.promo-ok');
+    var done = function () { if (ok) { ok.textContent = b.getAttribute('data-done'); setTimeout(function () { ok.textContent = ''; }, 2500); } };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done, function () {});
+    else { var t = document.createElement('textarea'); t.value = code; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (x) {} t.remove(); }
   });
 
   /* Header + sticky bar */

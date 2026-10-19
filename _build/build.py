@@ -16,6 +16,7 @@ import re
 import shutil
 
 import blog as B
+import commerce as CM
 import pages as PG
 from pages import BUILDERS, PAGES, SLUGS
 from urllib.parse import quote
@@ -168,16 +169,35 @@ COMMON = dict(maps=MAPS, phone=PHONE, phone_txt=PHONE_TXT, email=EMAIL,
                                clink(f"mailto:{EMAIL}", EMAIL, "i-mail", "email_click", "find", ext=False, stroke=True)), head_font="Geologica", font_families=["Geologica", "Inter"])
 
 # ── EN ───────────────────────────────────────────────────────────
+_SBP_SVG = None
+
+
+def sbp_svg():
+    """The official SBP mark (_build/assets/sbp.svg), inlined unchanged – colours and proportions as published.
+    Decorative: the text next to it always names SBP."""
+    global _SBP_SVG
+    if _SBP_SVG is None:
+        svg = open(os.path.join(HERE, "assets", "sbp.svg"), encoding="utf-8").read()
+        svg = svg[svg.index("<svg"):].strip().replace(
+            '<svg width="97" height="120" viewBox="0 0 97 120" fill="none" xmlns="http://www.w3.org/2000/svg">',
+            '<svg class="pay-logo" viewBox="0 0 97 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">', 1)
+        _SBP_SVG = "".join(line.strip() for line in svg.splitlines())
+    return _SBP_SVG
+
+
 def sbp_note():
-    """RU only: payment in roubles via SBP at the tea house and for tea ordered in Telegram (not the online shop).
-    The official SBP mark (_build/assets/sbp.svg) is inlined unchanged – colours and proportions as published."""
-    svg = open(os.path.join(HERE, "assets", "sbp.svg"), encoding="utf-8").read()
-    svg = svg[svg.index("<svg"):].strip().replace(
-        '<svg width="97" height="120" viewBox="0 0 97 120" fill="none" xmlns="http://www.w3.org/2000/svg">',
-        '<svg class="pay-logo" viewBox="0 0 97 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">', 1)
-    svg = "".join(line.strip() for line in svg.splitlines())
-    return (f'<div class="pay"><p><b>{svg}Принимаем оплату по СБП</b>'
-            f'<span>В нашей чайной и при заказе чая через Telegram можно оплатить покупку в рублях через Систему быстрых платежей.</span></p></div>')
+    """RU contacts (home, /ru/contact/): payment in roubles via SBP at the tea house and for tea ordered in Telegram."""
+    tg = " и при заказе чая через Telegram" if CM.SBP_TELEGRAM_ORDERS else ""
+    return (f'<div class="pay"><p><b>{sbp_svg()}Принимаем оплату по СБП</b>'
+            f'<span>В нашей чайной{tg} можно оплатить покупку в рублях через Систему быстрых платежей.</span></p></div>')
+
+
+def sbp_line(text, sub="", cls=""):
+    """One compact line with the mark – under a price list, in the footer, on the wholesale page. RU only."""
+    if not CM.SBP_IN_STORE:
+        return ""
+    sub = f"<small>{sub}</small>" if sub else ""
+    return f'<p class="sbp{" " + cls if cls else ""}">{sbp_svg()}<span>{text}{sub}</span></p>'
 
 
 # styles of the SBP note – only on pages that show it (RU), so the EN pages stay byte-for-byte unchanged
@@ -189,7 +209,13 @@ PAY_CSS = """
 .pay-logo{width:15px;height:18px;flex:none;display:block}
 .pay span{display:block;margin-top:2px;padding-left:25px}
 .dark .pay b{color:var(--on-dark)}
-.find .pay p{font-size:14px;line-height:1.45;color:var(--on-dark-2)}"""
+.find .pay p{font-size:14px;line-height:1.45;color:var(--on-dark-2)}
+.sbp{display:flex;align-items:center;gap:10px;margin:18px 0 0;font-size:15px;line-height:1.45;color:var(--muted-l)}
+.sbp .pay-logo{width:15px;height:18px}
+.dark .sbp,.wood .sbp{color:var(--muted-d)}
+.sbp small{display:block;font-size:13px;color:var(--muted-d)}
+.ftr .sbp{margin:12px 0 0;color:var(--on-dark-2);font-size:inherit}
+.ftr .sbp span{display:block}"""
 
 
 EN = dict(
@@ -255,9 +281,12 @@ EN = dict(
     tea_intro="No need to know any of this before you come. Point at a jar, and the tea master will brew it for you.",
     tea_items=tea(TEA_EN), tea_list=TEA_EN,
     shop_h2="Your favorite tea, delivered",
-    shop_text="Explore our selection of tea and teaware. Free delivery across Thailand on online orders over 2000฿, worldwide shipping with DHL – and a discount with the promo code MOYCHAY.",
-    shop_cta="Visit online shop",
-    shop_note="phuket.moychay.asia is the official online shop of Moychay Phuket: more than 200 teas, teaware and accessories.",
+    shop_lead="Explore Chinese tea, teaware and accessories at the official Moychay Phuket online store.",
+    shop_ship="Delivery across Thailand – free on orders from {thb}",
+    shop_promo_on="{p}% off with code {code}", shop_promo_off="A discount with code {code}",
+    shop_world="Worldwide shipping with DHL", shop_copy_l="Copy the promo code", shop_copied="Copied",
+    shop_cta="Shop tea online",
+    sbp_prices="", sbp_footer="", sbp_wholesale="",
     deliv_cta="Order on WhatsApp",
     ev_h2="Upcoming events",
     ev_intro="Tastings, ceremonies and evenings at the tea house every week. Open to everyone, no tea background needed.",
@@ -384,9 +413,14 @@ RU = dict(
     tea_intro="Заранее разбираться не нужно. Покажите на банку – и чайный мастер заварит.",
     tea_items=tea(TEA_RU), tea_list=TEA_RU,
     shop_h2="Любимый чай – с доставкой",
-    shop_text="Выбирайте китайский чай, посуду и аксессуары в нашем интернет-магазине. Бесплатная доставка по Таиланду при онлайн-заказе от 2000฿, по всему миру отправляем через DHL, а по промокоду MOYCHAY – скидка.",
-    shop_cta="Перейти в магазин",
-    shop_note="phuket.moychay.asia – официальный интернет-магазин Moychay Phuket: более 200 сортов чая, посуда и аксессуары.",
+    shop_lead="Китайский чай, посуда и аксессуары в официальном интернет-магазине Moychay Phuket.",
+    shop_ship="Доставка по всему Таиланду – бесплатно от {thb}",
+    shop_promo_on="Скидка {p}% по промокоду {code}", shop_promo_off="Скидка по промокоду {code}",
+    shop_world="По всему миру – доставка DHL", shop_copy_l="Скопировать промокод", shop_copied="Скопировано",
+    shop_cta="Купить чай онлайн",
+    sbp_prices=sbp_line("При оплате в чайной принимаем рубли через СБП"),
+    sbp_footer=sbp_line("Принимаем рубли по СБП", "Оплата в чайной", "sbp-ftr"),
+    sbp_wholesale=sbp_line("В нашей чайной доступна оплата в рублях через СБП"),
     deliv_cta="Заказать в Telegram",
     ev_h2="Ближайшие мероприятия",
     ev_intro="Каждую неделю – дегустации, церемонии и вечера в чайной. Приходить может любой, опыт не нужен.",
@@ -502,6 +536,7 @@ def home_page(data):
                "alternateName": ["Moychay Phuket tea house", "Мойчай Пхукет"], "inLanguage": ["en", "ru"]}
     return {**data,
             "main": open(os.path.join(HERE, "pages", "home.html"), encoding="utf-8").read(),
+            "shop_copy": PG.shop_copy(data, "shop_section"),
             "canonical": url(lang), "url_en": url("en"), "url_ru": url("ru"),
             "home_href": "#home", "nb": "", "lp": "/ru/" if lang == "ru" else "/",
             "href_en": data["root_href"] if lang == "en" else "../", "href_ru": "ru/" if lang == "en" else "./",
@@ -569,6 +604,7 @@ def render(data, out="404.html"):
     values["font_faces"], values["font_preload"] = fonts(data["font_families"], data["font_preload_files"], data["root"])
     values.update(cha_values(data))
     values.setdefault("pay_row", "")
+    values.setdefault("sbp_footer", "")
     values["js_i18n"] = json.dumps({**data["js"], "root": data["root"]}, ensure_ascii=False)
     px = CONFIG["cfg_pixel"]
     values["ym_noscript"] = (f'<noscript><div><img src="https://mc.yandex.ru/watch/{CONFIG["cfg_ym"]}" style="position:absolute; left:-9999px;" alt=""></div></noscript>'
@@ -579,8 +615,8 @@ def render(data, out="404.html"):
         values["hreflang"] = hreflang(values.get("url_en"), values.get("url_ru"))
     values.setdefault("ftr_blog_link", footer_blog(data))
     html = html.replace("{{main}}", values.pop("main", ""))
-    # SBP note styles only where the note is on the page (RU home and contacts)
-    html = html.replace("{{pay_css}}", PAY_CSS if 'class="pay"' in html or ('{{pay_row}}' in html and values["pay_row"]) else "")
+    # SBP styles only on pages that show SBP (RU): EN pages carry none of it
+    html = html.replace("{{pay_css}}", PAY_CSS if re.search(r'class="(pay|sbp)\b', html) or ('{{pay_row}}' in html and values["pay_row"]) or ('{{sbp_' in html and values.get("sbp_footer")) else "")
     for _ in range(2):   # second pass: placeholders inside inserted values ({{lp}}, {{root}}…)
         for k, v in values.items():
             if isinstance(v, str):
@@ -870,6 +906,8 @@ def page_404():
     ru = region["ru"][1]
     head, rest = html.split("</head>", 1)
     head = re.sub(r"<title>.*?</title>", f"<title>{NF['en']['title']}</title>", head, flags=re.S)
+    if 'class="sbp' in ru and PAY_CSS not in head:      # the RU copy shows SBP in its footer
+        head = head.replace(".master-role span{display:block;font-weight:400}", ".master-role span{display:block;font-weight:400}" + PAY_CSS, 1)
     head = re.sub(r'<meta name="description"[^>]*>', '<meta name="robots" content="noindex">', head)
     head = re.sub(r'\s*<link rel="(canonical|alternate)"[^>]*>', "", head)
     head = re.sub(r'\s*<meta (property|name)="(og|twitter):[^"]*"[^>]*>', "", head)

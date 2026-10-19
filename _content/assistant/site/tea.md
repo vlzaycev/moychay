@@ -62,6 +62,8 @@ Clay teapots, porcelain cups and antique teaware on our shelves are a real colle
 The tea master will help you choose a teapot for the tea you like.
 
 ## Buy tea online
-Tea and teaware from our online shop, delivered anywhere in Thailand – free on online orders over 2000฿. We ship worldwide with DHL, and the promo code MOYCHAY gives a discount.
-phuket.moychay.asia is the official online shop of Moychay Phuket: more than 200 teas, teaware and accessories.
+Explore Chinese tea, teaware and accessories at the official Moychay Phuket online store.
+- Delivery across Thailand – free on orders from ฿2,000
+- A discount with code MOYCHAY
+Worldwide shipping with DHL
 Shop tea online

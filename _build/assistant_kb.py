@@ -98,6 +98,8 @@ def _clean(s):
 
 
 def extract(html):
+    # the promo code is a copy button on the page; for the assistant it is just the code
+    html = re.sub(r'<button class="promo-code"[^>]*>([A-Z0-9]+)<svg.*?</button>', r"\1", html, flags=re.S)
     p = _Main()
     p.feed(html)
     p.flush()
@@ -122,4 +124,8 @@ def build(root, site_url):
                f"source: {site_url}{url}\n---\n" + body)
         with open(os.path.join(out_dir, f"{name}.md"), "w", encoding="utf-8") as f:
             f.write(doc)
+    # payment and online-shop terms: one source (commerce.py) for the pages and for Cha
+    import commerce
+    with open(os.path.join(out_dir, "payment-and-offers.md"), "w", encoding="utf-8") as f:
+        f.write(commerce.knowledge_md())
     print("built assistant knowledge from", len(PAGES), "pages")
