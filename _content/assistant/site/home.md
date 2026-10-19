@@ -29,7 +29,6 @@ Price on request
 Up to 30 guests, at the tea house or your venue
 Birthdays, team events and gatherings.
 Also on the menu: non-alcoholic matcha lattes and tonics and kombucha on tap, from 250฿, to stay or to go. More about matcha
-Not sure where to start? Ask the tea master – from a light green tea to an aged pu-erh.
 Book a ceremony on WhatsApp All ceremony formats
 
 ## Our teas

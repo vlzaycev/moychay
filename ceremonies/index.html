@@ -311,8 +311,7 @@ figure{margin:0}
 .menu-p small{font-family:Inter,sans-serif;font-size:15px;font-weight:400;color:var(--muted-l)}
 .menu-m{margin:0;font-size:15px;font-weight:500;color:var(--clay-text)}
 .menu-d{margin:0;font-size:16px;color:var(--muted-l);max-width:52ch}
-.cer-foot{display:grid;gap:18px;margin-top:28px}
-.cer-foot p{margin:0;color:var(--muted-l);max-width:46ch}
+.cer-foot{display:flex;margin-top:28px}
 @media (max-width:599px){.cer-foot .btn{width:100%}}
 @media (min-width:600px){
   .menu-i{grid-template-columns:1fr auto;column-gap:32px}
@@ -322,7 +321,6 @@ figure{margin:0}
 @media (min-width:900px){
   .cer .wrap{grid-template-columns:5fr 7fr;gap:72px;align-items:start}
   .cer-ph{margin:0 0 0 calc(var(--bleed) * -1);aspect-ratio:auto;height:clamp(520px,56vw,720px);position:sticky;top:96px}
-  .cer-foot{grid-template-columns:1fr auto;align-items:center;gap:32px}
 }
 
 /* Our teas */
@@ -790,7 +788,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </li>
       </ul>
       <div class="cer-foot">
-        <p>Not sure where to start? Ask the tea master – from a light green tea to an aged pu-erh.</p>
         <a class="btn" href="https://wa.me/66817959110?text=Hi%21%20I%27d%20like%20to%20book%20a%20tea%20ceremony" target="_blank" rel="noopener" data-track="whatsapp" data-place="ceremonies_formats"><svg class="bi" aria-hidden="true"><use href="#i-wa"/></svg>Book a tea ceremony</a>
       </div>
     </div>

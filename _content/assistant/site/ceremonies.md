@@ -28,7 +28,6 @@ Up to 30 guests, at the tea house or your venue, booking required
 Birthdays, team events and gatherings.
 Tell us the date, the number of guests and the place – we'll reply with the details and the price.
 Ask about a group ceremony
-Not sure where to start? Ask the tea master – from a light green tea to an aged pu-erh.
 Book a tea ceremony
 
 ## Which format to choose

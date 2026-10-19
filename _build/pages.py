@@ -231,7 +231,6 @@ def ceremonies(L, P, cfg):
 {chr(10).join(fm)}
       </ul>{L["sbp_prices"]}
       <div class="cer-foot">
-        <p>{P["formats_note"]}</p>
 {btn_msg(L, "ceremonies_formats", L["msg_book_url"], P["cta"])}
       </div>
     </div>
@@ -515,7 +514,6 @@ PAGES = dict(
                      terms="Tell us the date, the number of guests and the place – we'll reply with the details and the price.",
                      book="Ask about a group ceremony"),
             ],
-            formats_note="Not sure where to start? Ask the tea master – from a light green tea to an aged pu-erh.",
             m_h2="Meet our tea master", m_exp="Experience", m_appr="Approach to the ceremony",
             how_h2="How a ceremony goes",
             how=[
@@ -568,7 +566,6 @@ PAGES = dict(
                      terms="Напишите дату, количество гостей и место – ответим с деталями и ценой.",
                      book="Узнать о групповой церемонии"),
             ],
-            formats_note="Не знаете, с чего начать? Спросите чайного мастера – подберёт что-то от лёгкого зелёного до выдержанного пуэра.",
             m_h2="Наш чайный мастер", m_exp="Опыт", m_appr="Подход к церемонии",
             how_h2="Как проходит церемония",
             how=[
