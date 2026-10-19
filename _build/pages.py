@@ -639,7 +639,6 @@ PAGES = dict(
                 "The tea master will help you choose a teapot for the tea you like.",
             ],
             shop_h2="Buy tea online",
-            shop_text="Tea and teaware from our online shop, delivered anywhere in Thailand – free on online orders over 2000฿. We ship worldwide with DHL, and the promo code MOYCHAY gives a discount.",
         ),
         ru=dict(
             title="Китайский чай на Пхукете – Пуэр, улун и другие сорта",
@@ -674,7 +673,6 @@ PAGES = dict(
                 "Чайный мастер поможет подобрать чайник под ваш чай.",
             ],
             shop_h2="Купить чай онлайн",
-            shop_text="Чай и посуда из нашего интернет-магазина с доставкой по всему Таиланду – бесплатно при онлайн-заказе от 2000฿. По всему миру отправляем через DHL, а по промокоду MOYCHAY – скидка.",
         ),
     ),
     matcha=dict(

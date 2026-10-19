@@ -72,7 +72,7 @@ More about our teas
 ## Your favorite tea, delivered
 Explore Chinese tea, teaware and accessories at the official Moychay Phuket online store.
 - Delivery across Thailand – free on orders from ฿2,000
-- A discount with code MOYCHAY
+- –10% 10% off your first order with code MOYCHAY
 Worldwide shipping with DHL
 Shop tea online Order on WhatsApp
 
@@ -107,5 +107,5 @@ Not for a walk-in tasting – just come by. The gong fu cha ceremony and group e
 No. Most guests are trying a tea ceremony for the first time.
 Yes – it's a real collection for sale, not decoration.
 Yes, on site at Boat Avenue.
-Yes. Online orders over 2000฿ are delivered free anywhere in Thailand, and we ship worldwide with DHL. Order in our online shop – the promo code MOYCHAY gives a discount – or message us.
+Yes. Online orders over 2000฿ are delivered free anywhere in Thailand, and we ship worldwide with DHL. Order in our online shop – the promo code MOYCHAY gives 10% off your first order – or message us.
 Yes – non-alcoholic matcha drinks and kombucha, to stay or to go.

@@ -11,4 +11,4 @@ title: Payment at the tea house and online shop offers (generated from _build/co
 - Official online shop: https://phuket.moychay.asia/
 - Free delivery across Thailand on online orders from 2000 THB.
 - Worldwide shipping with DHL.
-- Promo code MOYCHAY gives a discount in the online shop. The size of the discount is not published – never state a percentage or conditions.
+- Promo code MOYCHAY gives 10% off the first order in the online shop. No other conditions are published (minimum order, end date, combining with other offers) – do not invent any; the shop applies the code at checkout.

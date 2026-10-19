@@ -96,8 +96,8 @@ UTM-метки ставятся до якоря: `https://teaphuket.com/ru/?utm_
 Из него собираются блок «Любимый чай – с доставкой» (главная и /tea/, EN/RU), подписи СБП на русских страницах
 и документ `payment-and-offers` в базе знаний Ча.
 
-- **Скидка 10%:** `PROMO_ENABLED = False`, пока владелец не подтвердит размер и условия. Включить:
-  `PROMO_ENABLED = True` → `python3 _build/build.py` → Push → в `_server/chat-worker` выполнить `npm run kb:push`
-  (чтобы Ча тоже начал называть 10%). Выключить – так же, `False`.
+- **Скидка 10% на первый заказ:** включена 19.10.2026 (`PROMO_ENABLED = True`, `PROMO_FIRST_ORDER = True`). Выключить после окончания акции:
+  `PROMO_ENABLED = False` → `python3 _build/build.py` → Push → в `_server/chat-worker` выполнить `npm run kb:push`
+  (чтобы Ча перестал называть 10%). Включить снова – так же, `True`.
 - **СБП:** только RU и только оплата в чайной (плюс заказы через Telegram – `SBP_TELEGRAM_ORDERS`). Логотип –
   `_build/assets/sbp.svg` (официальный, без изменений), встраивается в страницу сборкой.
