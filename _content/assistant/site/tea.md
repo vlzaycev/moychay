@@ -63,6 +63,6 @@ The tea master will help you choose a teapot for the tea you like.
 
 ## Buy tea online
 Explore Chinese tea, teaware and accessories at the official Moychay Phuket online store.
-Delivery across Thailand is free on orders from ฿2,000. International orders are shipped via DHL.
+Delivery across Thailand is free on orders from 2000฿. International orders are shipped via DHL.
 Get 10% off your first order with code MOYCHAY.
 Shop tea online

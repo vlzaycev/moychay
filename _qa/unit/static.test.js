@@ -281,10 +281,10 @@ test('online shop block: plain sentences from commerce.py, code as bold text, no
   const cm = fs.readFileSync(path.join(ROOT, '_build/commerce.py'), 'utf8');
   const enabled = /^PROMO_ENABLED = True/m.test(cm);
   for (const [f, h2, cta, ship, promo] of [
-    ['index.html', 'Your favorite tea, delivered', 'Shop tea online', 'Delivery across Thailand is free on orders from ฿2,000. International orders are shipped via DHL.', 'Get 10% off your first order with code <b>MOYCHAY</b>.'],
-    ['ru/index.html', 'Любимый чай – с доставкой', 'Купить чай онлайн', 'Доставка по Таиланду – бесплатно от 2 000 ฿. Международные заказы отправляем через DHL.', 'Скидка 10% на первый заказ по промокоду <b>MOYCHAY</b>.'],
-    ['tea/index.html', null, 'Shop tea online', 'Delivery across Thailand is free on orders from ฿2,000.', 'with code <b>MOYCHAY</b>'],
-    ['ru/tea/index.html', null, 'Купить чай онлайн', 'бесплатно от 2 000 ฿.', 'по промокоду <b>MOYCHAY</b>']]) {
+    ['index.html', 'Your favorite tea, delivered', 'Shop tea online', 'Delivery across Thailand is free on orders from 2000฿. International orders are shipped via DHL.', 'Get 10% off your first order with code <b>MOYCHAY</b>.'],
+    ['ru/index.html', 'Любимый чай – с доставкой', 'Купить чай онлайн', 'Доставка по Таиланду – бесплатно от 2000฿. Международные заказы отправляем через DHL.', 'Скидка 10% на первый заказ по промокоду <b>MOYCHAY</b>.'],
+    ['tea/index.html', null, 'Shop tea online', 'Delivery across Thailand is free on orders from 2000฿.', 'with code <b>MOYCHAY</b>'],
+    ['ru/tea/index.html', null, 'Купить чай онлайн', 'бесплатно от 2000฿.', 'по промокоду <b>MOYCHAY</b>']]) {
     const h = read(f);
     const blk = h.slice(h.indexOf('<div class="shop-copy'), h.indexOf('</section>', h.indexOf('<div class="shop-copy')));
     if (h2) assert.ok(blk.includes(`<h2 id="shop-h">${h2}</h2>`), `${f}: h2`);

@@ -256,7 +256,7 @@ for (const lang of ['en', 'ru']) {
     }
     await expect(page.locator('#delivery .shop-terms').first()).toContainText('DHL');
     await expect(page.locator('#delivery .shop-terms b')).toHaveText('MOYCHAY');
-    await expect(page.locator('#delivery .shop-terms').first()).toContainText(lp === '/' ? '฿2,000' : '2\u00a0000\u00a0฿');
+    await expect(page.locator('#delivery .shop-terms').first()).toContainText(lp === '/' ? '2000฿' : '2000฿');
     const ld = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent())['@graph'][0];
     expect(ld).toMatchObject({ telephone: '+66817959110', email: 'info@phuket.moychay.asia', parentOrganization: { name: 'Moychay' } });
     await page.locator('#find-us a[href^="tel:"]').evaluate(a => a.addEventListener('click', e => e.preventDefault()));

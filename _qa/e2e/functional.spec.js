@@ -75,7 +75,7 @@ for (const p of PAGES) {
       expect(order.indexOf('events')).toBe(order.indexOf('delivery') + 1);
       const sec = page.locator('#delivery');
       await expect(sec.locator('h2')).toHaveText(p.lang === 'en' ? 'Your favorite tea, delivered' : 'Любимый чай\u00a0– с доставкой');
-      await expect(sec).toContainText(p.lang === 'en' ? '฿2,000' : '2\u00a0000\u00a0฿');
+      await expect(sec).toContainText(p.lang === 'en' ? '2000฿' : '2000฿');
       await expect(sec.locator('a.btn')).toHaveCount(1);
       const links = page.locator('a[data-track="online_shop_click"]');
       const places = await links.evaluateAll(as => as.map(a => a.dataset.place).sort());

@@ -20,8 +20,8 @@ SBP_TELEGRAM_ORDERS = True            # also for tea ordered through Telegram (o
 
 
 def thb(n, lang):
-    """2000 → "2 000 ฿" (RU) / "฿2,000" (EN)."""
-    return f"{n:,}".replace(",", " ") + " ฿" if lang == "ru" else f"฿{n:,}"
+    """2000 → "2000฿" – the way every price on the site is written (300฿, 600฿), in both languages."""
+    return f"{n}฿"
 
 
 def promo_phrase(lang):
