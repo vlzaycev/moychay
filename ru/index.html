@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){if(!i||navigator.webdriver)return;w[l]=w[l]||[];w[l].push({'gtm.start':
+<script>(function(w,d,s,l,i){if(!i||(navigator.webdriver&&!/Google/.test(navigator.userAgent)))return;w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
@@ -179,7 +179,9 @@ window.SITE = {
 (function (S) {
   // Google tag (GA4 + Google Ads)
   // Automated browsers (our tests, CI, headless bots) are not visitors: no analytics for them
-  var bot = navigator.webdriver;
+  // Google's own checkers (AdsBot, tag coverage, URL inspection) are let through: they verify the tags are
+  // installed, and GA4 drops known bots from reports anyway
+  var bot = navigator.webdriver && !/Google/.test(navigator.userAgent);
   var gid = bot ? '' : (S.GA4_ID || S.ADS_ID);
   if (gid) {
     var g = document.createElement('script'); g.async = true;
