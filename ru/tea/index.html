@@ -85,8 +85,8 @@ window.SITE = {
   },
   YM_ID:         "113664767",    // Yandex Metrika counter, e.g. "98765432"
   PIXEL_ID:      "2041380899914040", // Meta (Facebook) Pixel, e.g. "123456789012345"
-  EVENTS_SHEET:  "1zcA3xGzhUeQvWD2pFi1obgOf8mC2gi32D0l_q4tw_es", // Google Sheet with events
-  CHAT: { endpoint: "/api/chat", sitekey: "0x4AAAAAAFYnqNdF-cMkUD1N", src: "../../js/cha.js?v=03a297a6fe", lang: "ru" }  // Cha assistant; empty endpoint = off
+  EVENTS_API:    "/api/events", // public events schedule (chat Worker, filtered from the Google Sheet)
+  CHAT: { endpoint: "/api/chat", sitekey: "0x4AAAAAAFYnqNdF-cMkUD1N", src: "../../js/cha.js?v=e20b1cae26", lang: "ru" }  // Cha assistant; empty endpoint = off
 };
 (function (S) {
   // Google tag (GA4 + Google Ads)
@@ -900,7 +900,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
 (function () {
-  var I18N = {"lang": "ru", "evEmpty": "Анонсы появляются каждую неделю – в Telegram-клубе и Instagram.", "evMore": "Подробнее", "evFree": "Бесплатно", "evAll": "Показать все мероприятия", "form": {"required": "Заполните это поле.", "email": "Укажите корректный email, например name@example.com.", "phone": "Укажите номер в международном формате, например +66 81 234 5678.", "tg": "Telegram username: 5–32 латинские буквы, цифры или _.", "short": "Напишите чуть подробнее.", "fix": "Проверьте отмеченные поля.", "sending": "Отправляем…", "ok": "Спасибо! Сообщение доставлено – скоро ответим на email.", "fail": "Не получилось отправить сообщение. Попробуйте ещё раз или напишите нам в Telegram.", "too_long": "Слишком длинно – сократите, пожалуйста.", "links": "Пожалуйста, не больше 3 ссылок.", "invalid": "Проверьте это поле.", "captcha": "Дождитесь окончания проверки безопасности и попробуйте ещё раз.", "rate": "Слишком много сообщений за короткое время. Попробуйте позже или напишите нам в Telegram."}, "root": "../../"};
+  var I18N = {"lang": "ru", "evEmpty": "Анонсы появляются каждую неделю – в Telegram-клубе и Instagram.", "evMore": "Подробнее", "evFree": "Бесплатно", "evAll": "Показать все мероприятия", "evAsk": "Уточнить детали", "evAskUrl": "https://t.me/moychay_phuket", "evAskTrack": "telegram", "evAskText": "", "form": {"required": "Заполните это поле.", "email": "Укажите корректный email, например name@example.com.", "phone": "Укажите номер в международном формате, например +66 81 234 5678.", "tg": "Telegram username: 5–32 латинские буквы, цифры или _.", "short": "Напишите чуть подробнее.", "fix": "Проверьте отмеченные поля.", "sending": "Отправляем…", "ok": "Спасибо! Сообщение доставлено – скоро ответим на email.", "fail": "Не получилось отправить сообщение. Попробуйте ещё раз или напишите нам в Telegram.", "too_long": "Слишком длинно – сократите, пожалуйста.", "links": "Пожалуйста, не больше 3 ссылок.", "invalid": "Проверьте это поле.", "captcha": "Дождитесь окончания проверки безопасности и попробуйте ещё раз.", "rate": "Слишком много сообщений за короткое время. Попробуйте позже или напишите нам в Telegram."}, "root": "../../"};
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1058,35 +1058,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   if (!$('#evRow')) return;                           // pages without events (404, inner pages)
 
-  /* Events from Google Sheets (CSV export — keeps every cell as typed text):
-     columns → date | time | title_en | title_ru | text_en | text_ru | price_en | price_ru | link | show | image (optional)
-     Past events are hidden automatically; nearest first. */
+  /* Events: GET /api/events (the chat Worker reads the Google Sheet and returns only published, upcoming events
+     with their public fields – hidden rows and other columns never reach the browser).
+     Sheet columns → date | time | title_en | title_ru | text_en | text_ru | price_en | price_ru | link (or details_url) | show | image
+     "Details" appears only for a link to this event (a post, a registration page); the tea house's Instagram profile
+     is not one – such cards offer "Ask about this event" in the messenger instead. */
   var row = $('#evRow'), L = I18N.lang, IMG = I18N.root + 'img/';
   function todayISO() {
     try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(new Date()); }
     catch (e) { return new Date().toISOString().slice(0, 10); }
   }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
-  function toISO(v) {
-    var m;
-    if ((m = v.match(/(\d{4})-(\d{1,2})-(\d{1,2})/))) return m[1] + '-' + pad(+m[2]) + '-' + pad(+m[3]);
-    if ((m = v.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/))) return m[3] + '-' + pad(+m[2]) + '-' + pad(+m[1]);
-    if ((m = v.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/))) return m[3] + '-' + pad(+m[1]) + '-' + pad(+m[2]);
-    return '';
-  }
-  function parseCSV(t) {
-    var rows = [], r = [], f = '', q = false;
-    for (var i = 0; i < t.length; i++) {
-      var ch = t[i];
-      if (q) { if (ch === '"') { if (t[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += ch; }
-      else if (ch === '"') q = true;
-      else if (ch === ',') { r.push(f); f = ''; }
-      else if (ch === '\n' || ch === '\r') { if (ch === '\r' && t[i + 1] === '\n') i++; r.push(f); rows.push(r); r = []; f = ''; }
-      else f += ch;
-    }
-    if (f || r.length) { r.push(f); rows.push(r); }
-    return rows;
-  }
   function nicePrice(p) {
     var m = p.match(/^([\d\s.,]+)\s*(thb|฿|бат\S*)?$/i);
     if (!m) return p;                                   // "Donation", "Донат", "Free" etc. as written
@@ -1151,14 +1133,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       body.appendChild(el('p', 'evc-text', r.text));  // always present: keeps rows aligned across cards
       var foot = el('div', 'evc-foot');
       foot.appendChild(el('span', 'evc-price', r.price ? nicePrice(r.price) : ''));
-      if (/^https?:\/\//.test(r.link)) {
-        var a = el('a', 'tlink', I18N.evMore);
-        a.href = r.link; a.target = '_blank'; a.rel = 'noopener';
-        a.setAttribute('data-track', /instagram/.test(r.link) ? 'instagram' : 'event_link');
-        a.setAttribute('data-place', 'event_card');
-        a.insertAdjacentHTML('beforeend', '<svg class="ico"><use href="#i-arrow"/></svg>');
-        foot.appendChild(a);
-      }
+      // a link to this very event → "Details"; otherwise → ask the tea house in the page's messenger
+      var link = /^https:\/\//.test(r.link) ? r.link : '';
+      var a = el('a', 'tlink', link ? I18N.evMore : I18N.evAsk);
+      a.href = link || (I18N.evAskTrack === 'whatsapp' ? I18N.evAskUrl + encodeURIComponent(I18N.evAskText.replace('%s', r.title + ', ' + when)) : I18N.evAskUrl);
+      a.target = '_blank'; a.rel = 'noopener';
+      a.setAttribute('data-track', link ? (/instagram/.test(link) ? 'instagram' : 'event_link') : I18N.evAskTrack);
+      a.setAttribute('data-place', 'event_card');
+      a.insertAdjacentHTML('beforeend', '<svg class="ico"><use href="#i-arrow"/></svg>');
+      foot.appendChild(a);
       body.appendChild(foot);
       card.appendChild(ph); card.appendChild(body); row.appendChild(card);
     });
@@ -1177,7 +1160,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         location: place, organizer: { '@type': 'Organization', name: 'Moychay Phuket', url: 'https://teaphuket.com/' } };
       if (r.text) e.description = r.text;
       if (r.src) e.image = new URL(r.src, location.href).href;
-      if (/^https?:\/\//.test(r.link)) e.url = r.link;
+      if (/^https:\/\//.test(r.link)) e.url = r.link;
       var p = nicePrice(r.price || '');
       if (/^\d+฿$/.test(p)) e.offers = { '@type': 'Offer', price: parseInt(p, 10), priceCurrency: 'THB', availability: 'https://schema.org/InStock', url: e.url || location.href };
       else if (p === I18N.evFree) e.isAccessibleForFree = true;
@@ -1187,34 +1170,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     s.id = 'ev-ld'; s.type = 'application/ld+json'; s.textContent = JSON.stringify({ '@context': 'https://schema.org', '@graph': list });
   }
   function loadEvents() {
-    var id = window.SITE && window.SITE.EVENTS_SHEET;
-    if (!id) return renderEmpty();
+    var src = window.SITE && window.SITE.EVENTS_API;
+    if (!src) return renderEmpty();
     var finished = false, to = setTimeout(function () { if (!finished) renderEmpty(); }, 15000);
-    fetch('https://docs.google.com/spreadsheets/d/' + id + '/export?format=csv').then(function (r) {
-      if (!r.ok) throw new Error(r.status); return r.text();
-    }).then(function (t) {
+    fetch(src).then(function (r) {
+      if (!r.ok) throw new Error(r.status); return r.json();
+    }).then(function (j) {
       finished = true; clearTimeout(to);
-      var data = parseCSV(t).filter(function (r) { return r.join('').trim(); });
-      var head = (data.shift() || []).map(function (h) { return h.trim().toLowerCase(); });
-      var today = todayISO();
-      var rows = data.map(function (c) {
-        var g = function (n) { var i = head.indexOf(n); return i < 0 ? '' : String(c[i] || '').trim(); };
-        var title = g('title_' + L) || g('title_en');
+      var today = todayISO();                            // the server filters too; this keeps a cached answer honest
+      var rows = (j && j.events || []).map(function (e) {
+        var t = function (o) { return o && (o[L] || o.en || o.ru) || ''; };
+        var title = t(e.title);
         if (L === 'ru') title = title.replace(/"([^"]+)"/g, '«$1»');
-        return {
-          date: toISO(g('date')), time: g('time'), title: title,
-          text: g('text_' + L) || g('text_en'),
-          price: g('price_' + L) || g('price_en'),
-          link: g('link'), image: g('image'), show: g('show').toLowerCase(),
-          hay: [g('title_en'), g('title_ru'), g('text_en')].join(' ')
-        };
-      }).filter(function (r) {
-        return r.date && r.title && r.date >= today && ['no', 'нет', '0', 'false', 'hide'].indexOf(r.show) < 0;
-      }).sort(function (a, b) { return (a.date + a.time).localeCompare(b.date + b.time); }).slice(0, LIMIT);
+        return { date: e.date || '', time: e.time || '', title: title, text: t(e.text), price: t(e.price),
+          link: e.details_url || '', image: e.image || '', hay: [e.title && e.title.en, e.title && e.title.ru, e.text && e.text.en].join(' ') };
+      }).filter(function (r) { return /^\d{4}-\d{2}-\d{2}$/.test(r.date) && r.title && r.date >= today; })
+        .sort(function (a, b) { return (a.date + a.time).localeCompare(b.date + b.time); }).slice(0, LIMIT);
       render(rows);
     }).catch(function () { clearTimeout(to); if (!finished) renderEmpty(); finished = true; });
   }
-  loadEvents();   // start right away: Google's CSV export takes a few seconds
+  loadEvents();   // start right away
 })();
 </script>
 <!-- Cha – AI tea assistant: a small button; the chat code loads only on click or when the page is idle -->

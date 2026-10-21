@@ -35,6 +35,12 @@ export async function conversationByToken(db, token) {
   return db.prepare('SELECT * FROM conversations WHERE token_hash = ?').bind(await sha256hex(token)).first();
 }
 
+/** "Start a new chat": the token is replaced by a random hash nobody knows – the old session is dead at once.
+ *  The conversation itself stays (the team may still be reading it in Telegram) and is purged by retention. */
+export async function revokeToken(db, id) {
+  await db.prepare('UPDATE conversations SET token_hash = ? WHERE id = ?').bind('revoked:' + newId(), id).run();
+}
+
 export const conversationById = (db, id) =>
   /^[0-9a-f]{32}$/.test(id || '') ? db.prepare('SELECT * FROM conversations WHERE id = ?').bind(id).first() : null;
 

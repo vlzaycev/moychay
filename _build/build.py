@@ -37,7 +37,7 @@ CONFIG = {
     "cfg_ym": "113664767",      # Yandex Metrika counter ID
     "cfg_pixel": "2041380899914040",  # Meta Pixel ID (loaded in window.SITE below; skipped for automated browsers)
     "cfg_fb_verify": "2xbz3ulgnxnpw9oo6wmnhndoz5n8xl",  # Meta Business domain verification
-    "cfg_sheet": "1zcA3xGzhUeQvWD2pFi1obgOf8mC2gi32D0l_q4tw_es",  # events Google Sheet
+    "cfg_events_api": "/api/events",  # events schedule: the chat Worker reads the Google Sheet (EVENTS_SHEET_ID / EVENTS_CSV_URL in its wrangler.toml)
     # Contact & wholesale forms: URL of the server handler (_server/contact-worker), e.g. "/api/contact".
     # Empty = forms are shown disabled with a note to use WhatsApp/Telegram (nothing is sent anywhere).
     "cfg_form_endpoint": "/api/contact",
@@ -322,6 +322,7 @@ EN = dict(
     ftr_privacy="Privacy policy",
     credit_by="Website & marketing by", credit_label="Website & marketing by vlad.marketing (opens in a new tab)",
     js=dict(lang="en", evEmpty="New dates are announced every week on Instagram.", evMore="Details", evFree="Free", evAll="Show all events",
+            evAsk="Ask about this event", evAskUrl=f"{WA}?text=", evAskTrack="whatsapp", evAskText="Hi! I'd like to know more about %s",
             form=dict(required="Please fill in this field.", email="Please enter a valid email, e.g. name@example.com.",
                       phone="Please enter the number in international format, e.g. +66 81 234 5678.",
                       tg="Telegram username: 5–32 Latin letters, digits or _.", short="Please write a little more.",
@@ -454,6 +455,7 @@ RU = dict(
     ftr_privacy="Политика конфиденциальности",
     credit_by="Сайт и маркетинг –", credit_label="Сайт и маркетинг – vlad.marketing (откроется в новой вкладке)",
     js=dict(lang="ru", evEmpty="Анонсы появляются каждую неделю – в Telegram-клубе и Instagram.", evMore="Подробнее", evFree="Бесплатно", evAll="Показать все мероприятия",
+            evAsk="Уточнить детали", evAskUrl=TG, evAskTrack="telegram", evAskText="",
             form=dict(required="Заполните это поле.", email="Укажите корректный email, например name@example.com.",
                       phone="Укажите номер в международном формате, например +66 81 234 5678.",
                       tg="Telegram username: 5–32 латинские буквы, цифры или _.", short="Напишите чуть подробнее.",

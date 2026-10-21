@@ -1,6 +1,6 @@
-// Events block (Google Sheet → cards): ordering, filtering, XSS safety, error/empty states.
+// Events block (Google Sheet → chat Worker GET /api/events → cards): ordering, filtering, XSS safety, links, error/empty states.
 const { test, expect } = require('./test');
-const { mockEvents, PAGES, EXPORT_URL } = require('./helpers');
+const { mockEvents, PAGES, EVENTS_URL } = require('./helpers');
 
 const HEADER = 'date,time,title_en,title_ru,text_en,text_ru,price_en,price_ru,link,show\n';
 
@@ -29,10 +29,35 @@ for (const p of PAGES) {
       await page.goto(p.path + '#events');
       const first = page.locator('#evRow .evc').first();
       await expect(first.locator('h3')).toContainText(p.lang === 'en' ? '<img' : '<script>');
-      await expect(first.locator('a')).toHaveCount(0); // javascript: link not rendered
+      // the javascript: link is dropped – the card offers the messenger instead
+      await expect(first.locator('a')).toHaveAttribute('href', p.lang === 'en' ? /^https:\/\/wa\.me\// : /^https:\/\/t\.me\/moychay_phuket$/);
       expect(await page.locator('#evRow script, #evRow img[src="x"]').count()).toBe(0);
       await page.waitForTimeout(500);
       expect(alerted).toBe(false);
+    });
+
+    test('"Details" only for a link to the event itself; the Instagram profile becomes "Ask about this event" in the messenger', async ({ page }) => {
+      await mockEvents(page, HEADER +
+        '2099-12-01,18:00,Profile link,Ссылка на профиль,t,т,,,https://www.instagram.com/moychay.phuket,yes\n' +
+        '2099-12-02,18:00,Post link,Ссылка на пост,t,т,,,https://www.instagram.com/p/AbC123/,yes\n' +
+        '2099-12-03,18:00,No link,Без ссылки,t,т,,,,yes\n');
+      const sheetCalls = [];
+      page.on('request', (r) => { if (/docs\.google\.com/.test(r.url())) sheetCalls.push(r.url()); });
+      await page.goto(p.path + '#events');
+      const links = page.locator('#evRow .evc .tlink');
+      await expect(links).toHaveCount(3);
+      const ask = p.lang === 'en' ? 'Ask about this event' : 'Уточнить детали', more = p.lang === 'en' ? 'Details' : 'Подробнее';
+      await expect(links.nth(0)).toHaveText(ask);
+      await expect(links.nth(1)).toHaveText(more);
+      await expect(links.nth(1)).toHaveAttribute('href', 'https://www.instagram.com/p/AbC123/');
+      await expect(links.nth(2)).toHaveText(ask);
+      for (const i of [0, 2]) {
+        await expect(links.nth(i)).toHaveAttribute('href', p.lang === 'en' ? /^https:\/\/wa\.me\/66817959110\?text=Hi!/ : 'https://t.me/moychay_phuket');
+        await expect(links.nth(i)).toHaveAttribute('data-track', p.lang === 'en' ? 'whatsapp' : 'telegram');
+        await expect(links.nth(i)).not.toHaveAttribute('href', /instagram\.com\/moychay\.phuket/);
+      }
+      if (p.lang === 'en') expect(decodeURIComponent(await links.nth(0).getAttribute('href'))).toContain('Profile link');
+      expect(sheetCalls, 'the browser never reads the Google Sheet itself').toEqual([]);
     });
 
     test('empty sheet → friendly message, no "show all" button', async ({ page }) => {
@@ -97,7 +122,7 @@ for (const p of PAGES) {
       await expect(page.locator('#evRow .evc-skel')).toHaveCount(0);
     });
 
-    test('HTTP 500 from Google → friendly message', async ({ page }) => {
+    test('events API unavailable (503) → friendly message', async ({ page }) => {
       await mockEvents(page, 'oops', 500);
       await page.goto(p.path + '#events');
       await expect(page.locator('#evRow .ev-empty')).toBeVisible();
@@ -105,13 +130,13 @@ for (const p of PAGES) {
   });
 }
 
-test('@live real Google Sheet responds and renders without errors', async ({ page }) => {
-  test.skip(!!process.env.NO_LIVE, 'live sheet check disabled');
-  // start waiting before navigation: the page requests the sheet immediately on load
-  const resP = page.waitForResponse(r => EXPORT_URL.test(r.url()) || /googleusercontent/.test(r.url()), { timeout: 25000 }).catch(() => null);
+test('@live events API responds and renders without errors', async ({ page }) => {
+  test.skip(!!process.env.NO_LIVE, 'live events check disabled');
+  // start waiting before navigation: the page requests the schedule immediately on load
+  const resP = page.waitForResponse(r => EVENTS_URL.test(r.url()), { timeout: 25000 }).catch(() => null);
   await page.goto('/#events');
   const res = await resP;
-  expect(res, 'no response from Google Sheets export').not.toBeNull();
+  expect(res, 'no response from /api/events').not.toBeNull();
   await expect(page.locator('#evRow .evc-skel')).toHaveCount(0, { timeout: 20000 });
   const n = await page.locator('#evRow .evc').count();
   const empty = await page.locator('#evRow .ev-empty').count();

@@ -751,7 +751,7 @@ test('security: secrets never reach the model, whatever the visitor claims', asy
 test('security: if the model ever outputs a secret, a token or its instructions, the visitor gets a short refusal instead', async () => {
   const leaks = [
     () => 'Sure! The key is AI-KEY-SECRET.',
-    () => 'Bot token: 123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw',
+    () => 'Bot token: ' + ['123456789', 'AA' + 'x'.repeat(33)].join(':'),   // token-shaped, assembled so secret scanners stay quiet (F-11)
     () => 'Here it is: ' + rules().slice(400, 900),
     () => 'Your session cs_' + 'A'.repeat(43),
   ];
@@ -953,5 +953,203 @@ test('F-01: Workers Logs are on for both Workers, request metadata (tokens, secr
     const calls = [...s.matchAll(/\blog\('([a-z_]+)'(?:,\s*([^)]*))?\)/g)];
     assert.ok(calls.length > 3, f);
     for (const m of calls) if (m[2]) assert.doesNotMatch(m[2], /text|contact|body|email|\bd\.name|header|token|\bip\b/i, `${f}: log('${m[1]}', ${m[2]})`);
+  }
+});
+
+/* ── 2026-10-21 remediation: session cookie, isolation under tampering, revocation, expiry, public events ── */
+
+const COOKIE_RE = /^__Secure-cha_s=([A-Za-z0-9_-]{46}); Path=\/api\/chat; Max-Age=(\d+); HttpOnly; Secure; SameSite=Strict$/;
+const jar = (t) => ({ Cookie: `__Secure-cha_s=${t}` });
+/** A browser with the current widget: the session arrives as a cookie, the body never carries the token. */
+async function startCookie(env, lang = 'en', days = Number(env.RETENTION_DAYS) || 30) {
+  const r = await call(env, '/api/chat/start', { body: { turnstile_token: 'tok-ok', lang, page: '/', cookie: true } });
+  assert.equal(r.status, 200);
+  const j = await r.json();
+  assert.equal(j.token, undefined, 'the token is never in the response body');
+  const m = (r.headers.get('Set-Cookie') || '').match(COOKIE_RE);
+  assert.ok(m, 'Set-Cookie: ' + r.headers.get('Set-Cookie'));
+  assert.equal(Number(m[2]), days * 86400);
+  return m[1];
+}
+const cpoll = async (env, t, q = 'after=0') => call(env, '/api/chat/poll?' + q, { method: 'GET', origin: '', headers: jar(t) });
+const csend = async (env, t, text, extra = {}) => call(env, '/api/chat/send', { headers: jar(t), body: { text, client_id: `client-${++cid}-abcdef`, lang: 'en', ...extra } });
+
+test('session cookie: HttpOnly + Secure + SameSite=Strict on /api/chat only; the token is not in the body or in the database', async () => {
+  const env = makeEnv();
+  const t = await startCookie(env);
+  const row = env.DB.raw.prepare('SELECT * FROM conversations').get();
+  assert.ok(!JSON.stringify(row).includes(t));
+  const r = await csend(env, t, 'hello');
+  assert.equal(r.status, 200);
+  assert.match(r.headers.get('Set-Cookie') || '', COOKIE_RE, 'an active chat refreshes the cookie (sliding 30 days)');
+  const p = await (await cpoll(env, t)).json();
+  assert.deepEqual(p.messages.map((m) => m.sender), ['visitor', 'assistant']);
+});
+
+test('isolation: visitor B cannot read, write, hand off, re-language or end visitor A – whatever ids are put in the request', async () => {
+  const env = makeEnv();
+  const A = await startCookie(env), B = await startCookie(env);
+  await csend(env, A, 'private question of visitor A');
+  const rowA = env.DB.raw.prepare("SELECT * FROM conversations WHERE seq > 0").get();
+  const ids = { id: rowA.id, conv_id: rowA.id, conversation_id: rowA.id, conversation: rowA.id, code: rowA.code, session: rowA.code };
+  // read: B's session with A's id/code in the query
+  for (const q of [`after=0&id=${rowA.id}`, `after=0&conv=${rowA.id}&code=${rowA.code}`, 'after=-5', 'after=0&after=0']) {
+    const p = await (await cpoll(env, B, q)).json();
+    assert.ok(!JSON.stringify(p).includes('visitor A'), q);
+  }
+  // write / status / language with A's ids in the body → only B's conversation changes
+  await csend(env, B, 'message from B', ids);
+  await call(env, '/api/chat/human', { headers: jar(B), body: ids });
+  await call(env, '/api/chat/lang', { headers: jar(B), body: { lang: 'ru', ...ids } });
+  const a = env.DB.raw.prepare('SELECT status, lang, seq FROM conversations WHERE id = ?').get(rowA.id);
+  assert.deepEqual({ ...a }, { status: 'ai_active', lang: 'en', seq: 2 }, 'A is untouched');
+  const pa = await (await cpoll(env, A)).json();
+  assert.ok(!JSON.stringify(pa).includes('message from B'));
+  // end with A's ids revokes only B
+  await call(env, '/api/chat/end', { headers: jar(B), body: ids });
+  assert.equal((await cpoll(env, A)).status, 200, 'A still works');
+  assert.equal((await cpoll(env, B)).status, 401);
+});
+
+test('isolation: forged and modified tokens are refused – via cookie and via Bearer', async () => {
+  const env = makeEnv();
+  const A = await startCookie(env);
+  const row = env.DB.raw.prepare('SELECT id, code, token_hash FROM conversations').get();
+  const flip = (s, i) => s.slice(0, i) + (s[i] === 'A' ? 'B' : 'A') + s.slice(i + 1);
+  const bad = [flip(A, 3), flip(A, 20), flip(A, A.length - 1), A.slice(0, -1), A + 'x', 'cs_' + 'A'.repeat(43), row.id, row.code, row.token_hash,
+    "cs_' OR '1'='1", 'cs_' + A.slice(3).split('').reverse().join(''), A.toUpperCase()];
+  for (const t of bad) {
+    assert.equal((await cpoll(env, t)).status, 401, 'cookie ' + t);
+    assert.equal((await call(env, '/api/chat/poll?after=0', { method: 'GET', origin: '', token: t })).status, 401, 'bearer ' + t);
+    assert.equal((await call(env, '/api/chat/send', { headers: jar(t), body: { text: 'x', client_id: 'client-forged-1' } })).status, 401);
+  }
+  assert.equal((await call(env, '/api/chat/poll?after=0', { method: 'GET', origin: '', headers: { Cookie: `other=1; __Secure-cha_s=${A}x` } })).status, 401);
+  assert.equal((await call(env, '/api/chat/poll?after=0', { method: 'GET', origin: '', headers: { Cookie: `x=1; __Secure-cha_s=${A}; y=2` } })).status, 200);
+});
+
+test('CSRF: other sites cannot use the cookie – foreign Origin and Sec-Fetch-Site: cross-site are refused', async () => {
+  const env = makeEnv();
+  const A = await startCookie(env);
+  assert.equal((await call(env, '/api/chat/send', { origin: 'https://evil.example', headers: jar(A), body: { text: 'x', client_id: 'client-csrf-001' } })).status, 403);
+  assert.equal((await call(env, '/api/chat/send', { origin: '', headers: jar(A), body: { text: 'x', client_id: 'client-csrf-002' } })).status, 403);
+  assert.equal((await call(env, '/api/chat/poll?after=0', { method: 'GET', origin: '', headers: { ...jar(A), 'Sec-Fetch-Site': 'cross-site' } })).status, 403);
+  assert.equal((await call(env, '/api/chat/end', { origin: 'null', headers: jar(A), body: {} })).status, 403);
+  assert.equal((await cpoll(env, A)).status, 200, 'still alive');
+});
+
+test('revocation: "Start a new chat" kills the old token at once (cookie cleared); the team thread keeps working', async () => {
+  const env = makeEnv();
+  const A = await startCookie(env);
+  await csend(env, A, 'Can I speak to a person?');
+  const rootId = net.tg.find((x) => x.method === 'sendMessage').body && 1000;
+  const r = await call(env, '/api/chat/end', { headers: jar(A), body: {} });
+  assert.equal(r.status, 200);
+  assert.match(r.headers.get('Set-Cookie'), /^__Secure-cha_s=; Path=\/api\/chat; Max-Age=0; HttpOnly; Secure; SameSite=Strict$/);
+  assert.equal((await cpoll(env, A)).status, 401);
+  assert.equal((await call(env, '/api/chat/poll?after=0', { method: 'GET', origin: '', token: A })).status, 401);
+  assert.equal(env.DB.raw.prepare('SELECT COUNT(*) n FROM conversations').get().n, 1, 'the conversation itself is kept for the team (retention purges it)');
+  assert.equal((await hook(env, reply(rootId, 'late answer'))).status, 200, 'a late team reply is stored, nobody can read it');
+});
+
+test('expiry: a session older than RETENTION_DAYS is refused and the cookie cleared; a fresh one keeps working', async () => {
+  const env = makeEnv();
+  const A = await startCookie(env);
+  env.DB.raw.prepare('UPDATE conversations SET last_activity = ?').run(Date.now() - 31 * 86400000);
+  const r = await cpoll(env, A);
+  assert.equal(r.status, 401);
+  assert.match(r.headers.get('Set-Cookie'), /Max-Age=0/);
+  const env2 = makeEnv({ RETENTION_DAYS: '2' });
+  const B = await startCookie(env2);
+  env2.DB.raw.prepare('UPDATE conversations SET last_activity = ?').run(Date.now() - 1 * 86400000);
+  assert.equal((await cpoll(env2, B)).status, 200);
+});
+
+test('migration: an older browser with the token in localStorage moves it into the cookie (adopt); language switch keeps the session', async () => {
+  const env = makeEnv();
+  const legacy = await start(env);                       // old widget: token in the body
+  assert.match(legacy, /^cs_/);
+  const r = await call(env, '/api/chat/adopt', { token: legacy, body: {} });
+  assert.equal(r.status, 200);
+  const m = (r.headers.get('Set-Cookie') || '').match(COOKIE_RE);
+  assert.equal(m && m[1], legacy);
+  assert.equal((await call(env, '/api/chat/adopt', { token: 'cs_' + 'Z'.repeat(43), body: {} })).status, 401, 'cannot adopt an unknown token');
+  await csend(env, legacy, 'hello in English');
+  assert.equal((await call(env, '/api/chat/lang', { headers: jar(legacy), body: { lang: 'ru' } })).status, 200);
+  const p = await (await cpoll(env, legacy)).json();
+  assert.equal(p.lang, 'ru');
+  assert.ok(p.messages.some((m) => m.text === 'hello in English'), 'history survives the language switch');
+});
+
+test('Telegram live support with cookie sessions: two visitors, replies reach only their own visitor', async () => {
+  const env = makeEnv();
+  const A = await startCookie(env), B = await startCookie(env);
+  await csend(env, A, 'Can I speak to a person?');
+  const rootA = 1000 + net.tg.filter((x) => x.method === 'sendMessage').length - 1;
+  await csend(env, B, 'Can I speak to a person?');
+  const rootB = 1000 + net.tg.filter((x) => x.method === 'sendMessage').length - 1;
+  await hook(env, reply(rootA, 'reply for A'));
+  await hook(env, reply(rootB, 'reply for B'));
+  const pa = await (await cpoll(env, A)).json(), pb = await (await cpoll(env, B)).json();
+  assert.deepEqual(pa.messages.filter((m) => m.sender === 'operator').map((m) => m.text), ['reply for A']);
+  assert.deepEqual(pb.messages.filter((m) => m.sender === 'operator').map((m) => m.text), ['reply for B']);
+  await csend(env, A, 'thanks from A');
+  assert.match(net.tg.at(-1).body.text, /thanks from A/);
+  assert.ok(!JSON.stringify(pb).includes('A'.repeat(0) + 'thanks from A'));
+});
+
+test('GET /api/events: only published upcoming events and public fields; hidden rows and extra columns never leave the Worker', async () => {
+  const csv = 'date,time,title_en,title_ru,text_en,text_ru,price_en,price_ru,link,show,image,notes,phone\n' +
+    '2020-01-01,18:00,Old,Старое,,,,,,yes,,,\n' +
+    '2099-03-02,19:00,Hidden party,Скрытое,secret plan,,,,,no,,internal note,+66 1\n' +
+    '2099-03-01,18:00,Tea tasting,"Дегустация ""Юннань""",Yunnan teas,Чаи Юннани,380.00THB,380.00THB,https://www.instagram.com/moychay.phuket,yes,events/yunnan,cost 120,+66 2\n' +
+    '2099-03-03,19:00,DJ tea,DJ TEA,,,,,https://www.instagram.com/p/AbC123/,,dj-tea,,\n' +
+    '2099-03-04,19:00,Bad link,,,,,,javascript:alert(1),,"x"" onerror=""1",,\n';
+  mockNet({ csv });
+  const env = makeEnv();
+  const r = await call(env, '/api/events', { method: 'GET', origin: '' });
+  assert.equal(r.status, 200);
+  assert.match(r.headers.get('Cache-Control'), /public, max-age=300/);
+  const raw = await r.text();
+  for (const s of ['Hidden party', 'secret plan', 'internal note', 'cost 120', '+66', 'Old', 'javascript', 'onerror', '"show"', 'notes', 'phone']) assert.ok(!raw.includes(s), 'leaked: ' + s);
+  const { events } = JSON.parse(raw);
+  assert.deepEqual(events.map((e) => e.date), ['2099-03-01', '2099-03-03', '2099-03-04']);
+  assert.deepEqual(Object.keys(events[0]).sort(), ['date', 'details_url', 'image', 'price', 'text', 'time', 'title']);
+  assert.equal(events[0].details_url, '', 'the Instagram profile is not a "Details" link');
+  assert.equal(events[0].title.ru, 'Дегустация "Юннань"');
+  assert.equal(events[1].details_url, 'https://www.instagram.com/p/AbC123/');
+  assert.equal(events[2].details_url, '');
+  assert.equal(events[2].image, '');
+  // the sheet is read once per 10 minutes, not per visitor
+  const before = net.sheet;
+  await call(env, '/api/events', { method: 'GET', origin: '' });
+  assert.equal(net.sheet, before);
+});
+
+test('GET /api/events: Google down → 503 (the site shows its friendly empty state); not configured → 503; POST → 405', async () => {
+  globalThis.fetch = async () => { throw new Error('offline'); };
+  assert.equal((await call(makeEnv(), '/api/events', { method: 'GET', origin: '' })).status, 503);
+  resetCaches();
+  assert.equal((await call(makeEnv({ EVENTS_SHEET_ID: '' }), '/api/events', { method: 'GET', origin: '' })).status, 503);
+  assert.equal((await call(makeEnv(), '/api/events', { method: 'POST', body: {} })).status, 405);
+});
+
+test('events source: a published CSV URL (EVENTS_CSV_URL) is preferred; any other URL is ignored', async () => {
+  const seen = [];
+  globalThis.fetch = async (u) => { seen.push(String(u)); return new Response('date,title_en,show\n2099-01-01,Pub,yes\n'); };
+  const env = makeEnv({ EVENTS_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-abc_DEF-123/pub?gid=1&single=true&output=csv' });
+  const j = await (await call(env, '/api/events', { method: 'GET', origin: '' })).json();
+  assert.equal(j.events[0].title.en, 'Pub');
+  assert.match(seen[0], /\/d\/e\/2PACX-abc_DEF-123\/pub\?/);
+  resetCaches(); seen.length = 0;
+  await call(makeEnv({ EVENTS_CSV_URL: 'https://evil.example/x.csv' }), '/api/events', { method: 'GET', origin: '' });
+  assert.match(seen[0], /\/d\/sheet\/export\?format=csv/);
+});
+
+test('deployable: the Worker entry exports only functions and the handler (workerd refuses anything else at startup)', async () => {
+  for (const f of ['../../_server/chat-worker/src/index.js', '../../_server/contact-worker/src/index.js']) {
+    const mod = await import(f);
+    for (const [k, v] of Object.entries(mod)) {
+      assert.ok(typeof v === 'function' || (k === 'default' && typeof v.fetch === 'function'), `${f}: export ${k} is ${typeof v}`);
+    }
   }
 });

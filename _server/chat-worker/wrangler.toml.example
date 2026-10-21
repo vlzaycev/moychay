@@ -10,7 +10,8 @@ main = "src/index.js"
 compatibility_date = "2026-10-01"
 
 # The site calls the chat on its own domain (no CORS in production)
-routes = [{ pattern = "teaphuket.com/api/chat/*", zone_name = "teaphuket.com" }]
+routes = [{ pattern = "teaphuket.com/api/chat/*", zone_name = "teaphuket.com" },
+          { pattern = "teaphuket.com/api/events", zone_name = "teaphuket.com" }]   # public events schedule for the site
 # The Telegram webhook uses the workers.dev address: zone security settings (Bot Fight Mode, rules)
 # must never block Telegram's servers.
 workers_dev = true
@@ -28,10 +29,12 @@ invocation_logs = false
 AI_PROVIDER = "anthropic"            # anthropic | openai (OpenAI-compatible, set AI_BASE_URL) – mock works only locally
 AI_MODEL = "claude-haiku-5-5"
 AI_ENABLED = "1"                     # "0" switches the AI off; the chat, handoff and Telegram keep working
+AI_DAILY_LIMIT = "300"               # hard stop for AI answers per day (peak so far 18/day); alert to staff at 80 %
 TRANSLATE = "0"                      # "1": visitor questions get a Russian translation in Telegram, Russian staff replies are translated for the visitor
 TELEGRAM_STAFF_CHAT_ID = ""          # the staff group, e.g. -5304623826
 TELEGRAM_OPERATOR_IDS = ""           # comma-separated Telegram user ids allowed to answer, e.g. 362008939
-EVENTS_SHEET_ID = "1zcA3xGzhUeQvWD2pFi1obgOf8mC2gi32D0l_q4tw_es"   # same public sheet as the site's events block
+EVENTS_SHEET_ID = "1zcA3xGzhUeQvWD2pFi1obgOf8mC2gi32D0l_q4tw_es"   # events sheet: the Worker serves it to the site as /api/events
+# EVENTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/…/pub?gid=…&single=true&output=csv"   # published public tab (preferred: the sheet can then be private)
 # Optional limits (defaults in src/config.js): AI_DAILY_LIMIT, AI_PER_CONVERSATION, AI_MAX_TOKENS, HISTORY_MESSAGES, RETENTION_DAYS
 
 # Cloudflare D1 (free tier). Create once: npx wrangler d1 create teaphuket-chat → paste the id

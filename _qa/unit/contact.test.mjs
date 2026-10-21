@@ -5,7 +5,8 @@ import assert from 'node:assert/strict';
 import { validate, normalizeTelegram, normalizeWhatsapp, LIMITS } from '../../_server/contact-worker/src/validate.js';
 import { formatMessage, sendTelegram } from '../../_server/contact-worker/src/telegram.js';
 import { verifyTurnstile } from '../../_server/contact-worker/src/turnstile.js';
-import worker, { MAX_BODY } from '../../_server/contact-worker/src/index.js';
+import worker, { maxBody } from '../../_server/contact-worker/src/index.js';
+const MAX_BODY = maxBody();
 
 const base = { inquiry_type: 'contact', name: 'Anna', email: 'Anna@Example.com', contact_method: 'whatsapp',
   contact_value: '+66 81 234 5678', message: 'Hello, can we book a ceremony?', page_language: 'en', page_path: '/contact/',

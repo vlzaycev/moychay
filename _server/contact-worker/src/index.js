@@ -8,8 +8,10 @@ import { formatMessage, sendTelegram } from './telegram.js';
 import { verifyTurnstile } from './turnstile.js';
 import { missingConfig, hashIp, hashMessage, checkLimits, countSend, isDuplicate, rememberSent } from './guard.js';
 
-export const ALLOWED_ORIGINS = ['https://teaphuket.com'];
-export const MAX_BODY = 16 * 1024;
+// Not exported: the Workers runtime accepts only handlers and functions as exports of the entry module
+const ALLOWED_ORIGINS = ['https://teaphuket.com'];
+const MAX_BODY = 16 * 1024;
+export const maxBody = () => MAX_BODY;          // for tests
 
 function json(status, body, origin) {
   const h = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };

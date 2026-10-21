@@ -1,6 +1,8 @@
 /* Cha – AI tea assistant by Moychay Phuket. Built into /js/cha.js by _build/build.py (do not edit the output).
    Loaded only after a click on the launcher or when the page is idle – never blocks rendering.
-   All text from the server is rendered with textContent; links become clickable only for known domains. */
+   All text from the server is rendered with textContent; links become clickable only for known domains.
+   The session is an HttpOnly cookie set by the server: this script never sees the token. localStorage keeps only
+   a non-secret note that a conversation exists (status, language, time) so the chat can be restored. */
 (function () {
   'use strict';
   var A = {"name": {"en": "Cha", "ru": "Ча"}, "title": {"en": "Here to help", "ru": "Помогу с чаем и визитом"}, "ask": {"en": "Ask Cha", "ru": "Спросить Ча"}, "greeting": {"en": "Hi! I'm Cha, Moychay Phuket's virtual tea guide. Looking for tea, a ceremony, or directions? Just ask!", "ru": "Привет! Я Ча, виртуальный консультант Moychay Phuket. Помогу выбрать чай, узнать о церемониях или найти нашу чайную. Что подсказать?"}, "quick": {"en": [["choose", "Choose tea"], ["ceremonies", "Tea ceremonies"], ["visit", "Find us"]], "ru": [["choose", "Выбрать чай"], ["ceremonies", "Церемонии"], ["visit", "Как нас найти"]]}, "quick_prompts": {"en": {"ceremonies": "Tell me about your tea ceremonies.", "visit": "Where are you and how do I get there?", "choose": "Help me choose a tea.", "shop": "How can I order tea online?"}, "ru": {"ceremonies": "Расскажите о ваших чайных церемониях.", "visit": "Где вы находитесь и как до вас добраться?", "choose": "Помогите выбрать чай.", "shop": "Как заказать чай онлайн?"}}, "retention_days": 30};
@@ -33,7 +35,7 @@
         shop: 'Интернет-магазин', directions: 'Проложить маршрут', whatsapp: 'WhatsApp', telegram: 'Telegram', human: 'Связаться с человеком' } }
   };
 
-  var C, lang, el = {}, state = { token: '', status: 'ai_active', seq: 0, msgs: {} }, busy = false, pollT = 0, lastNew = Date.now();
+  var C, lang, el = {}, state = { on: false, status: 'ai_active', seq: 0, msgs: {} }, busy = false, pollT = 0, lastNew = Date.now();
   var tsLoading = null, opened = false, retryFn = null, loadedAt = Date.now(), calling = false, waitT = 0, handoffAt = 0, savedY = 0;
   var WAIT_HINT_MS = 2 * 60 * 1000;   // no team reply after 2 minutes: offer a contact field and messengers
   var LIVE_WAIT_MS = 45 * 1000;       // the "waiting" dots stop after 45 s and become a quiet "Waiting for a reply"
@@ -46,15 +48,15 @@
   function lp() { return lang === 'ru' ? '/ru/' : '/'; }
   function id() { var a = new Uint8Array(12); crypto.getRandomValues(a); return Array.prototype.map.call(a, function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
   function h(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
-  function save() { ls(STORE, state.token ? JSON.stringify({ token: state.token, status: state.status, lang: lang, at: Date.now() }) : null); }
+  function save() { ls(STORE, state.on ? JSON.stringify({ v: 2, status: state.status, lang: lang, at: Date.now() }) : null); }
 
   /* ── API ── */
   function api(path, opts) {
     opts = opts || {};
     var headers = { 'Content-Type': 'application/json' };
-    if (state.token) headers.Authorization = 'Bearer ' + state.token;
+    if (opts.bearer) headers.Authorization = 'Bearer ' + opts.bearer;     // only to move an old session into the cookie
     return fetch(C.endpoint.replace(/\/$/, '') + '/' + path, { method: opts.method || 'POST', headers: headers,
-      body: opts.body ? JSON.stringify(opts.body) : undefined, credentials: 'omit', cache: 'no-store' })
+      body: opts.body ? JSON.stringify(opts.body) : undefined, credentials: 'include', cache: 'no-store' })
       .then(function (r) {
         return r.json().catch(function () { return {}; }).then(function (j) {
           if (r.status === 401 && path !== 'start') { reset(); }
@@ -67,8 +69,8 @@
   // POST /send as server-sent events: on(event, data) gets "visitor" and "delta"; resolves with the final "done" state.
   // Falls back to the plain JSON answer if the server (or a proxy) does not stream.
   function sendStream(body, on) {
-    var headers = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + state.token };
-    return fetch(C.endpoint.replace(/\/$/, '') + '/send', { method: 'POST', headers: headers, body: JSON.stringify(body), credentials: 'omit', cache: 'no-store' })
+    var headers = { 'Content-Type': 'application/json' };
+    return fetch(C.endpoint.replace(/\/$/, '') + '/send', { method: 'POST', headers: headers, body: JSON.stringify(body), credentials: 'include', cache: 'no-store' })
       .then(function (r) {
         var ct = r.headers.get('content-type') || '';
         if (!r.ok || ct.indexOf('event-stream') < 0 || !r.body || !r.body.getReader) {
@@ -119,12 +121,12 @@
   }
 
   function ensureSession() {
-    if (state.token) return Promise.resolve();
+    if (state.on) return Promise.resolve();
     return turnstile().then(function (tok) {
-      return api('start', { body: { turnstile_token: tok, lang: lang, page: location.pathname.slice(0, 120) } });
+      return api('start', { body: { turnstile_token: tok, lang: lang, page: location.pathname.slice(0, 120), cookie: true } });
     }).then(function (j) {
       el.ts.textContent = '';
-      state.token = j.token; state.status = j.status; state.seq = 0; save();
+      state.on = true; state.status = j.status; state.seq = 0; save();
       track('chat_started');
     });
   }
@@ -210,7 +212,7 @@
     state.msgs = {};
     var g = h('div', 'cha-m a'); g.textContent = A.greeting[lang] || A.greeting.en;
     el.log.appendChild(g);
-    if (!state.token) quick();
+    if (!state.on) quick();
   }
 
   function quick() {
@@ -280,7 +282,7 @@
     el.human.hidden = state.status !== 'ai_active';
     var nc = el.log.querySelector('.cha-new');
     if (state.status === 'closed' && !nc) {
-      var b = h('button', 'cha-chip cha-new', u().newChat); b.type = 'button'; b.onclick = function () { reset(); greeting(); el.input.focus(); };
+      var b = h('button', 'cha-chip cha-new', u().newChat); b.type = 'button'; b.onclick = function () { endChat(); greeting(); el.input.focus(); };
       var w = h('div', 'cha-acts c'); w.appendChild(b); el.log.appendChild(w);
     }
     schedule();
@@ -368,20 +370,20 @@
 
   // wait > 0: long polling – the server answers as soon as something new arrives (a team reply in ~1 s)
   function poll(wait) {
-    if (!state.token) return Promise.resolve();
+    if (!state.on) return Promise.resolve();
     return api('poll?after=' + state.seq + (wait ? '&wait=' + wait : ''), { method: 'GET' }).then(merge).catch(function () {});
   }
   // While a person is requested or in the chat: a held-open request with the panel open and visible,
   // a check every 15 s otherwise, every 30 s after 30 idle minutes. Nothing at all in the AI mode.
   function schedule() {
     clearTimeout(pollT);
-    if (!state.token || (state.status !== 'human_requested' && state.status !== 'human_active')) return;
+    if (!state.on || (state.status !== 'human_requested' && state.status !== 'human_active')) return;
     var idle = Date.now() - lastNew > 30 * 60 * 1000;
     if (opened && !document.hidden && !idle) { if (!lpBusy) pollT = setTimeout(longPoll, 0); return; }
     pollT = setTimeout(function () { poll().then(schedule); }, idle ? 30000 : 15000);
   }
   function longPoll() {
-    if (lpBusy || !state.token) return;
+    if (lpBusy || !state.on) return;
     lpBusy = true;
     var t = Date.now(), seq = state.seq;
     api('poll?after=' + seq + '&wait=20', { method: 'GET' }).then(function (j) {
@@ -398,10 +400,12 @@
 
   function reset() {
     clearTimeout(pollT);
-    state = { token: '', status: 'ai_active', seq: 0, msgs: {} };
+    state = { on: false, status: 'ai_active', seq: 0, msgs: {} };
     ls(STORE, null);
     if (el.state) { el.state.hidden = true; el.human.hidden = false; }
   }
+  // "Start a new chat": the server revokes the old session and clears the cookie; the next message starts a new one
+  function endChat() { if (state.on) api('end', { body: {} }).catch(function () {}); reset(); }
 
   /* ── panel ── */
   function paintChrome() {
@@ -483,7 +487,7 @@
     fitViewport();
     track('chat_open');
     seenInvite();
-    (state.token && state.seq === 0 ? poll() : Promise.resolve()).then(function () { scroll(); schedule(); });
+    (state.on && state.seq === 0 ? poll() : Promise.resolve()).then(function () { scroll(); schedule(); });
     // desktop: ready to type; phones: no keyboard until the visitor taps the field (like messengers)
     if (matchMedia('(pointer:fine)').matches) setTimeout(function () { el.input.focus({ preventScroll: true }); }, 60);
   }
@@ -502,7 +506,7 @@
   function ss(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { return '1'; } }
   function seenInvite() { ss('cha_invite', '1'); hideInvite(); }
   function invite() {
-    if (state.token || ss('cha_invite') || !/^\/(ru\/)?$/.test(location.pathname)) return;
+    if (state.on || ss('cha_invite') || !/^\/(ru\/)?$/.test(location.pathname)) return;
     var t0 = Number(ss('cha_t0')) || Math.round(Date.now() - performance.now());   // the timer does not restart on other pages
     ss('cha_t0', String(t0));
     setTimeout(function () {
@@ -523,13 +527,18 @@
       el.launch = document.getElementById('cha-launch');
       var saved = null; try { saved = JSON.parse(ls(STORE) || 'null'); } catch (e) {}
       lang = UI[cfg.lang] ? cfg.lang : 'en';
-      if (saved && saved.token && Date.now() - saved.at < (A.retention_days || 30) * 86400000) {
-        state.token = saved.token; state.status = saved.status || 'ai_active';
-        // the visitor switched EN/RU on the site: the interface follows the page, history stays as it was written,
-        // new answers and team notices come in the page language
-        if (saved.lang && saved.lang !== lang) api('lang', { body: { lang: lang } }).then(save, function () {});
-        // a conversation with the team continues in the background: new replies show a dot on the launcher
-        if (state.status === 'human_requested' || state.status === 'human_active') { build(); poll().then(schedule); }
+      if (saved && Date.now() - saved.at < (A.retention_days || 30) * 86400000) {
+        state.on = true; state.status = saved.status || 'ai_active';
+        // a session from before the cookie: the token moves into the HttpOnly cookie and leaves localStorage
+        var ready = saved.token ? api('adopt', { body: {}, bearer: saved.token }).then(save, function () { reset(); }) : Promise.resolve();
+        ready.then(function () {
+          if (!state.on) return;
+          // the visitor switched EN/RU on the site: the interface follows the page, history stays as it was written,
+          // new answers and team notices come in the page language
+          if (saved.lang && saved.lang !== lang) api('lang', { body: { lang: lang } }).then(save, function () {});
+          // a conversation with the team continues in the background: new replies show a dot on the launcher
+          if (state.status === 'human_requested' || state.status === 'human_active') { build(); poll().then(schedule); }
+        });
       }
       invite();
       if (window.visualViewport) { visualViewport.addEventListener('resize', fitViewport); visualViewport.addEventListener('scroll', fitViewport); }

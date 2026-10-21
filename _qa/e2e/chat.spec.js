@@ -9,6 +9,9 @@ const EP = '/api/chat';
 
 function fakeApi(page, { reply, stream = false, delay = 0 } = {}) {
   const s = { status: 'ai_active', seq: 0, msgs: [], calls: [] };
+  // Playwright's WebKit wipes localStorage when a mocked response sets a Secure cookie on http://localhost
+  // (the test server). Production is HTTPS; WebKit runs here without the cookie, Chromium checks it.
+  const noCookie = page.context().browser().browserType().name() === 'webkit';
   const add = (m) => { m.seq = ++s.seq; m.at = Date.now(); s.msgs.push(m); return m; };
   s.add = add;
   page.route('**/api/chat/**', async (route) => {
@@ -16,12 +19,17 @@ function fakeApi(page, { reply, stream = false, delay = 0 } = {}) {
     const u = new URL(req.url());
     const action = u.pathname.split('/').pop();
     const body = req.postData() ? JSON.parse(req.postData()) : {};
-    s.calls.push({ action, body, wait: u.searchParams.get('wait'), auth: req.headers().authorization || '', origin: req.headers().origin || '' });
+    s.calls.push({ action, body, wait: u.searchParams.get('wait'), auth: req.headers().authorization || '', origin: req.headers().origin || '',
+      cookie: (await req.headerValue('cookie')) || '' });
     const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' };
     if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
-    const out = (o) => route.fulfill({ status: 200, contentType: 'application/json', headers: cors, body: JSON.stringify({ ok: true, ...o }) });
+    const out = (o, h = {}) => route.fulfill({ status: 200, contentType: 'application/json', headers: { ...cors, ...h }, body: JSON.stringify({ ok: true, ...o }) });
+    const COOKIE = '__Secure-cha_s=cs_' + 'a'.repeat(43) + '; Path=/api/chat; Max-Age=2592000; HttpOnly; Secure; SameSite=Strict';
     const after = (n) => s.msgs.filter((m) => m.seq > n);
-    if (action === 'start') return out({ token: 'cs_' + 'a'.repeat(43), status: s.status, messages: [] });
+    // like the Worker: the current widget asks for the cookie and gets no token; an old widget would get the token
+    if (action === 'start') return body.cookie ? out({ status: s.status, messages: [] }, noCookie ? {} : { 'Set-Cookie': COOKIE }) : out({ token: 'cs_' + 'a'.repeat(43), status: s.status, messages: [] });
+    if (action === 'adopt') return out({}, noCookie ? {} : { 'Set-Cookie': COOKIE });
+    if (action === 'end') return out({}, { 'Set-Cookie': '__Secure-cha_s=; Path=/api/chat; Max-Age=0; HttpOnly; Secure; SameSite=Strict' });
     if (action === 'poll') return out({ status: s.status, messages: after(Number(u.searchParams.get('after') || 0)) });
     if (action === 'send') {
       const before = s.seq;
@@ -167,6 +175,7 @@ test('messages: answer with fixed-URL buttons, HTML shown as text, only known li
 
 test('switching EN → RU on the site: the widget follows the page, the conversation stays; analytics get event names only', async ({ page }) => {
   await enable(page);
+
   const api = fakeApi(page);
   await page.goto('/');
   await page.locator('#cha-launch').click();
@@ -217,8 +226,38 @@ test('handoff: waiting state, team reply appears without reload, conversation re
   expect(api.calls.filter((c) => c.action === 'start').length).toBe(1);
   const polls = api.calls.filter((c) => c.action === 'poll');
   expect(polls.length).toBeGreaterThan(0);
-  expect(polls.every((c) => c.auth === 'Bearer cs_' + 'a'.repeat(43))).toBe(true);
+  // the session travels as the HttpOnly cookie only: no Authorization header, nothing secret in localStorage or in page scripts
+  expect(polls.every((c) => !c.auth)).toBe(true);
+  // WebKit keeps no Secure cookies on http://localhost (the test server); production is HTTPS. Chromium checks the cookie itself.
+  if (test.info().project.name.startsWith('chromium')) expect(polls.every((c) => c.cookie.includes('__Secure-cha_s=cs_'))).toBe(true);
   expect(polls.every((c) => c.origin === '')).toBe(true);                       // what production sees: no Origin on same-origin GET
+  expect(api.calls.find((c) => c.action === 'start').body.cookie).toBe(true);
+  const stored = await page.evaluate(() => JSON.stringify(localStorage) + document.cookie);
+  expect(stored).not.toContain('cs_');
+});
+
+test('an older visitor with the token in localStorage: it moves into the cookie once and leaves localStorage', async ({ page }) => {
+  await enable(page);
+  const api = fakeApi(page);
+  api.status = 'human_active';
+  api.add({ sender: 'operator', text: 'Earlier reply from the team' });
+  await page.addInitScript(() => {
+    if (!sessionStorage.getItem('legacy_set')) {
+      localStorage.setItem('cha_session', JSON.stringify({ token: 'cs_' + 'b'.repeat(43), status: 'human_active', lang: 'en', at: Date.now() }));
+      sessionStorage.setItem('legacy_set', '1');
+    }
+  });
+  await page.goto('/');
+  await expect.poll(() => api.calls.filter((c) => c.action === 'adopt').length, { timeout: 15000 }).toBe(1);   // the chat code loads when the page is idle
+  const adopt = api.calls.find((c) => c.action === 'adopt');
+  expect(adopt.auth).toBe('Bearer cs_' + 'b'.repeat(43));
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('cha_session')), { timeout: 15000 }).not.toContain('cs_');
+  await page.locator('#cha-launch').click();
+  await expect(page.locator('.cha-m.o')).toContainText('Earlier reply from the team');
+  const after = api.calls.slice(api.calls.indexOf(adopt) + 1);
+  expect(after.length).toBeGreaterThan(0);
+  expect(after.every((c) => !c.auth)).toBe(true);
+  if (test.info().project.name.startsWith('chromium')) expect(after.every((c) => c.cookie.includes('__Secure-cha_s='))).toBe(true);
 });
 
 test('fits the screen: no horizontal scroll, input and send button visible', async ({ page }) => {
