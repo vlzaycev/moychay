@@ -19,7 +19,9 @@ test('build is reproducible: _build/build.py output == committed HTML', () => {
   fs.cpSync(path.join(ROOT, '_build'), path.join(tmp, '_build'), { recursive: true });
   if (fs.existsSync(path.join(ROOT, '_content'))) fs.cpSync(path.join(ROOT, '_content'), path.join(tmp, '_content'), { recursive: true });
   // start from the committed output: <lastmod> is kept for pages whose HTML did not change
-  for (const f of [...Object.values(PAGES), 'sitemap.xml']) {
+  // every page in the sitemap (not only the ones checked below), or a missing one would get today's <lastmod>
+  const inSitemap = [...read('sitemap.xml').matchAll(/<loc>https:\/\/teaphuket\.com\/([^<]*)<\/loc>/g)].map((m) => m[1] + 'index.html');
+  for (const f of new Set([...Object.values(PAGES), ...inSitemap, 'sitemap.xml'])) {
     fs.mkdirSync(path.dirname(path.join(tmp, f)), { recursive: true });
     fs.copyFileSync(path.join(ROOT, f), path.join(tmp, f));
   }

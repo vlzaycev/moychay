@@ -397,8 +397,9 @@ test('knowledge base: documents from the site and hand-written files, SQL is esc
 });
 
 test('events: only upcoming, visible events from the live sheet, never invented', async () => {
-  const csv = 'date,time,title_en,title_ru,price_en,show\n2026-10-01,18:00,Past,Прошлое,,\n2026-10-25,19:00,"Pu-erh tasting, part 2",Дегустация,500฿,\n2026-10-26,19:00,Hidden,,,no\n';
-  const list = eventsFromCSV(csv, '2026-10-18');
+  const day = (n) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);   // relative to today: Cha looks 30 days ahead
+  const csv = `date,time,title_en,title_ru,price_en,show\n2026-10-01,18:00,Past,Прошлое,,\n${day(5)},19:00,"Pu-erh tasting, part 2",Дегустация,500฿,\n${day(6)},19:00,Hidden,,,no\n`;
+  const list = eventsFromCSV(csv, day(0));
   assert.deepEqual(list.map((e) => e.title), ['Pu-erh tasting, part 2']);
   mockNet({ csv });
   const env = makeEnv();
