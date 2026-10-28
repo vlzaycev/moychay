@@ -38,9 +38,9 @@ for (const p of PAGES) {
 
     test('"Details" only for a link to the event itself; the Instagram profile becomes "Ask about this event" in the messenger', async ({ page }) => {
       await mockEvents(page, HEADER +
-        '2099-12-01,18:00,Profile link,Ссылка на профиль,t,т,,,https://www.instagram.com/moychay.phuket,yes\n' +
+        '2099-12-01,18:00,Profile link,Ссылка на профиль,t,т,Donation,Донат,https://www.instagram.com/moychay.phuket,yes\n' +
         '2099-12-02,18:00,Post link,Ссылка на пост,t,т,,,https://www.instagram.com/p/AbC123/,yes\n' +
-        '2099-12-03,18:00,No link,Без ссылки,t,т,,,,yes\n');
+        '2099-12-03,18:00,No link,Без ссылки,t,т,380,380,,yes\n');
       const sheetCalls = [];
       page.on('request', (r) => { if (/docs\.google\.com/.test(r.url())) sheetCalls.push(r.url()); });
       await page.goto(p.path + '#events');
@@ -57,6 +57,9 @@ for (const p of PAGES) {
         await expect(links.nth(i)).not.toHaveAttribute('href', /instagram\.com\/moychay\.phuket/);
       }
       if (p.lang === 'en') expect(decodeURIComponent(await links.nth(0).getAttribute('href'))).toContain('Profile link');
+      // the longer label still fits its card on a 375 px phone (it wraps under the price instead of running off the edge)
+      const fit = await links.evaluateAll((ls) => ls.map((l) => l.getBoundingClientRect().right - l.closest('.evc').getBoundingClientRect().right));
+      for (const d of fit) expect(d).toBeLessThanOrEqual(1);
       expect(sheetCalls, 'the browser never reads the Google Sheet itself').toEqual([]);
     });
 
