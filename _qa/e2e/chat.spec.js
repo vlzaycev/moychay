@@ -1,7 +1,7 @@
 // Cha chat widget in the browser. The chat API is faked with page.route (no Worker, no AI, no Telegram):
 // these tests cover the widget – loading, layout, accessibility, rendering safety, handoff UI, restore, analytics.
 // The Worker itself is covered by _qa/unit/chat.test.mjs.
-const { test, expect } = require('./test');
+const { test, expect, LOCAL } = require('./test');
 const { mockEvents } = require('./helpers');
 
 // same origin as the site, like production: browsers send no Origin header on these GET requests
@@ -59,6 +59,8 @@ function fakeApi(page, { reply, stream = false, delay = 0 } = {}) {
 }
 
 async function enable(page, { invite = false } = {}) {
+  // these tests fake the chat API and Turnstile – only possible on a local copy; the production smoke run skips them
+  test.skip(!LOCAL, 'fake chat API: local runs only');
   await page.addInitScript(([ep, inv]) => {
     localStorage.setItem('cha_endpoint', ep);
     if (!inv && !sessionStorage.getItem('cha_t0')) sessionStorage.setItem('cha_invite', '1');

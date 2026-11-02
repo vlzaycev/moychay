@@ -1,5 +1,5 @@
 // Inner pages (/ceremonies/ /tea/ /matcha/ /events/ /contact/ /wholesale/ + /ru/…): SEO, navigation, forms.
-const { test, expect } = require('./test');
+const { test, expect, LOCAL } = require('./test');
 const { mockEvents, watchErrors } = require('./helpers');
 
 const H1 = {
@@ -228,6 +228,7 @@ for (const lang of ['en', 'ru']) {
 
   test(`${lp}blog/ drafts: local preview works, is noindex, and nothing is published`, async ({ page, request }) => {
     expect((await request.get(lp + 'blog/')).status()).toBe(404);
+    test.skip(!LOCAL, 'the drafts preview exists only in the local build (production: /blog/ 404 checked above)');
     const r = await page.goto('/_preview' + lp + 'blog/');
     expect(r.status()).toBe(200);
     await expect(page.locator('meta[name=robots]')).toHaveAttribute('content', 'noindex');

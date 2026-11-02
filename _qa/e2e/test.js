@@ -12,4 +12,4 @@ const test = base.test.extend({
   },
 });
 
-module.exports = { test, expect: base.expect };
+module.exports = { test, expect: base.expect, LOCAL };
