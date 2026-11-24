@@ -678,7 +678,7 @@ BLOG_T = dict(
                          events="Upcoming tea events", contact="Address and directions", wholesale="Tea for your business",
                          home="Visit Moychay Phuket", shop="Online shop with delivery across Thailand")),
     ru=dict(title="Блог о чае – Moychay Phuket", crumb="Блог",
-            h1="Блог о чае – Moychay Phuket",
+            h1="Блог о чае Moychay Phuket",
             desc="Материалы о китайском чае от чайной Moychay Phuket в Бангтао: чайные церемонии, пуэр, заваривание дома и выбор чая для кафе и ресторанов.",
             lead="Неспешные материалы о китайском чае от нашей чайной на Boat Avenue: что попробовать, как заварить и как чай вписывается в жизнь.",
             read="мин чтения", published="Опубликовано", updated="Обновлено", by="Автор:",

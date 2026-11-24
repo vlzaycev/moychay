@@ -50,6 +50,7 @@ The tea master brews it gong fu cha style and explains the brewing steps, the te
 
 ### Stay a while
 The ceremony takes about 60 minutes. After that you can stay at the table for up to an hour to relax.
+What happens at a Chinese tea ceremony?
 
 ## Ceremonies for hotels, teams and private events
 We also hold tea ceremonies and tastings outside the tea house – for hotel guests, private groups, client meetings and residents' events, in English or Russian.

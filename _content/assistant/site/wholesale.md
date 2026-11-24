@@ -78,6 +78,7 @@ We agree on products, services and commercial terms in an individual proposal.
 
 ### Launch & ongoing supply
 We train the team, check the service together and agree on a reorder schedule.
+How to choose tea for a café or restaurant
 
 ## Wholesale terms
 Wholesale terms depend on your order and the products selected. Contact us for a tailored quotation.

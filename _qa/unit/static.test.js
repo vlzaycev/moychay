@@ -73,7 +73,9 @@ test('robots.txt, sitemap.xml and CNAME are valid', () => {
   const sm = read('sitemap.xml');
   assert.match(sm, /<loc>https:\/\/teaphuket\.com\/<\/loc>/);
   const locs = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
-  assert.equal(locs.length, 16);                    // 7 pages × EN/RU + privacy policy EN/RU
+  const posts = fs.readdirSync(path.join(ROOT, '_content', 'blog')).filter(f => /\nstatus:\s*published/.test(read('_content/blog/' + f)));
+  const indexes = new Set(posts.map(f => f.split('.')[1])).size;
+  assert.equal(locs.length, 16 + posts.length + indexes);   // 7 pages × EN/RU + privacy EN/RU + published articles + blog indexes
   for (const u of ['https://teaphuket.com/privacy/', 'https://teaphuket.com/ru/privacy/']) assert.ok(locs.includes(u), u);
   for (const s of SLUGS) for (const u of ['https://teaphuket.com/' + s, 'https://teaphuket.com/ru/' + s]) assert.ok(locs.includes(u), u);
   assert.doesNotMatch(sm, /404/);

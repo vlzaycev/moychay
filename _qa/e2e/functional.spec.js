@@ -162,7 +162,7 @@ for (const p of PAGES) {
       expect(await f.locator('.soc a').count()).toBeGreaterThanOrEqual(2);
       const nav = await f.locator('nav.ftr-col a').evaluateAll(as => as.map(a => a.getAttribute('href')));
       const lp = p.lang === 'en' ? '/' : '/ru/';
-      expect(nav).toEqual(['ceremonies/', 'tea/', 'matcha/', 'events/', 'contact/', 'wholesale/'].map(s => lp + s).concat('https://phuket.moychay.asia/'));
+      expect(nav).toEqual(['ceremonies/', 'tea/', 'matcha/', 'events/', 'contact/', 'blog/', 'wholesale/'].map(s => lp + s).concat('https://phuket.moychay.asia/'));
       await expect(f.locator('.ftr-contact a[data-track="directions"]')).toHaveAttribute('href', MAPS);
       await expect(f.locator('.ftr-bottom')).toContainText('Moychay Thai Co. LTD');
       const c = f.locator('a.credit');

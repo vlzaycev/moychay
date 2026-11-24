@@ -5,7 +5,7 @@ description: Gongfu cha step by step: the teaware, the short infusions and what 
 language: en
 author: Moychay Phuket
 reviewer:
-published_at:
+published_at: 2026-11-24
 updated_at:
 hero_image: people/8_people
 image_alt: Guests at a gongfu cha tea ceremony around the round table at Moychay Phuket
@@ -13,7 +13,7 @@ category: ceremony
 related_pages: [ceremonies, events, tea]
 seo_title: What Happens at a Chinese Tea Ceremony? Gongfu Cha Explained
 seo_description: Gongfu cha step by step: teaware, short infusions and what a guest does. Plus how to try a Chinese tea ceremony in Phuket.
-status: draft
+status: published
 verify: [Which vessel our tea master uses most (gaiwan or clay teapot) | Whether the first rinse is done for every tea or only for pu-erh and rolled oolongs | Typical number of infusions in our 60-minute ceremony | Typical infusion times we quote to guests]
 photos: [Close-up of the tea master pouring from a gaiwan at Moychay Phuket | Fair cup and small cups on the tea tray | Guests smelling the dry leaf before brewing]
 ---

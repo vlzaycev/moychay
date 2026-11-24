@@ -5,7 +5,7 @@ description: Raw and ripe pu-erh compared – how each is made, how they look an
 language: en
 author: Moychay Phuket
 reviewer:
-published_at:
+published_at: 2026-11-24
 updated_at:
 hero_image: interior/2_shop
 image_alt: Pu-erh tea cakes on the shelves of Moychay Phuket
@@ -13,7 +13,7 @@ category: guide
 related_pages: [tea, shop, ceremonies]
 seo_title: "Sheng vs Shou Pu-erh: The Difference Explained | Moychay Phuket"
 seo_description: Raw (sheng) and ripe (shou) pu-erh compared – production, dry leaf, liquor, taste and ageing. Plus which pu-erh to try first.
-status: draft
+status: published
 verify: [The year and place usually given for the first wet-piling (early 1970s, Kunming Tea Factory) | Brewing guidance we give for sheng and shou (water temperature, rinse, infusion times) | Which pu-erh are currently on our shelves (young sheng, aged sheng 10+ years, shou and dark teas)]
 photos: [Sheng and shou cakes side by side, unwrapped | Two cups next to each other: amber sheng liquor and dark shou liquor | Dry leaf of both on a tasting tray]
 ---

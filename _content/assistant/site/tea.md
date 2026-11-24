@@ -60,6 +60,7 @@ The difference starts with how the leaf is processed after picking. A short guid
 ## Teaware and antiques
 Clay teapots, porcelain cups and antique teaware on our shelves are a real collection for sale, not decor.
 The tea master will help you choose a teapot for the tea you like.
+Sheng vs shou pu-erh: what's the difference?
 
 ## Buy tea online
 Explore Chinese tea, teaware and accessories at the official Moychay Phuket online store.

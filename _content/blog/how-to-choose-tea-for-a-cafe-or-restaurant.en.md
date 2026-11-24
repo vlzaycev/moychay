@@ -5,7 +5,7 @@ description: A practical guide for venues in Phuket – building a short tea lis
 language: en
 author: Moychay Phuket
 reviewer:
-published_at:
+published_at: 2026-11-24
 updated_at:
 hero_image: interior/4_shop
 image_alt: Round tea table set with teaware at Moychay Phuket
@@ -13,7 +13,7 @@ category: business
 related_pages: [wholesale, tea, contact]
 seo_title: How to Choose Tea for a Café or Restaurant | Moychay Phuket
 seo_description: Build a short tea list, pair tea with food, brew it the same way every time and store it well in Phuket's humidity. A practical guide for venues.
-status: draft
+status: published
 verify: [The suggested size of a first tea list (around five teas) | Pairing suggestions by tea type | Advice on batch brewing for iced tea]
 photos: [Tea service at a partner venue – only with the partner's permission | Recipe card and scales next to a teapot | Tea storage tins on a shelf]
 ---

@@ -226,22 +226,36 @@ for (const lang of ['en', 'ru']) {
     await expect(page.locator('#prices .menu-extra a')).toHaveAttribute('href', lp + 'matcha/');
   });
 
-  test(`${lp}blog/ drafts: local preview works, is noindex, and nothing is published`, async ({ page, request }) => {
-    expect((await request.get(lp + 'blog/')).status()).toBe(404);
-    test.skip(!LOCAL, 'the drafts preview exists only in the local build (production: /blog/ 404 checked above)');
-    const r = await page.goto('/_preview' + lp + 'blog/');
+  test(`${lp}blog/: index and every article are published, indexable and linked`, async ({ page }) => {
+    const errors = watchErrors(page);
+    const r = await page.goto(lp + 'blog/');
     expect(r.status()).toBe(200);
-    await expect(page.locator('meta[name=robots]')).toHaveAttribute('content', 'noindex');
-    const links = page.locator('.posts h2 a');
-    expect(await links.count()).toBeGreaterThanOrEqual(3);
-    await links.first().click();
     await expect(page.locator('h1')).toHaveCount(1);
-    await expect(page.locator('.draft')).toBeVisible();
-    await expect(page.locator('.prose h2').first()).toBeVisible();
-    const ld = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent())['@graph'];
-    expect(ld[0]['@type']).toBe('BlogPosting');
-    expect(ld[0].datePublished).toBeUndefined();          // no invented dates
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+    await expect(page.locator(`.ftr a[href="${lp}blog/"]`)).toHaveCount(1);
+    const hrefs = await page.locator('.posts h2 a').evaluateAll(as => as.map(a => a.getAttribute('href')));
+    expect(hrefs.length).toBeGreaterThanOrEqual(3);
+    for (const href of hrefs) {
+      expect((await page.goto(href)).status()).toBe(200);
+      await expect(page.locator('h1')).toHaveCount(1);
+      await expect(page.locator('.draft')).toHaveCount(0);
+      await expect(page.locator('meta[name=robots]')).toHaveCount(0);
+      await expect(page.locator('link[rel=canonical]')).toHaveAttribute('href', 'https://teaphuket.com' + href);
+      const slug = href.replace(/^\/ru/, '');
+      await expect(page.locator('link[hreflang=en]')).toHaveAttribute('href', 'https://teaphuket.com' + slug);
+      await expect(page.locator('link[hreflang=ru]')).toHaveAttribute('href', 'https://teaphuket.com/ru' + slug);
+      await expect(page.locator('.prose h2').first()).toBeVisible();
+      const ld = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent())['@graph'];
+      expect(ld[0]['@type']).toBe('BlogPosting');
+      expect(ld[0].datePublished).toMatch(/^\d{4}-\d{2}-\d{2}/);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+    }
+    expect(errors).toEqual([]);
+  });
+
+  test(`${lp}blog/ local preview stays noindex`, async ({ page }) => {
+    test.skip(!LOCAL, 'the preview exists only in the local build');
+    expect((await page.goto('/_preview' + lp + 'blog/')).status()).toBe(200);
+    await expect(page.locator('meta[name=robots]')).toHaveAttribute('content', 'noindex');
   });
 }
 

@@ -5,7 +5,7 @@ description: Практическое руководство для заведе
 language: ru
 author: Moychay Phuket
 reviewer:
-published_at:
+published_at: 2026-11-24
 updated_at:
 hero_image: interior/4_shop
 image_alt: Круглый чайный стол с посудой в Moychay Phuket
@@ -13,7 +13,7 @@ category: business
 related_pages: [wholesale, tea, contact]
 seo_title: Как подобрать чай для кафе или ресторана | Moychay Phuket
 seo_description: Короткая чайная карта, сочетания с блюдами, одинаковое заваривание и хранение во влажном климате Пхукета. Руководство для заведений.
-status: draft
+status: published
 verify: [Рекомендуемый размер первой чайной карты (около пяти сортов) | Сочетания по типам чая | Советы по заготовке холодного чая]
 photos: [Чайная подача в заведении-партнёре – только с разрешения партнёра | Техкарта и весы рядом с чайником | Банки для хранения чая на полке]
 ---
