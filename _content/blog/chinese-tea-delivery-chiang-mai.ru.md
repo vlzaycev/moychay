@@ -57,3 +57,9 @@ Moychay Phuket – чайная на Boat Avenue в Бангтао на Пхук
 ## Если будете на Пхукете
 
 Заходите в нашу чайную на втором этаже Boat Avenue в Бангтао: здесь можно попробовать любой чай перед покупкой. Открыто каждый день с 11:00 до 22:00.
+
+## Заказать онлайн
+
+Несколько чаёв, с которых удобно начать. Полный выбор – в разделе [все чаи](https://phuket.moychay.asia/collections/alltea).
+
+[[shop: yunnan-baihao-yinzhen-20g | foxy-shu-puer-tea-moychay-harvest-2019-pressed-in-2023 | under-the-stars-sheng-puer-moychay-harvest-2022-pressed-in-2023 | zhong-huo-da-hong-pao-30g]]

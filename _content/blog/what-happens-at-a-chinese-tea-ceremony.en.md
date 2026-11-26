@@ -60,3 +60,11 @@ Hold the cup, smell it, drink slowly. Notice how the second infusion differs fro
 At [Moychay Phuket](/ceremonies/) on Boat Avenue in Bangtao the gongfu cha ceremony takes about 60 minutes, and you can stay at the table for up to an hour afterwards. It needs booking. If you only have a few minutes, a walk-in tasting gives you a short introduction with the tea master, and then you stay with the tea you picked.
 
 Tea ceremonies also appear in our [weekly events](/events/), and every tea on our shelves can be tried at the tea house.
+
+## Order online
+
+To brew gongfu cha at home you need a gaiwan or a clay teapot and small cups – all in the [teaware](https://phuket.moychay.asia/collections/teaware) section of our store.
+
+[[shop: ice-white-bowl-gold | clay-teapot-93620 | 10-head-gradient-blue-pot | china-white-8-travel]]
+
+All our teas and teaware are in the [Moychay Phuket online store](https://phuket.moychay.asia/). Free delivery across Thailand on orders from 2000฿, and the code MOYCHAY gives 10% off your first order.

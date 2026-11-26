@@ -56,3 +56,9 @@ Chiang Mai has many cafés, tea rooms and guesthouses. If you are choosing tea f
 ## If you are in Phuket
 
 Visit our tea house on the 2nd floor of Boat Avenue in Bangtao – you can taste any tea before you buy. Open daily 11:00-22:00.
+
+## Order online
+
+A few teas to start with. The full range is under [all teas](https://phuket.moychay.asia/collections/alltea).
+
+[[shop: yunnan-baihao-yinzhen-20g | foxy-shu-puer-tea-moychay-harvest-2019-pressed-in-2023 | under-the-stars-sheng-puer-moychay-harvest-2022-pressed-in-2023 | zhong-huo-da-hong-pao-30g]]

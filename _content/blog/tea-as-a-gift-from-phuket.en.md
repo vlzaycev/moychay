@@ -66,4 +66,10 @@ More in our guide on [where to buy real tea in Phuket](/blog/where-to-buy-real-t
 
 Moychay Phuket is on the 2nd floor of Boat Avenue in Bangtao, open daily 11:00-22:00. The shelves hold more than 200 natural loose-leaf teas with no artificial flavourings, and you can taste any of them before you buy. A walk-in tasting is 300฿ plus tea by weight.
 
-If you have already left or want to send a gift, order from our [online store](https://phuket.moychay.asia/): delivery across Thailand is free on orders from 2000฿, and international orders are shipped via DHL. The code MOYCHAY gives 10% off your first order.
+## Order online
+
+You can also choose a gift online: pressed teas, teaware and [tea sets](https://phuket.moychay.asia/collections/tea-sets).
+
+[[shop: fuding-lao-bai-cha-moychay-collection-aged-shou-mei-white-tea-from-fuding-fujian-province-2016-357g-cake | wild-trees-gaba-tea-spring-2023-gaba-tea-357g-cake-thailand-tea-forest-project | 10-head-gradient-blue-pot | china-white-8-travel]]
+
+All our teas and teaware are in the [Moychay Phuket online store](https://phuket.moychay.asia/). Free delivery across Thailand on orders from 2000฿, international orders ship via DHL, and the code MOYCHAY gives 10% off your first order.

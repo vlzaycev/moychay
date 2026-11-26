@@ -56,3 +56,11 @@ Both kinds suit gongfu brewing: plenty of leaf, hot water and short infusions. P
 ## Pu-erh at Moychay Phuket
 
 On our shelves you will find young raw pu-erh, raw pu-erh aged for over ten years, and shou pu-erh and other dark teas. You can try any of them at the tea house on Boat Avenue, or order pu-erh from our [online shop](https://phuket.moychay.asia/) with delivery across Thailand.
+
+## Order online
+
+Order sheng and shu online: [sheng pu-erh](https://phuket.moychay.asia/collections/sheng-puer) and [shu pu-erh](https://phuket.moychay.asia/collections/shu-puer) in our store. A few good places to start:
+
+[[shop: under-the-stars-sheng-puer-moychay-harvest-2022-pressed-in-2023 | youle-mountain-raw-puer-tea-moychay-harvest-2022-pressed-in-2023-100g | foxy-shu-puer-tea-moychay-harvest-2019-pressed-in-2023 | gongfu-shu-cha-moychay-harvest-2019-pressed-in-2023]]
+
+All our teas and teaware are in the [Moychay Phuket online store](https://phuket.moychay.asia/). Free delivery across Thailand on orders from 2000฿, and the code MOYCHAY gives 10% off your first order.

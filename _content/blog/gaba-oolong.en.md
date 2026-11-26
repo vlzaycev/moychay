@@ -47,8 +47,14 @@ GABA oolong opens up best in a gaiwan or small teapot.
 
 In a mug: 3-4 g per 250-300 ml, 2-3 minutes. More in [how to brew oolong at home](/blog/how-to-brew-oolong/).
 
+## GABA in our store
+
+Our [online store](https://phuket.moychay.asia/) currently has two GABA teas: a Thai GABA tea from the Thailand Tea Forest Project, made from wild-tree leaves picked in spring 2023 and pressed into a 357 g cake, and Mihuan Qilan GABA oolong. Both can be delivered anywhere in Thailand.
+
+[[shop: wild-trees-gaba-tea-spring-2023-gaba-tea-357g-cake-thailand-tea-forest-project | moychay-mihuan-qilan-gaba-28-hours-vacuum-fermentation]]
+
 ## Where to try it in Phuket
 
-GABA oolong is among the teas on the shelves at our tea house, Moychay Phuket on the 2nd floor of Boat Avenue in Bangtao. Ask the tea master what is available right now – you can taste any tea before you buy. A walk-in tasting is 300฿ plus tea by weight. Open daily 11:00-22:00.
+You can also taste GABA at our tea house, Moychay Phuket on the 2nd floor of Boat Avenue in Bangtao – any tea there can be tasted before you buy. A walk-in tasting is 300฿ plus tea by weight. Open daily 11:00-22:00.
 
 More Thai teas in our [Thai tea guide](/blog/thai-tea-guide/).

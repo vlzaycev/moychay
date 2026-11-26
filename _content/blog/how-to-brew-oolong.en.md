@@ -64,3 +64,11 @@ Keep oolong in a tightly closed jar or bag, in a dark place, away from spices, c
 The best way to find your oolong is to try a few. Our tea house, Moychay Phuket on Boat Avenue in Bangtao, has both light and dark oolongs. A walk-in tasting is 300฿ plus tea by weight, and the tea master will show you how to brew your tea. You can also choose teaware on the spot: gaiwans, clay teapots and cups.
 
 For something unusual, try a [GABA oolong](/blog/gaba-oolong/).
+
+## Order online
+
+Light and dark oolongs, gaiwans and clay teapots are in our store: [all oolongs](https://phuket.moychay.asia/collections/oolong-tea), [gaiwans](https://phuket.moychay.asia/collections/gaiwan) and [clay teapots](https://phuket.moychay.asia/collections/clay-teapots).
+
+[[shop: tie-guanyin-70g | zhangping-shuixian-oolong-tea-36g | zhong-huo-da-hong-pao-30g | high-mountain-dancong-mi-lan-xiang | ice-white-bowl-gold | clay-teapot-93620]]
+
+All our teas and teaware are in the [Moychay Phuket online store](https://phuket.moychay.asia/). Free delivery across Thailand on orders from 2000฿, and the code MOYCHAY gives 10% off your first order.

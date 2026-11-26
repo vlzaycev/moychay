@@ -334,3 +334,16 @@ test('"Your quiet place" ends with one editorial paragraph, not a list', () => {
   }
   assert.doesNotMatch(read('index.html'), /\.facts\{/, 'no leftover list styles');
 });
+
+test('blog: product cards link to the online shop and use local photos that exist', () => {
+  const files = ['blog', 'ru/blog'].flatMap(d => fs.readdirSync(path.join(ROOT, d)).filter(s => fs.existsSync(path.join(ROOT, d, s, 'index.html'))).map(s => d + '/' + s + '/index.html'));
+  let cards = 0;
+  for (const f of files) {
+    for (const m of read(f).matchAll(/<a class="shop-card" href="([^"]+)"[^>]*>\s*<img src="([^"]+)"/g)) {
+      cards++;
+      assert.match(m[1], /^https:\/\/phuket\.moychay\.asia\/products\/[a-z0-9-]+$/, f);
+      assert.ok(fs.existsSync(path.join(ROOT, m[2].replace(/^\//, ''))), f + ' ' + m[2]);
+    }
+  }
+  assert.ok(cards >= 20, 'product cards rendered: ' + cards);
+});

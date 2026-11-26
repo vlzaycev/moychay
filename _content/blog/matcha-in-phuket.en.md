@@ -58,3 +58,11 @@ Matcha quickly loses colour and aroma to heat, light and humidity. Keep it airti
 ## Try loose-leaf green tea too
 
 If you like matcha, try loose-leaf green tea – fresh, grassy and bright. It sits on our shelves next to white teas and oolongs. More about matcha at Moychay Phuket on our [matcha](/matcha/) page.
+
+## Order online
+
+If you like matcha, try loose-leaf [green tea](https://phuket.moychay.asia/collections/green-tea) from our store.
+
+[[shop: emeishan-maofeng-green-tea-60g | yunnan-bilochun-green-tea-70g | moli-maofeng-jasmine-maofeng-green-tea]]
+
+All our teas and teaware are in the [Moychay Phuket online store](https://phuket.moychay.asia/). Free delivery across Thailand on orders from 2000฿, and the code MOYCHAY gives 10% off your first order.

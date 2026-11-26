@@ -7,8 +7,8 @@ author: Moychay Phuket
 reviewer:
 published_at: 2026-11-26
 updated_at:
-hero_image: tea/gaba-oolong-1
-image_alt: Close-up of rolled Thai GABA oolong
+hero_image: tea/thai-tea-cakes
+image_alt: Thai Tea Forest Project tea cakes
 category: guide
 related_pages: [tea, contact, shop]
 seo_title: Thai Tea Guide – What to Try and Bring Home | Moychay Phuket
@@ -62,6 +62,14 @@ The famous orange Thai iced tea: strong black tea with sugar and condensed milk.
 - **As a fun taste of the holiday.** A pack of cha yen mix.
 
 Loose-leaf tea is light and travels well. Keep it in tight packaging, away from spices and coffee. More tips in [what to bring home from Phuket](/blog/tea-as-a-gift-from-phuket/).
+
+## Thai teas in our store
+
+Our [online store](https://phuket.moychay.asia/collections/thai-tea) carries Thai teas from the Thailand Tea Forest Project, made from the leaves of old wild tea trees: sheng pu-erh and red tea pressed into 357 g cakes, Thai GABA tea and spring white tea. A good way to try Thai tea that is nothing like the souvenir kind – and to have it delivered anywhere in Thailand.
+
+[[shop: wild-trees-sheng-puerh-tea-thai-tea-forest-project-spring-2023-357g-cake | wild-trees-gaba-tea-spring-2023-gaba-tea-357g-cake-thailand-tea-forest-project | wild-trees-red-tea-thailand-tea-forest-project-spring-2023 | thai-white-tea-spring-2024-1-bud-1-leaf-wild-tea-trees-thailand-tea-forest-project]]
+
+Not sure which to choose? Message us on WhatsApp, tell us what you like and we will help.
 
 ## Where to try them in Phuket
 

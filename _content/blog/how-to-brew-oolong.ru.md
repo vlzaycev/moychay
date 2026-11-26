@@ -64,3 +64,13 @@ photos: []
 Лучший способ найти свой улун – попробовать несколько. В нашей чайной Moychay Phuket на Boat Avenue в Бангтао есть и светлые, и тёмные улуны. Дегустация без записи стоит 300฿ плюс чай по весу, а чайный мастер покажет, как заваривать именно ваш чай. Посуду для заваривания – гайвани, глиняные чайники, пиалы – тоже можно подобрать на месте.
 
 Если хочется чего-то необычного, попробуйте [ГАБА-улун](/ru/blog/gaba-oolong/).
+
+## Заказать онлайн
+
+Светлые и тёмные улуны, гайвани и глиняные чайники – в нашем магазине: [все улуны](https://phuket.moychay.asia/collections/oolong-tea), [гайвани](https://phuket.moychay.asia/collections/gaiwan) и [глиняные чайники](https://phuket.moychay.asia/collections/clay-teapots).
+
+[[shop: tie-guanyin-70g | zhangping-shuixian-oolong-tea-36g | zhong-huo-da-hong-pao-30g | high-mountain-dancong-mi-lan-xiang | ice-white-bowl-gold | clay-teapot-93620]]
+
+Все чаи и посуда – в [интернет-магазине Moychay Phuket](https://phuket.moychay.asia/). Бесплатная доставка по Таиланду при заказе от 2000฿, промокод MOYCHAY даёт 10% скидки на первый заказ.
+
+> Оплатить можно в тайских батах, а в рублях – через СБП: в чайной на Boat Avenue и при заказе через [Telegram](https://t.me/moychay_phuket). В интернет-магазине оплата в батах.

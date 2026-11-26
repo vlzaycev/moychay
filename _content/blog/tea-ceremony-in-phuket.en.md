@@ -60,3 +60,11 @@ Ceremonies are held in Thai, English and Russian.
 - **If you like the tea.** Buy it at the tea house or in our [online store](https://phuket.moychay.asia/) with delivery across Thailand.
 
 We hold tastings and tea evenings every week. See what's on in our [events](/events/).
+
+## Order online
+
+Liked the tea at the ceremony? You can order it and the teaware for gong fu cha to your home.
+
+[[shop: ice-white-bowl-gold | china-white-8-travel | tie-guanyin-70g | zhong-huo-da-hong-pao-30g]]
+
+All our teas and teaware are in the [Moychay Phuket online store](https://phuket.moychay.asia/). Free delivery across Thailand on orders from 2000฿, and the code MOYCHAY gives 10% off your first order.

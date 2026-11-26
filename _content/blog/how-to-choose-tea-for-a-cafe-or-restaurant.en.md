@@ -68,3 +68,11 @@ The leaf is only part of the cost. A fair calculation includes the tea, water, t
 ## Working with a tea supplier in Phuket
 
 A local supplier can help with all of the above: choosing the range, tasting it with you, preparing recipe cards and training the team, then keeping the supply steady. Moychay Phuket works with [cafés, restaurants, hotels and spas](/wholesale/) on exactly this, and you're welcome to [taste the teas at our tea house](/contact/) on Boat Avenue first.
+
+## Order online
+
+Teas that make a good start for a tea menu are in our [online store](https://phuket.moychay.asia/collections/alltea). For venues we put together the range and terms individually – see [tea for business](/wholesale/).
+
+[[shop: tie-guanyin-70g | foxy-shu-puer-tea-moychay-harvest-2019-pressed-in-2023 | emeishan-maofeng-green-tea-60g | hibiscus-pressed-80-g]]
+
+All our teas and teaware are in the [Moychay Phuket online store](https://phuket.moychay.asia/). Free delivery across Thailand on orders from 2000฿, and the code MOYCHAY gives 10% off your first order.

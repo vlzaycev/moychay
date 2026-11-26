@@ -7,8 +7,8 @@ author: Moychay Phuket
 reviewer:
 published_at: 2026-11-26
 updated_at:
-hero_image: tea/gaba-oolong-1
-image_alt: Скрученный тайский ГАБА-улун крупным планом
+hero_image: tea/thai-tea-cakes
+image_alt: Тайские чаи проекта Thailand Tea Forest в блинах
 category: guide
 related_pages: [tea, contact, shop]
 seo_title: Тайский чай – какой попробовать и привезти из Таиланда | Moychay Phuket
@@ -62,6 +62,16 @@ photos: []
 - **Как шутку и вкус отпуска.** Пачку смеси для ча йен.
 
 Листовой чай лёгкий и хорошо переносит дорогу. Храните его в плотной упаковке, подальше от специй и кофе. Больше советов – в статье [что привезти с Пхукета](/ru/blog/tea-as-a-gift-from-phuket/).
+
+## Тайские чаи в нашем магазине
+
+В [интернет-магазине Moychay Phuket](https://phuket.moychay.asia/collections/thai-tea) есть тайские чаи проекта Thailand Tea Forest. Их делают из листа старых диких чайных деревьев: шэн пуэр и красный чай в блинах по 357 г, тайский ГАБА-чай и белый чай весеннего сбора. Это хороший способ попробовать тайский чай, который не похож на сувенирный, и заказать его домой с доставкой по Таиланду.
+
+[[shop: wild-trees-sheng-puerh-tea-thai-tea-forest-project-spring-2023-357g-cake | wild-trees-gaba-tea-spring-2023-gaba-tea-357g-cake-thailand-tea-forest-project | wild-trees-red-tea-thailand-tea-forest-project-spring-2023 | thai-white-tea-spring-2024-1-bud-1-leaf-wild-tea-trees-thailand-tea-forest-project]]
+
+Хотите сначала понять, что вам ближе? Напишите нам в WhatsApp или Telegram, расскажите, что вы любите, и мы подскажем.
+
+> Оплатить можно в тайских батах, а в рублях – через СБП: в чайной на Boat Avenue и при заказе через [Telegram](https://t.me/moychay_phuket). В интернет-магазине оплата в батах.
 
 ## Где попробовать на Пхукете
 

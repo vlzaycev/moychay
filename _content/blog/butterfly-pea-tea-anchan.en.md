@@ -63,3 +63,11 @@ Anchan is a herbal drink, not a medicine. The internet credits it with many heal
 Our tea house, Moychay Phuket on the 2nd floor of Boat Avenue in Bangtao, has caffeine-free herbal teas and more than 200 teas made from the tea leaf. Ask the tea master which herbal blends are on the shelves right now, and try a Thai oolong while you are there. Open daily 11:00-22:00.
 
 Other Thai teas worth knowing are in our [Thai tea guide](/blog/thai-tea-guide/).
+
+## Order online
+
+Our online store has caffeine-free [herbal teas](https://phuket.moychay.asia/collections/herbal-tea), such as hibiscus and pressed herbal blends.
+
+[[shop: hibiscus-pressed-80-g | herbal-tea-cake-calming-80-g]]
+
+All our teas and teaware are in the [Moychay Phuket online store](https://phuket.moychay.asia/). Free delivery across Thailand on orders from 2000฿, and the code MOYCHAY gives 10% off your first order.

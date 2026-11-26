@@ -58,3 +58,11 @@ Then head to Central Phuket, the big shopping centre near Phuket Town, roughly 3
 After a shower the beach is empty and the light is beautiful. Time to head back to the sea.
 
 We hold tastings and tea evenings every week – see what's on in our [events](/events/).
+
+## Order online
+
+If the rain catches you at home, order tea for delivery.
+
+[[shop: tie-guanyin-70g | foxy-shu-puer-tea-moychay-harvest-2019-pressed-in-2023 | china-white-8-travel]]
+
+All our teas and teaware are in the [Moychay Phuket online store](https://phuket.moychay.asia/). Free delivery across Thailand on orders from 2000฿, and the code MOYCHAY gives 10% off your first order.

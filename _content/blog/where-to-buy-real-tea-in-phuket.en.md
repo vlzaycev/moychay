@@ -69,3 +69,9 @@ Tea, teaware and accessories are available in the [Moychay Phuket online store](
 Give it at least an hour – tea does not like to be rushed. Don't worry if you know nothing about tea: most guests come for the first time. Sit down and taste first, then buy what you liked. That way you won't get it wrong.
 
 Address, hours and directions are on our [contact](/contact/) page.
+
+## Order online
+
+If Bangtao is too far, order online: the store has [all our teas](https://phuket.moychay.asia/collections/alltea), including [Thai teas](https://phuket.moychay.asia/collections/thai-tea).
+
+[[shop: wild-trees-sheng-puerh-tea-thai-tea-forest-project-spring-2023-357g-cake | tie-guanyin-70g | yunnan-baihao-yinzhen-20g | foxy-shu-puer-tea-moychay-harvest-2019-pressed-in-2023]]

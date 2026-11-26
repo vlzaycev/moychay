@@ -64,3 +64,9 @@ If you are choosing tea for a venue in Bangkok, get in touch. More on working wi
 ## If you are in Phuket
 
 Visit the tea house on the 2nd floor of Boat Avenue in Bangtao – you can taste any tea before you buy. Open daily 11:00-22:00.
+
+## Order online
+
+A few teas to start with. The full range is under [all teas](https://phuket.moychay.asia/collections/alltea), including [Thai teas](https://phuket.moychay.asia/collections/thai-tea).
+
+[[shop: wild-trees-sheng-puerh-tea-thai-tea-forest-project-spring-2023-357g-cake | tie-guanyin-70g | foxy-shu-puer-tea-moychay-harvest-2019-pressed-in-2023 | yunnan-baihao-yinzhen-20g]]

@@ -92,11 +92,46 @@ def _inline(s, ctx):
     return s
 
 
+SHOP_PRODUCTS = os.path.join(os.path.dirname(HERE), "_content", "shop", "products.json")
+_SHOP_CACHE = None
+
+
+def shop_products():
+    """Products from the online shop that articles may show as cards: {handle: {title, image}} (see _content/shop/)."""
+    global _SHOP_CACHE
+    if _SHOP_CACHE is None:
+        import json
+        _SHOP_CACHE = json.load(open(SHOP_PRODUCTS, encoding="utf-8")) if os.path.exists(SHOP_PRODUCTS) else {}
+    return _SHOP_CACHE
+
+
+def shop_cards(handles, ctx):
+    """[[shop: handle | handle]] → cards with a photo, the product name and a link to the product in the online shop."""
+    cta = "Смотреть в магазине" if ctx.get("lang") == "ru" else "View in the shop"
+    cards = []
+    for h in handles:
+        prod = shop_products().get(h)
+        if not prod:
+            raise SystemExit(f"{ctx['slug']}: unknown shop product {h} (add it to _content/shop/products.json)")
+        img = prod["image"]
+        cards.append(
+            f'<a class="shop-card" href="{SHOP}products/{h}" target="_blank" rel="noopener" data-track="online_shop_click" data-place="blog_product">'
+            f'<img src="/img/shop/{img}-400.webp" srcset="/img/shop/{img}-400.webp 400w, /img/shop/{img}-800.webp 800w" '
+            f'sizes="(min-width:700px) 220px, 45vw" width="400" height="400" loading="lazy" decoding="async" alt="{html.escape(prod["title"])}">'
+            f'<span class="sc-t">{html.escape(prod["title"])}</span><span class="sc-cta">{cta}&nbsp;→</span></a>')
+    return f'<div class="shop-cards">{"".join(cards)}</div>'
+
+
 def markdown(text, ctx):
     out, lines, i = [], text.strip().split("\n"), 0
     while i < len(lines):
         line = lines[i]
         if not line.strip():
+            i += 1
+            continue
+        m = re.fullmatch(r"\[\[shop:\s*(.+?)\s*\]\]", line.strip())
+        if m:
+            out.append(shop_cards([h.strip() for h in m.group(1).split("|") if h.strip()], ctx))
             i += 1
             continue
         if line.startswith("### "):
@@ -131,7 +166,7 @@ def markdown(text, ctx):
             out.append(f'<aside class="note"><p>{_inline(" ".join(quote), ctx)}</p></aside>')
         else:
             para = []
-            while i < len(lines) and lines[i].strip() and not re.match(r"(#{2,3} |\||- |\d+\. |> )", lines[i]):
+            while i < len(lines) and lines[i].strip() and not re.match(r"(#{2,3} |\||- |\d+\. |> |\[\[shop:)", lines[i]):
                 para.append(lines[i].strip())
                 i += 1
             out.append(f"<p>{_inline(' '.join(para), ctx)}</p>")

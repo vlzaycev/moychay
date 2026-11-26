@@ -56,3 +56,13 @@ photos: [Блины шэна и шу рядом, без обёртки | Две 
 ## Пуэр в Moychay Phuket
 
 На наших полках – молодой сырой пуэр, сырой пуэр с выдержкой больше десяти лет, шу пуэр и другие тёмные чаи. Любой из них можно попробовать в чайной на Boat Avenue или заказать в нашем [интернет-магазине](https://phuket.moychay.asia/) с доставкой по Таиланду.
+
+## Заказать онлайн
+
+Шэн и шу пуэры можно заказать онлайн: [шэн пуэры](https://phuket.moychay.asia/collections/sheng-puer) и [шу пуэры](https://phuket.moychay.asia/collections/shu-puer) в нашем магазине. Вот несколько, с которых удобно начать.
+
+[[shop: under-the-stars-sheng-puer-moychay-harvest-2022-pressed-in-2023 | youle-mountain-raw-puer-tea-moychay-harvest-2022-pressed-in-2023-100g | foxy-shu-puer-tea-moychay-harvest-2019-pressed-in-2023 | gongfu-shu-cha-moychay-harvest-2019-pressed-in-2023]]
+
+Все чаи и посуда – в [интернет-магазине Moychay Phuket](https://phuket.moychay.asia/). Бесплатная доставка по Таиланду при заказе от 2000฿, промокод MOYCHAY даёт 10% скидки на первый заказ.
+
+> Оплатить можно в тайских батах, а в рублях – через СБП: в чайной на Boat Avenue и при заказе через [Telegram](https://t.me/moychay_phuket). В интернет-магазине оплата в батах.
