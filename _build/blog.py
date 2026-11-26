@@ -71,6 +71,7 @@ def load():
         meta["body"] = m.group(2)
         meta["words"] = len(re.findall(r"\w+", m.group(2)))
         posts.append(meta)
+    posts.sort(key=lambda p: p.get("published_at") or "", reverse=True)   # newest first; stable for equal dates
     return posts
 
 
