@@ -113,6 +113,54 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://teaphuket.com/privacy/"/>
   </url>
   <url>
+    <loc>https://teaphuket.com/blog/bang-tao-things-to-do/</loc>
+    <lastmod>2026-11-27</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://teaphuket.com/blog/bang-tao-things-to-do/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://teaphuket.com/ru/blog/bang-tao-things-to-do/"/>
+  </url>
+  <url>
+    <loc>https://teaphuket.com/ru/blog/bang-tao-things-to-do/</loc>
+    <lastmod>2026-11-27</lastmod>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://teaphuket.com/ru/blog/bang-tao-things-to-do/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://teaphuket.com/blog/bang-tao-things-to-do/"/>
+  </url>
+  <url>
+    <loc>https://teaphuket.com/blog/chinese-tea-delivery-krabi-samui-phangan/</loc>
+    <lastmod>2026-11-27</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://teaphuket.com/blog/chinese-tea-delivery-krabi-samui-phangan/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://teaphuket.com/ru/blog/chinese-tea-delivery-krabi-samui-phangan/"/>
+  </url>
+  <url>
+    <loc>https://teaphuket.com/ru/blog/chinese-tea-delivery-krabi-samui-phangan/</loc>
+    <lastmod>2026-11-27</lastmod>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://teaphuket.com/ru/blog/chinese-tea-delivery-krabi-samui-phangan/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://teaphuket.com/blog/chinese-tea-delivery-krabi-samui-phangan/"/>
+  </url>
+  <url>
+    <loc>https://teaphuket.com/blog/phuket-beyond-the-beach/</loc>
+    <lastmod>2026-11-27</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://teaphuket.com/blog/phuket-beyond-the-beach/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://teaphuket.com/ru/blog/phuket-beyond-the-beach/"/>
+  </url>
+  <url>
+    <loc>https://teaphuket.com/ru/blog/phuket-beyond-the-beach/</loc>
+    <lastmod>2026-11-27</lastmod>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://teaphuket.com/ru/blog/phuket-beyond-the-beach/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://teaphuket.com/blog/phuket-beyond-the-beach/"/>
+  </url>
+  <url>
+    <loc>https://teaphuket.com/blog/phuket-quiet-evening/</loc>
+    <lastmod>2026-11-27</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://teaphuket.com/blog/phuket-quiet-evening/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://teaphuket.com/ru/blog/phuket-quiet-evening/"/>
+  </url>
+  <url>
+    <loc>https://teaphuket.com/ru/blog/phuket-quiet-evening/</loc>
+    <lastmod>2026-11-27</lastmod>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://teaphuket.com/ru/blog/phuket-quiet-evening/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://teaphuket.com/blog/phuket-quiet-evening/"/>
+  </url>
+  <url>
     <loc>https://teaphuket.com/blog/butterfly-pea-tea-anchan/</loc>
     <lastmod>2026-11-26</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://teaphuket.com/blog/butterfly-pea-tea-anchan/"/>
@@ -282,10 +330,10 @@
   </url>
   <url>
     <loc>https://teaphuket.com/blog/</loc>
-    <lastmod>2026-11-26</lastmod>
+    <lastmod>2026-11-27</lastmod>
   </url>
   <url>
     <loc>https://teaphuket.com/ru/blog/</loc>
-    <lastmod>2026-11-26</lastmod>
+    <lastmod>2026-11-27</lastmod>
   </url>
 </urlset>
