@@ -26,7 +26,7 @@
 | `/events/` | Tea Events & Tastings in Phuket \| Moychay Phuket | дегустации и вечера каждую неделю | tea events Phuket, tea tasting Phuket |
 | `/ru/events/` | Чайные мероприятия и дегустации на Пхукете \| Moychay | дегустации и вечера | чайный клуб Пхукет, дегустация чая Пхукет |
 | `/contact/` | Contact & Visit Moychay Phuket \| Tea House in Bangtao | адрес, часы, маршрут, WhatsApp | Moychay Phuket, tea house Bangtao |
-| `/ru/contact/` | Контакты Moychay Phuket – Чайная в Бангтао | адрес, часы, Telegram | Мойчай Пхукет, чайная Бангтао |
+| `/ru/contact/` | Контакты Moychay Phuket – Чайная на Бангтао | адрес, часы, Telegram | Мойчай Пхукет, чайная Бангтао |
 | `/wholesale/` | Wholesale Tea Supplier in Phuket \| Moychay Phuket | чай для кафе, ресторанов, отелей, SPA | wholesale tea Phuket, tea supplier Phuket |
 | `/ru/wholesale/` | Оптовые поставки чая на Пхукете \| Moychay | чай для заведений | чай оптом Пхукет, поставщик чая Пхукет |
 

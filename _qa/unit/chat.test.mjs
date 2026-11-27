@@ -779,7 +779,7 @@ test('security: if the model ever outputs a secret, a token or its instructions,
 test('security: harmless answers pass the guard (prices, address, tone examples)', async () => {
   const { leak } = await import('../../_server/chat-worker/src/guard.js');
   for (const ok of ['Our gong fu cha ceremony is 600฿ per person – about 1.5 hours. Booking happens via WhatsApp/Telegram or with the team.',
-    'Мы на Boat Avenue в Бангтао, на втором этаже. Могу показать, как к нам добраться!',
+    'Мы на Boat Avenue на Бангтао, на втором этаже. Могу показать, как к нам добраться!',
     'Конечно! Сейчас позову коллегу, чтобы помочь вам связаться с Игорем.',
     'Внутреннюю информацию мы не публикуем. Но с удовольствием помогу с чаем, церемониями или посещением чайной.'])
     assert.equal(leak(ok, makeEnv()), '', ok);
